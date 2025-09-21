@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IgnitionAI – Investor Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  :root{
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --accent: #06b6d4;
+    --accent-light: #0891b2;
+    --bg: #0f172a;
+    --bg-light: #1e293b;
+    --surface: rgba(30, 41, 59, 0.8);
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: var(--text);
+    overflow: hidden;
+  }
+  
+  .presentation {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    perspective: 1000px;
+  }
+  
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    padding: clamp(2rem, 5vw, 4rem);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .slide.active {
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .slide-header {
+    margin-bottom: clamp(1rem, 3vh, 2rem);
+  }
+  
+  .slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(1rem, 3vh, 2rem);
+  }
+  
+  .slide-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+  
+  .grid {
+    display: grid;
+    gap: clamp(1rem, 2vw, 1.5rem);
+  }
+  
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  
+  h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    color: var(--primary-light);
+    margin: 0 0 1rem 0;
+  }
+  
+  h3 {
+    font-size: clamp(1.125rem, 2vw, 1.25rem);
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 0.5rem 0;
+  }
+  
+  p {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0 0 1rem 0;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  li {
+    padding: 0.5rem 0;
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: clamp(0.875rem, 1.4vw, 1rem);
+    color: var(--text);
+  }
+  
+  .brand {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-bottom: 2rem;
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin: 0.25rem 0.5rem 0.25rem 0;
+  }
+  
+  .metric {
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .metric-value {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  
+  .metric-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+  
+  .comparison-table {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+  }
+  
+  .table-header {
+    background: rgba(37, 99, 235, 0.2);
+    padding: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  
+  .table-cell {
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .table-cell:first-child {
+    font-weight: 500;
+    color: var(--text);
+  }
+  
+  .navigation {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+  }
+  
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-dot.active {
+    background: var(--accent);
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+  }
+  
+  .controls {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+  }
+  
+  .control-btn {
+    padding: 0.5rem 1rem;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    color: var(--text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    z-index: 1;
+  }
+  
+  .timeline-item {
+    background: var(--glass);
+    border: 2px solid var(--accent);
+    border-radius: 1rem;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    min-width: 120px;
+  }
+  
+  .timeline-year {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  
+  .highlight {
+    color: var(--warning);
+    font-weight: 600;
+  }
+  
+  .success { color: var(--success); }
+  .danger { color: var(--danger); }
+  
+  .quote {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--accent);
+    font-style: italic;
+    padding: 2rem;
+    position: relative;
+  }
+  
+  .quote::before {
+    content: '"';
+    font-size: 4rem;
+    color: var(--primary);
+    position: absolute;
+    top: -1rem;
+    left: 1rem;
+  }
+  
+  .dtc-decoder {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    position: relative;
+  }
+  
+  .dtc-center {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    font-size: 3rem;
+    font-weight: 900;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin: 1rem 0;
+  }
+  
+  @media (max-width: 768px) {
+    .slide {
+      padding: 1rem;
+    }
+    
+    .grid-2, .grid-3, .grid-4 {
+      grid-template-columns: 1fr;
+    }
+    
+    .timeline {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .timeline::before {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="presentation">
+
+  <!-- Slide 1: Cover -->
+  <section class="slide active" data-title="Cover">
+    <div class="slide-content">
+      <div class="brand">IgnitionAI</div>
+      <h1>From symptom to fix.</h1>
+      <p class="subtitle">AI-powered, on-board OBD2 diagnostics revolutionizing vehicle repair in India</p>
+      
+      <div class="grid grid-2">
+        <div class="glass-card">
+          <h3>Founded by</h3>
+          <p><strong>Shashank A</strong> • Founder</p>
+          <p><strong>Pranav Vijay Dhole</strong> • Cofounder</p>
+          <div class="badge">Prototype Ready</div>
+        </div>
+        <div class="glass-card">
+          <h3>Mission</h3>
+          <p>Standardizing automotive diagnostics through intelligent, on-board AI systems that eliminate guesswork and reduce repair time.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="slide-footer">
+      <span>IgnitionAI • 2025</span>
+      <span>Use ← → to navigate • F for fullscreen</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: Problem -->
+  <section class="slide" data-title="Problem">
+    <div class="slide-header">
+      <h2>The Problem</h2>
+      <h1>Diagnosis delays cost everyone</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="grid grid-3">
+        <div class="glass-card">
+          <h3 class="danger">Slow Diagnosis</h3>
+          <ul>
+            <li>Prolonged repair cycles for no-start issues</li>
+            <li>Technician expertise dependency</li>
+            <li>Inconsistent problem identification</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3 class="warning">Delayed Repair</h3>
+          <ul>
+            <li>Extended vehicle downtime</li>
+            <li>Multiple shop visits required</li>
+            <li>Customer frustration increases</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3 class="danger">Higher Costs</h3>
+          <ul>
+            <li>Escalating service expenses</li>
+            <li>Lost productivity for fleets</li>
+            <li>Warranty claim complications</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="glass-card">
+        <h3>Why This Matters Now</h3>
+        <p>BS6 emissions standards have increased vehicle complexity, while the growth of independent and multi-brand service centers creates an urgent need for standardized diagnostic tools.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: OBD Timeline -->
+  <section class="slide" data-title="Timeline">
+    <div class="slide-header">
+      <h2>OBD Evolution</h2>
+      <h1>Three decades of diagnostic standards</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">1968</div>
+          <p>Volkswagen introduces first OBD scanning capability</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1991</div>
+          <p>California mandates basic on-board diagnostics (OBD-I)</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1996</div>
+          <p>OBD-II becomes standard across all vehicles</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2025</div>
+          <p class="highlight">IgnitionAI transforms diagnostic approach</p>
+        </div>
+      </div>
+      
+      <div class="glass-card" style="margin-top: 2rem;">
+        <p>Despite decades of evolution, current diagnostic tools remain <strong>code-centric rather than outcome-focused</strong>, creating opportunities for AI-driven solutions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Solution -->
+  <section class="slide" data-title="Solution">
+    <div class="slide-header">
+      <h2>Our Solution</h2>
+      <h1>Universal on-board AI diagnostics</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="grid grid-2">
+        <div class="glass-card">
+          <h3>Core Innovation</h3>
+          <ul>
+            <li><strong>Lives in the car</strong> - Continuous monitoring, not just scanning</li>
+            <li><strong>AI-powered</strong> - Rule-based algorithms with light ML</li>
+            <li><strong>Universal</strong> - Works across brands and models</li>
+            <li><strong>Evidence-linked</strong> - Provides repair verification</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3>Three-Step Process</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">1</div>
+              <div><strong>PLUG</strong> - CAN-FD/DoIP capable device connects instantly</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">2</div>
+              <div><strong>SETUP</strong> - Quick authentication and vehicle profiling</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--success); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">3</div>
+              <div><strong>PLAY</strong> - AI generates stepwise repair plan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Core Principle -->
+  <section class="slide" data-title="Philosophy">
+    <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+      <div class="quote">
+        AI should be leveraged, not just branded
+      </div>
+      <p style="font-size: 1.2rem; margin-top: 2rem;">We focus on practical intelligence that solves real problems, not impressive technology that creates complexity.</p>
+    </div>
+  </section>
+
+  <!-- Slide 6: Competitive Analysis -->
+  <section class="slide" data-title="Competition">
+    <div class="slide-header">
+      <h2>Competitive Landscape</h2>
+      <h1>Why not existing OBDAI apps?</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="comparison-table">
+        <div class="table-row table-header">
+          <div class="table-cell">Aspect</div>
+          <div class="table-cell">Phone AI OBD Apps</div>
+          <div class="table-cell" style="color: var(--accent);">IgnitionAI</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">Intelligence Location</div>
+          <div class="table-cell">Phone/Cloud</div>
+          <div class="table-cell success">In-vehicle edge module</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">Data Capture</div>
+          <div class="table-cell">Session-based</div>
+          <div class="table-cell success">Continuous learning</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">Dependency</div>
+          <div class="table-cell">Requires phone</div>
+          <div class="table-cell success">Operates phone-free</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">Outcome Focus</div>
+          <div class="table-cell">Code reading + guidance</div>
+          <div class="table-cell success">Standardized diagnosis for faster fixes</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7: Technical Specifications -->
+  <section class="slide" data-title="Tech Specs">
+    <div class="slide-header">
+      <h2>Technical Architecture</h2>
+      <h1>Built for reliability and performance</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="grid grid-2">
+        <div class="glass-card">
+          <h3>Hardware Foundation</h3>
+          <ul>
+            <li>Raspberry Pi Compute Module 4 (CM4)</li>
+            <li>Quad-core Cortex-A72 processor</li>
+            <li>CAN-FD/DoIP interface support</li>
+            <li>Automotive power conditioning (9-32V)</li>
+            <li>16GB eMMC storage for evidence bundles</li>
+          </ul>
+          <div class="badge">CM4</div>
+          <div class="badge">CAN-FD</div>
+          <div class="badge">DoIP</div>
+        </div>
+        <div class="glass-card">
+          <h3>Software Stack</h3>
+          <ul>
+            <li>Full OBD-II/UDS protocol support</li>
+            <li>Lightweight AI: Rules + ML models</li>
+            <li>Evidence graph for repair verification</li>
+            <li>Secure updates and encrypted logs</li>
+            <li>Offline operation with deferred sync</li>
+          </ul>
+          <div class="badge">ISO-TP</div>
+          <div class="badge">UDS</div>
+          <div class="badge">Secure</div>
+        </div>
+      </div>
+      
+      <div class="glass-card">
+        <h3>Performance Metrics</h3>
+        <div class="grid grid-3">
+          <div class="metric">
+            <div class="metric-value">&lt;10s</div>
+            <div class="metric-label">Diagnostic plan generation</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">&lt;100ms</div>
+            <div class="metric-label">PID processing pipeline</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">Fanless</div>
+            <div class="metric-label">Thermal design</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: Pricing Strategy -->
+  <section class="slide" data-title="Pricing">
+    <div class="slide-header">
+      <h2>Pricing Strategy</h2>
+      <h1>Affordable, scalable, sustainable</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="grid grid-3">
+        <div class="glass-card">
+          <h3>Bulk Units</h3>
+          <div class="metric">
+            <div class="metric-value">₹13,999</div>
+            <div class="metric-label">Complete system per unit</div>
+          </div>
+          <p>CAN-FD + DoIP device, enclosure, firmware, app, cloud onboarding</p>
+        </div>
+        <div class="glass-card">
+          <h3>Single Units</h3>
+          <div class="metric">
+            <div class="metric-value">₹20,999-₹30,999</div>
+            <div class="metric-label">Retail pricing range</div>
+          </div>
+          <p>Full-featured diagnostic solution for independent shops</p>
+        </div>
+        <div class="glass-card">
+          <h3>SaaS Model</h3>
+          <div class="metric">
+            <div class="metric-value">Subscription</div>
+            <div class="metric-label">Per-bay monthly/annual</div>
+          </div>
+          <p>Cloud inference, updates, and support included</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Funding Ask -->
+  <section class="slide" data-title="The Ask">
+    <div class="slide-header">
+      <h2>Funding Request</h2>
+      <h1>₹50,000 for prototype development</h1>
+    </div>
+    
+    <div class="slide-content">
+      <div class="grid grid-2">
+        <div class="glass-card">
+          <h3>Use of Funds</h3>
+          <ul>
+            <li><strong>Hardware:</strong> CM4 + carrier, CAN-FD/DoIP interfaces, enclosure</li>
+            <li><strong>Development:</strong> PCB bring-up, harness, thermal validation</li>
+            <li><strong>Software:</strong> OBD-II/UDS integration, rule engine, ML ranking</li>
+            <li><strong>Operations:</strong> Pilot setup, shop trials, consumables</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3>Timeline & Milestones</h3>
+          <ul>
+            <li><strong>Week 2:</strong> Hardware bring-up and CAN tests</li>
+            <li><strong>Week 4:</strong> PID streaming + rule-based planner</li>
+            <li><strong>Week 6:</strong> ML ranking and evidence graph</li>
+            <li><strong>Week 8-10:</strong> Shop pilot and investor demo</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="glass-card">
+        <h3>Success Metrics</h3>
+        <div class="grid grid-3">
+          <div class="metric">
+            <div class="metric-value">≥80%</div>
+            <div class="metric-label">Confirmed fixes rate</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">≥95%</div>
+            <div class="metric-label">Session completion</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">&lt;10s</div>
+            <div class="metric-label">Plan generation time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 10: Thank You -->
+  <section class="slide" data-title="Thank You">
+    <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+      <h1>Thank You</h1>
+      <p class="subtitle">Questions and suggestions are welcome</p>
+      
+      <div class="glass-card" style="max-width: 600px; margin: 2rem auto;">
+        <h3>Contact Information</h3>
+        <p><strong>Shashank A</strong> • Founder</p>
+        <p><strong>Pranav Vijay Dhole</strong> • Cofounder</p>
+        <p style="margin-top: 1rem; color: var(--accent);">Ready to revolutionize automotive diagnostics in India</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="navigation" id="navigation"></div>
+<div class="controls">
+  <button class="control-btn" onclick="previousSlide()">← Previous</button>
+  <button class="control-btn" onclick="nextSlide()">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navigation = document.getElementById('navigation');
+  let currentSlide = 0;
+
+  // Initialize navigation dots
+  slides.forEach((slide, index) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot';
+    if (index === 0) dot.classList.add('active');
+    dot.addEventListener('click', () => goToSlide(index));
+    navigation.appendChild(dot);
+  });
+
+  const navDots = document.querySelectorAll('.nav-dot');
+
+  function showSlide(index) {
+    slides[currentSlide].classList.remove('active');
+    navDots[currentSlide].classList.remove('active');
+    
+    currentSlide = index;
+    
+    slides[currentSlide].classList.add('active');
+    navDots[currentSlide].classList.add('active');
+  }
+
+  function nextSlide() {
+    const next = (currentSlide + 1) % slides.length;
+    showSlide(next);
+  }
+
+  function previousSlide() {
+    const prev = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(prev);
+  }
+
+  function goToSlide(index) {
+    showSlide(index);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    switch(e.key) {
+      case 'ArrowRight':
+      case ' ':
+        e.preventDefault();
+        nextSlide();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        previousSlide();
+        break;
+      case 'Home':
+        e.preventDefault();
+        goToSlide(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        goToSlide(slides.length - 1);
+        break;
+      case 'f':
+      case 'F11':
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+        break;
+    }
+  });
+
+  // Click to advance (except on controls)
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.controls, .navigation, .control-btn, .nav-dot')) {
+      nextSlide();
+    }
+  });
+
+  // Touch/swipe support for mobile
+  let startX = 0;
+  let startY = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+
+  document.addEventListener('touchend', (e) => {
+    if (!startX || !startY) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    
+    const diffX = startX - endX;
+    const diffY = startY - endY;
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        previousSlide();
+      }
+    }
+
+    startX = 0;
+    startY = 0;
+  });
+</script>
+</body>
+</html>
