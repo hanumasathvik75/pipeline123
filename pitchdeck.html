@@ -34,6 +34,7 @@
       radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
       linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: var(--text);
+
     overflow: hidden;
   }
   
@@ -407,6 +408,7 @@
           <h3>Founded by</h3>
           <p><strong>Shashank A</strong> • Founder</p>
           <p><strong>Pranav Vijay Dhole</strong> • Cofounder</p>
+          <p><strong>Dr. Thangaraja J (Director- Automotive Research Centre VIT Vellore )</strong> • Mentor</p>
           <div class="badge">Prototype Ready</div>
         </div>
         <div class="glass-card">
@@ -483,7 +485,11 @@
         </div>
         <div class="timeline-item">
           <div class="timeline-year">1996</div>
-          <p>OBD-II becomes standard across all vehicles</p>
+          <p>OBD-II becomes universal standard</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2022</div>
+          <p>Popularization of ADAS</p>
         </div>
         <div class="timeline-item">
           <div class="timeline-year">2025</div>
@@ -511,7 +517,7 @@
           <ul>
             <li><strong>Lives in the car</strong> - Continuous monitoring, not just scanning</li>
             <li><strong>AI-powered</strong> - Rule-based algorithms with light ML</li>
-            <li><strong>Universal</strong> - Works across brands and models</li>
+            <li><strong>Universal</strong> - Works across brands and models*</li>
             <li><strong>Evidence-linked</strong> - Provides repair verification</li>
           </ul>
         </div>
@@ -596,7 +602,7 @@
         <div class="glass-card">
           <h3>Hardware Foundation</h3>
           <ul>
-            <li>Raspberry Pi Compute Module 4 (CM4)</li>
+            <li>Raspberry Pi Compute Module 4 (CM4)/Latte panda</li>
             <li>Quad-core Cortex-A72 processor</li>
             <li>CAN-FD/DoIP interface support</li>
             <li>Automotive power conditioning (9-32V)</li>
@@ -618,24 +624,6 @@
           <div class="badge">ISO-TP</div>
           <div class="badge">UDS</div>
           <div class="badge">Secure</div>
-        </div>
-      </div>
-      
-      <div class="glass-card">
-        <h3>Performance Metrics</h3>
-        <div class="grid grid-3">
-          <div class="metric">
-            <div class="metric-value">&lt;10s</div>
-            <div class="metric-label">Diagnostic plan generation</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">&lt;100ms</div>
-            <div class="metric-label">PID processing pipeline</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">Fanless</div>
-            <div class="metric-label">Thermal design</div>
-          </div>
         </div>
       </div>
     </div>
@@ -707,23 +695,7 @@
         </div>
       </div>
       
-      <div class="glass-card">
-        <h3>Success Metrics</h3>
-        <div class="grid grid-3">
-          <div class="metric">
-            <div class="metric-value">≥80%</div>
-            <div class="metric-label">Confirmed fixes rate</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">≥95%</div>
-            <div class="metric-label">Session completion</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">&lt;10s</div>
-            <div class="metric-label">Plan generation time</div>
-          </div>
-        </div>
-      </div>
+      
     </div>
   </section>
 
@@ -737,6 +709,7 @@
         <h3>Contact Information</h3>
         <p><strong>Shashank A</strong> • Founder</p>
         <p><strong>Pranav Vijay Dhole</strong> • Cofounder</p>
+        <p><strong>Dr. Thangaraja J (Director- Automotive Research Centre VIT Vellore )</strong> • Mentor</p>
         <p style="margin-top: 1rem; color: var(--accent);">Ready to revolutionize automotive diagnostics in India</p>
       </div>
     </div>
@@ -758,10 +731,12 @@
   // Initialize navigation dots
   slides.forEach((slide, index) => {
     const dot = document.createElement('div');
+
     dot.className = 'nav-dot';
     if (index === 0) dot.classList.add('active');
     dot.addEventListener('click', () => goToSlide(index));
     navigation.appendChild(dot);
+
   });
 
   const navDots = document.querySelectorAll('.nav-dot');
@@ -769,21 +744,27 @@
   function showSlide(index) {
     slides[currentSlide].classList.remove('active');
     navDots[currentSlide].classList.remove('active');
+
     
     currentSlide = index;
     
+
     slides[currentSlide].classList.add('active');
     navDots[currentSlide].classList.add('active');
+
   }
 
   function nextSlide() {
+
     const next = (currentSlide + 1) % slides.length;
     showSlide(next);
+
   }
 
   function previousSlide() {
     const prev = (currentSlide - 1 + slides.length) % slides.length;
     showSlide(prev);
+
   }
 
   function goToSlide(index) {
@@ -793,29 +774,40 @@
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
     switch(e.key) {
+
       case 'ArrowRight':
       case ' ':
+
         e.preventDefault();
         nextSlide();
         break;
       case 'ArrowLeft':
+
         e.preventDefault();
         previousSlide();
+
         break;
       case 'Home':
         e.preventDefault();
         goToSlide(0);
+
         break;
+
       case 'End':
         e.preventDefault();
+
         goToSlide(slides.length - 1);
         break;
+
       case 'f':
       case 'F11':
+
         e.preventDefault();
         if (!document.fullscreenElement) {
+
           document.documentElement.requestFullscreen();
         } else {
+
           document.exitFullscreen();
         }
         break;
@@ -825,8 +817,10 @@
   // Click to advance (except on controls)
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.controls, .navigation, .control-btn, .nav-dot')) {
+
       nextSlide();
     }
+
   });
 
   // Touch/swipe support for mobile
@@ -835,6 +829,7 @@
 
   document.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
+
     startY = e.touches[0].clientY;
   });
 
@@ -842,16 +837,20 @@
     if (!startX || !startY) return;
 
     const endX = e.changedTouches[0].clientX;
+
     const endY = e.changedTouches[0].clientY;
     
     const diffX = startX - endX;
+
     const diffY = startY - endY;
 
     if (Math.abs(diffX) > Math.abs(diffY)) {
+
       if (diffX > 0) {
         nextSlide();
       } else {
         previousSlide();
+
       }
     }
 
