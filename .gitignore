@@ -1,0 +1,127 @@
+# IgnitionAI — Comprehensive .gitignore
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+pip-wheel-metadata/
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# IDE & Editors
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Secrets & API Keys
+*.env
+.env.*
+secrets.py
+api_keys.py
+# IMPORTANT: Never commit the config.py with real keys
+# Use config.example.py as a template
+desktop/app/config.py
+
+# Gradle / Android
+.gradle/
+/local.properties
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.keystore
+*.jks
+key.properties
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+# Uncomment if not sharing pubspec.lock intentionally
+# pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Distribution / packaging
+*.tar.gz
+*.zip
+*.rar
+
+# Logs
+*.log
+logs/
+
+# Compiled Python
+*.pyc
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Reports (PDF exports — user generated)
+*_Report.pdf
+IgnitionAI_Report*.pdf
+
+# Notebooks (if any)
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
