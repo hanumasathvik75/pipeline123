@@ -16,7 +16,7 @@ from app.config import (
     COLOR_BG_DARKEST, COLOR_SIDEBAR, COLOR_BORDER,
     COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_CYAN,
 )
-from app.ui.styles import get_stylesheet
+from app.ui.styles import get_stylesheet, get_outlined_logo
 from app.ui.scan_panel import ScanPanel
 from app.ui.results_panel import ResultsPanel
 from app.ui.ai_panel import AIPanel
@@ -62,21 +62,21 @@ class MainWindow(QMainWindow):
         # Logo area in sidebar
         logo_frame = QFrame()
         logo_frame.setObjectName("header")
-        logo_frame.setFixedHeight(80)
+        logo_frame.setFixedHeight(120)
         logo_layout = QHBoxLayout(logo_frame)
-        logo_layout.setContentsMargins(16, 12, 16, 12)
+        logo_layout.setContentsMargins(16, 16, 16, 16)
+        logo_layout.setAlignment(Qt.AlignCenter)
 
-        logo_pix = QPixmap(LOGO_PATH)
-        if not logo_pix.isNull():
+        logo_outlined = get_outlined_logo(LOGO_PATH, 75)
+        if not logo_outlined.isNull():
             logo_label = QLabel()
-            logo_label.setPixmap(logo_pix.scaledToHeight(42, Qt.SmoothTransformation))
+            logo_label.setPixmap(logo_outlined)
             logo_layout.addWidget(logo_label)
         else:
             name_label = QLabel(APP_NAME)
-            name_label.setStyleSheet(f"font-size:18px; font-weight:800; color: {COLOR_CYAN};")
+            name_label.setStyleSheet(f"font-size:22px; font-weight:800; color: {COLOR_CYAN};")
             logo_layout.addWidget(name_label)
 
-        logo_layout.addStretch()
         sidebar_layout.addWidget(logo_frame)
 
         # Version tag
@@ -95,10 +95,10 @@ class MainWindow(QMainWindow):
         # Nav buttons
         self.nav_buttons: list[QPushButton] = []
         nav_items = [
-            ("🏠  Dashboard", 0),
-            ("🔍  Scan Vehicle", 1),
-            ("📊  Results & Analysis", 2),
-            ("🤖  AI Diagnosis", 3),
+            ("Dashboard", 0),
+            ("Scan Vehicle", 1),
+            ("Results & Analysis", 2),
+            ("AI Diagnosis", 3),
         ]
 
         for label, idx in nav_items:
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         tools_label.setStyleSheet(f"color: #2A4A6A; font-size: 10px; font-weight:600; letter-spacing:1.5px; padding: 4px 20px;")
         sidebar_layout.addWidget(tools_label)
 
-        dtc_btn = QPushButton("📋  DTC Reference")
+        dtc_btn = QPushButton("DTC Reference")
         dtc_btn.setObjectName("nav_btn")
         dtc_btn.clicked.connect(self._show_dtc_reference)
         sidebar_layout.addWidget(dtc_btn)
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         header_h.addStretch()
 
         # AI status badge
-        ai_badge = QLabel("  ⚡ Gemini AI Active  ")
+        ai_badge = QLabel("  Gemini AI Active  ")
         ai_badge.setObjectName("ai_badge")
         header_h.addWidget(ai_badge)
 
@@ -186,7 +186,9 @@ class MainWindow(QMainWindow):
         content_layout.addWidget(self.stack)
         root_layout.addWidget(content_area)
 
-        # Connect scan panel → results/AI panels
+        # Connect navigation and scan signals
+        self.dashboard.navigate_requested.connect(self._nav_to)
+        self.results_panel.navigate_requested.connect(self._nav_to)
         self.scan_panel.analysis_complete.connect(self._on_analysis_complete)
 
         # Default nav

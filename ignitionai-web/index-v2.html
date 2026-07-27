@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IgnitionAI — AI Diagnostic Intelligence for Indian Workshops</title>
+  <meta name="description" content="From OBD codes to ranked root cause in minutes. AI diagnostic intelligence for Indian workshops.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+    /* ═══════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════ */
+    :root {
+      --blue:        #1E6FE8;
+      --blue-mid:    #2A7EF5;
+      --blue-dim:    rgba(30,111,232,0.12);
+      --blue-glow:   rgba(30,111,232,0.5);
+      --blue-border: rgba(30,111,232,0.4);
+
+      /* Dark mode */
+      --bg:          #080A0F;
+      --surface:     #0E1118;
+      --surface2:    #141820;
+      --border:      rgba(255,255,255,0.09);
+      --text:        #ECEAE4;        /* ← bright, high contrast */
+      --text-mid:    #B0AEA8;        /* ← mid, readable */
+      --muted:       #78767F;        /* ← muted, still legible */
+      --card-bg:     #0E1118;
+      --theme-icon:  '☀️';
+
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+      --ease: cubic-bezier(0.16,1,0.3,1);
+    }
+
+    [data-theme="light"] {
+      --bg:       #F4F3F0;
+      --surface:  #FFFFFF;
+      --surface2: #F0EEE8;
+      --border:   rgba(0,0,0,0.09);
+      --text:     #111110;
+      --text-mid: #2A2A28;
+      --muted:    #6B6966;
+      --card-bg:  #FFFFFF;
+      --theme-icon: '🌙';
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.65;
+      transition: background 0.4s var(--ease), color 0.3s;
+    }
+
+    /* Hide native cursor on desktop — custom cursor takes over */
+    @media (min-width: 769px) {
+      *, *::before, *::after { cursor: none !important; }
+    }
+
+    ::selection { background: rgba(30,111,232,0.25); }
+
+    /* ═══════════════════════════════════════
+       MAGNETIC CURSOR
+    ═══════════════════════════════════════ */
+    #cursor-dot, #cursor-ring {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+    }
+    #cursor-dot {
+      width: 8px; height: 8px;
+      background: #fff;
+      top: 0; left: 0;
+      transform: translate(-50%,-50%);
+      transition: width 0.2s, height 0.2s, background 0.2s;
+    }
+    #cursor-ring {
+      width: 40px; height: 40px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      top: 0; left: 0;
+      transform: translate(-50%,-50%);
+      transition: width 0.35s var(--ease), height 0.35s var(--ease), border-color 0.2s;
+    }
+    body.cursor-hover #cursor-ring { width: 64px; height: 64px; border-color: rgba(30,111,232,0.8); }
+    body.cursor-hover #cursor-dot  { width: 4px; height: 4px; }
+    @media (max-width: 768px) { #cursor-dot, #cursor-ring { display: none; } }
+
+    /* ═══════════════════════════════════════
+       CANVAS
+    ═══════════════════════════════════════ */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+
+    /* ═══════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 40px;
+      /* backdrop-filter on ::before avoids stacking context breaking child mix-blend-mode */
+      isolation: auto;
+    }
+    nav::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: background 0.4s;
+    }
+
+    /* Logo: single transparent image, recolored via filter */
+    .nav-logo img {
+      height: 54px; /* BIGGER logo */
+      width: auto;
+      max-width: 250px;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.2s;
+      filter: brightness(0) invert(1); /* Default dark mode: make logo white */
+      opacity: 0.95;
+    }
+    .nav-logo:hover img { opacity: 1; }
+    [data-theme="light"] .nav-logo img {
+      filter: brightness(0); /* Light mode: turn logo black */
+      opacity: 0.85;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+      flex: 1;
+    }
+
+    .nav-links a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);         /* ← readable, not muted to death */
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 1px;
+      background: var(--blue);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s var(--ease);
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+    .theme-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-mid);
+      transition: all 0.2s;
+      padding: 0;
+    }
+    .theme-btn:hover { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+    .theme-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+
+    .btn-outline-nav {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-mid);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-outline-nav:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+    .btn-nav-cta {
+      font-size: 12px; font-weight: 800;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: #fff;
+      text-decoration: none;
+      padding: 9px 20px;
+      border-radius: 6px;
+      background: var(--blue);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-nav-cta:hover { background: var(--blue-mid); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(30,111,232,0.5); }
+
+    /* Hamburger */
+    .hamburger { display: none; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 7px; cursor: pointer; color: var(--text); }
+    .hamburger svg { width: 18px; height: 18px; display: block; }
+
+    .mob-drawer {
+      position: fixed; top: 0; right: -100%; bottom: 0;
+      width: 260px; z-index: 300;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 76px 28px 28px;
+      display: flex; flex-direction: column; gap: 24px;
+      transition: right 0.4s var(--ease);
+    }
+    .mob-drawer.open { right: 0; }
+    .mob-drawer a { font-size: 16px; font-weight: 600; color: var(--text); text-decoration: none; }
+    .mob-overlay { display: none; position: fixed; inset: 0; z-index: 290; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); }
+    .mob-overlay.open { display: block; }
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 140px 24px 100px;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Transparent watermark logo — uses mix-blend-mode to be truly transparent */
+    .hero-watermark {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -54%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-watermark-glow {
+      position: absolute;
+      inset: -20%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(30,111,232,0.18) 0%, transparent 65%);
+      animation: wm-breathe 5s ease-in-out infinite;
+    }
+    @keyframes wm-breathe {
+      0%,100% { transform: scale(1); opacity: 0.6; }
+      50%      { transform: scale(1.18); opacity: 1; }
+    }
+
+
+    .hero-badge {
+      position: relative; z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s var(--ease) 0.1s both;
+    }
+    .badge-pulse {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 var(--blue-glow); }
+      70%  { box-shadow: 0 0 0 9px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .hero-title {
+      position: relative; z-index: 2;
+      font-size: clamp(42px, 6.5vw, 84px);
+      font-weight: 900;
+      letter-spacing: -0.045em;
+      line-height: 1.04;
+      max-width: 1000px;
+      color: var(--text);            /* ← HIGH CONTRAST */
+      margin: 0 auto 28px;
+      animation: fadeUp 0.8s var(--ease) 0.25s both;
+    }
+
+    /* Gradient word */
+    .grad {
+      background: linear-gradient(135deg, var(--blue) 0%, #7CB9FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Typewriter cursor */
+    .typewriter-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 0.85em;
+      background: var(--blue);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink-cursor 0.9s step-end infinite;
+    }
+    @keyframes blink-cursor {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0; }
+    }
+
+    .hero-sub {
+      position: relative; z-index: 2;
+      font-size: 18px;
+      color: var(--text-mid);        /* ← NOT var(--muted) — much more readable */
+      max-width: 580px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+      animation: fadeUp 0.8s var(--ease) 0.4s both;
+    }
+
+    .hero-actions {
+      position: relative; z-index: 2;
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.8s var(--ease) 0.55s both;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--sans);
+      font-size: 14px; font-weight: 800;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: #fff;
+      background: var(--blue);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 13px 26px;
+      border-radius: 6px;
+      text-decoration: none;
+      position: relative; overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .btn-primary:hover { background: var(--blue-mid); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(30,111,232,0.5); }
+    .btn-primary:hover::before { opacity: 1; }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--text);            /* ← HIGH CONTRAST on secondary */
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 13px 26px;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600;
+      color: var(--text-mid);
+      border: 1px solid var(--border);
+      padding: 13px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+    /* STATS row */
+    .hero-stats {
+      position: relative; z-index: 2;
+      display: flex; gap: 48px; flex-wrap: wrap; justify-content: center;
+      margin-top: 72px;
+      animation: fadeUp 0.8s var(--ease) 0.7s both;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 32px; font-weight: 700;
+      color: var(--text);            /* ← HIGH CONTRAST */
+      display: block;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+      display: block;
+    }
+    .stat-divider { width: 1px; height: 44px; background: var(--border); align-self: center; }
+
+    /* ═══════════════════════════════════════
+       MOCKUP
+    ═══════════════════════════════════════ */
+    .hero-mockup {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 940px;
+      margin: 80px auto 0;
+      animation: fadeUp 1s var(--ease) 0.9s both;
+    }
+
+    .mockup-frame {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px var(--border),
+        0 48px 96px rgba(0,0,0,0.5),
+        0 0 120px rgba(30,111,232,0.07);
+      position: relative;
+    }
+
+    /* Scan sweep laser */
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--blue) 35%, rgba(30,111,232,0.3) 65%, transparent 100%);
+      box-shadow: 0 0 20px 3px rgba(30,111,232,0.4);
+      z-index: 20;
+      animation: scan 3.5s linear infinite;
+      top: 0;
+    }
+    @keyframes scan {
+      0%   { top: 0%; opacity: 1; }
+      85%  { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .mockup-titlebar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .tb-dots { display: flex; gap: 6px; }
+    .tb-dots span { width: 11px; height: 11px; border-radius: 50%; }
+    .tb-url {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-mid);        /* ← readable */
+    }
+    .tb-live {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      color: #22C55E;
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22C55E; animation: live-blink 1.2s ease-in-out infinite; }
+    @keyframes live-blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .mockup-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .mockup-sidebar {
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      background: color-mix(in srgb, var(--bg) 60%, transparent);
+    }
+    .sb-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .sb-vehicle {
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      margin-bottom: 8px;
+    }
+    .sv-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .sv-year { font-family: var(--mono); font-size: 11px; color: var(--blue); margin-top: 2px; }
+    .sb-other { padding: 8px 10px; border-radius: 5px; }
+    .sb-other-name { font-size: 12px; color: var(--text-mid); } /* ← visible */
+
+    .mockup-main { padding: 24px; }
+    .mm-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .mm-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .dtc-badge {
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      padding: 4px 10px; border-radius: 4px;
+      animation: dtc-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes dtc-pulse {
+      0%,100% { border-color: rgba(30,111,232,0.3); }
+      50%      { border-color: rgba(30,111,232,0.9); box-shadow: 0 0 14px rgba(30,111,232,0.25); }
+    }
+
+    .causes { display: flex; flex-direction: column; gap: 10px; }
+    .cause {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--surface2) 50%, transparent);
+      opacity: 0;
+      transform: translateX(16px);
+      animation: causeIn 0.45s var(--ease) forwards;
+    }
+    .cause:nth-child(1){animation-delay:0.3s}
+    .cause:nth-child(2){animation-delay:0.55s}
+    .cause:nth-child(3){animation-delay:0.8s}
+    @keyframes causeIn { to{opacity:1;transform:translateX(0)} }
+
+    .cause-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+    .cause-name { font-size: 13px; font-weight: 600; color: var(--text); } /* ← HIGH CONTRAST */
+    .cause-pct  { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--blue); }
+    .bar-bg  { height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--border) 100%, transparent); overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue), #7CB9FF);
+      transform: scaleX(0); transform-origin: left;
+      animation: barIn 0.9s var(--ease) forwards;
+    }
+    .cause:nth-child(1) .bar-fill { animation-delay: 0.4s; --scale: 0.87; }
+    .cause:nth-child(2) .bar-fill { animation-delay: 0.65s; --scale: 0.64; }
+    .cause:nth-child(3) .bar-fill { animation-delay: 0.9s; --scale: 0.41; }
+    @keyframes barIn { to { transform: scaleX(var(--scale, 1)); } }
+
+    /* ═══════════════════════════════════════
+       SECTION BASE
+    ═══════════════════════════════════════ */
+    section { position: relative; z-index: 1; border-top: 1px solid var(--border); }
+
+    .section-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 110px 24px;
+    }
+
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 20px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      width: 20px; height: 1px;
+      background: var(--blue);
+    }
+
+    .section-h2 {
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text);            /* ← HIGH CONTRAST */
+      margin-bottom: 18px;
+    }
+
+    .section-desc {
+      font-size: 17px;
+      color: var(--text-mid);        /* ← readable */
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 64px;
+    }
+
+    /* ═══════════════════════════════════════
+       PROBLEM CARDS — 3D TILT
+    ═══════════════════════════════════════ */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .prob-card {
+      background: var(--surface);
+      padding: 44px 32px;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: background 0.3s;
+      transform-style: preserve-3d;
+    }
+    .prob-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--blue);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s var(--ease);
+    }
+    .prob-card:hover { background: rgba(30,111,232,0.03); }
+    .prob-card:hover::after { transform: scaleX(1); }
+
+    .prob-num {
+      font-family: var(--mono);
+      font-size: 48px; font-weight: 800;
+      color: var(--text);            /* ← bright white */
+      margin-bottom: 8px;
+    }
+    .prob-accent { color: var(--blue); font-size: 30px; }
+    .prob-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .prob-desc { font-size: 14px; color: var(--text-mid); line-height: 1.65; } /* ← readable */
+
+    /* ═══════════════════════════════════════
+       HOW IT WORKS — STEPPER
+    ═══════════════════════════════════════ */
+    .steps-container {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--border);
+      gap: 1px;
+    }
+
+    .steps-nav { background: var(--surface2); padding: 8px; }
+
+    .step-btn {
+      width: 100%;
+      background: none; border: none;
+      text-align: left; cursor: pointer;
+      padding: 14px 16px;
+      border-radius: 6px;
+      display: flex; align-items: center; gap: 14px;
+      transition: background 0.2s;
+    }
+    .step-btn:hover { background: rgba(255,255,255,0.03); }
+    .step-btn.active { background: var(--blue-dim); }
+
+    .step-num {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .step-btn.active .step-num { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    .step-label { font-size: 13px; font-weight: 600; color: var(--text-mid); transition: color 0.2s; }
+    .step-btn.active .step-label { color: var(--text); }
+
+    .step-content-area {
+      background: var(--surface);
+      padding: 48px;
+      min-height: 360px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    .step-panel { display: none; animation: stepFade 0.35s ease; }
+    .step-panel.active { display: block; }
+    @keyframes stepFade {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--blue);
+      margin-bottom: 24px;
+    }
+    .step-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    .step-content-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin-bottom: 12px; }
+    .step-content-body  { font-size: 15px; color: var(--text-mid); line-height: 1.75; max-width: 460px; } /* ← readable */
+
+    /* ═══════════════════════════════════════
+       FEATURES — TILT CARDS
+    ═══════════════════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: border-color 0.3s, transform 0.4s var(--ease);
+      transform-style: preserve-3d;
+    }
+    /* Shimmer on hover */
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(30,111,232,0.08) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-card:hover { border-color: var(--blue-border); }
+
+    .feat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--blue);
+      margin-bottom: 20px;
+    }
+    .feat-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    .feat-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; } /* ← HIGH CONTRAST */
+    .feat-desc  { font-size: 14px; color: var(--text-mid); line-height: 1.65; } /* ← readable */
+
+    /* ═══════════════════════════════════════
+       CTA / PILOT SECTION
+    ═══════════════════════════════════════ */
+    .cta-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 110px 24px;
+      text-align: center;
+    }
+
+    .cta-h2 {
+      font-size: clamp(36px, 5vw, 62px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.07;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .cta-sub { font-size: 17px; color: var(--text-mid); margin-bottom: 48px; line-height: 1.65; }
+
+    /* Form */
+    .pilot-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: left;
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--text-mid);       /* ← visible */
+      margin-bottom: 7px;
+    }
+    .form-input {
+      width: 100%;
+      background: color-mix(in srgb, var(--surface2) 80%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 11px 14px;
+      color: var(--text);           /* ← input text visible */
+      font-family: var(--sans);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input::placeholder { color: var(--muted); }
+    .form-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(30,111,232,0.12);
+    }
+
+    .form-submit { width: 100%; margin-top: 8px; padding: 13px; cursor: pointer; justify-content: center; font-size: 14px; }
+
+    .form-success { display: none; text-align: center; padding: 48px 24px; }
+    .form-success.show { display: block; }
+    .success-ring {
+      width: 60px; height: 60px;
+      border-radius: 50%; border: 2px solid #22C55E;
+      margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: #22C55E;
+      animation: scaleIn 0.5s var(--ease);
+    }
+    @keyframes scaleIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-ring svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    .success-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .success-sub   { font-size: 14px; color: var(--text-mid); }
+
+    /* Contact strip */
+    .contact-strip {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .contact-item {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 14px; color: var(--text-mid);
+    }
+    .contact-item svg { width: 15px; height: 15px; color: var(--blue); fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
+    .contact-item a { color: var(--text); font-weight: 600; text-decoration: none; transition: color 0.2s; }
+    .contact-item a:hover { color: var(--blue); }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 56px 40px 32px;
+      position: relative; z-index: 1;
+      background: var(--surface);
+    }
+
+    .footer-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    /* Footer logo */
+    .footer-logo img {
+      height: 46px; /* Bigger footer logo */
+      width: auto;
+      max-width: 220px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 20px;
+      filter: brightness(0) invert(1); /* Dark mode: white */
+      opacity: 0.9;
+    }
+    [data-theme="light"] .footer-logo img {
+      filter: brightness(0); /* Light mode: turn logo black */
+      opacity: 0.8;
+    }
+
+    .footer-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; max-width: 280px; }
+
+    .footer-contacts { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .footer-contacts a {
+      font-size: 13px; color: var(--text-mid);
+      text-decoration: none; display: flex; align-items: center; gap: 8px;
+      transition: color 0.2s;
+    }
+    .footer-contacts a:hover { color: var(--text); }
+    .footer-contacts svg { width: 13px; height: 13px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; color: var(--blue); }
+
+    .footer-col-h {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-mid);       /* ← visible column headers */
+      margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul a { font-size: 13px; color: var(--text-mid); text-decoration: none; transition: color 0.2s; }
+    .footer-col ul a:hover { color: var(--text); }
+
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+    .udyam {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--surface2) 80%, transparent);
+      border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 4px;
+    }
+
+    /* ═══════════════════════════════════════
+       SCROLL REVEAL
+    ═══════════════════════════════════════ */
+    .reveal {
+      opacity: 0; transform: translateY(36px);
+      transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    .stagger > * {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+    .stagger.in > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .stagger.in > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
+    .stagger.in > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
+    .stagger.in > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
+    .stagger.in > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
+    .stagger.in > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+
+    /* ═══════════════════════════════════════
+       ANIMATIONS UTIL
+    ═══════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 900px) {
+      nav { padding: 0 20px; gap: 0; }
+      .nav-links { display: none; }
+      .btn-outline-nav { display: none; }
+      .hamburger { display: none; }
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-sidebar { display: none; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .steps-container { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .stat-divider { display: none; }
+      .hero-stats { gap: 28px; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      .nav-logo img { height: 38px; }
+      .btn-nav-cta { padding: 8px 14px; font-size: 11px; }
+      .hero { padding: 110px 16px 80px; }
+      .hero-title { font-size: clamp(34px, 10vw, 42px); }
+      .hero-sub { font-size: 16px; margin-bottom: 32px; }
+      .hero-stats { flex-direction: column; gap: 32px; text-align: center; margin-top: 48px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; text-align: center; }
+      .footer-logo img { margin: 0 auto 20px; }
+      .footer-contacts { align-items: center; }
+      .pilot-form { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Magnetic cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Canvas background -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═══ NAV ═══ -->
+<nav id="main-nav">
+  <a href="/" class="nav-logo">
+    <img src="logo_transparent.png" alt="ignitionAI" />
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pilot">Join Pilot</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="theme-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+      <!-- Sun icon (shown in dark mode to switch to light) -->
+      <svg id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>
+      <!-- Moon icon (shown in light mode to switch to dark) -->
+      <svg id="icon-moon" viewBox="0 0 24 24" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27m%20interested%20in%20learning%20more%20about%20IgnitionAI%20pricing%20for%20my%20workshop.%0A%0AWorkshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A%0APhone%2FWhatsApp%3A%0A%0ALooking%20forward%20to%20hearing%20from%20you." class="btn-outline-nav">Enquire Pricing</a>
+    <a href="#pilot" class="btn-nav-cta">Request Pilot</a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Drawer -->
+<div class="mob-overlay" id="mob-overlay"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <a href="#how"      onclick="closeDrawer()">How it works</a>
+  <a href="#features" onclick="closeDrawer()">Features</a>
+  <a href="#pilot"    onclick="closeDrawer()">Join Pilot</a>
+  <a href="mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AWorkshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A" style="color:var(--blue)">Enquire Pricing</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="home">
+
+
+  <div class="hero-badge">
+    <span class="badge-pulse"></span>
+    Pilot Program Open · 150 Workshops · 3 Cities
+  </div>
+
+  <h1 class="hero-title">
+    AI diagnostic intelligence<br>
+    for <span class="grad">every Indian</span><br>
+    <span id="typewriter"></span><span class="typewriter-cursor"></span>
+  </h1>
+
+  <p class="hero-sub">
+    From OBD-II fault codes to ranked root cause in under 30 seconds.
+    Built for Maruti, Tata, Hyundai and every vehicle Indian mechanics see daily.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#pilot" class="btn-primary">Join the Pilot — Free</a>
+    <a href="#how" class="btn-secondary">See how it works</a>
+    <a href="mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27m%20interested%20in%20IgnitionAI%20pricing.%0A%0AWorkshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A" class="btn-ghost">Enquire Pricing</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num"><span class="counter" data-to="50">0</span>%</span>
+      <span class="stat-label">Faster Diagnosis</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num"><span class="counter" data-to="40">0</span>%</span>
+      <span class="stat-label">Fewer Comebacks</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num"><span class="counter" data-to="30">0</span>s</span>
+      <span class="stat-label">To Root Cause</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num"><span class="counter" data-to="150">0</span></span>
+      <span class="stat-label">Pilot Workshops</span>
+    </div>
+  </div>
+
+  <!-- Mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-frame">
+      <div class="scan-line"></div>
+      <div class="mockup-titlebar">
+        <div class="tb-dots">
+          <span style="background:#FF5F57"></span>
+          <span style="background:#FEBC2E"></span>
+          <span style="background:#28C840"></span>
+        </div>
+        <span class="tb-url">ignitionai.console — Session #4821</span>
+        <div class="tb-live"><span class="live-dot"></span> ECU LIVE</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="sb-label">Active Vehicle</div>
+          <div class="sb-vehicle">
+            <div class="sv-name">Maruti Swift</div>
+            <div class="sv-year">2019 · K-Series 1.2L</div>
+          </div>
+          <div class="sb-label" style="margin-top:18px">Recent</div>
+          <div class="sb-other"><div class="sb-other-name">Mahindra Thar '21</div></div>
+          <div class="sb-other"><div class="sb-other-name">Hyundai i20 '18</div></div>
+          <div class="sb-other"><div class="sb-other-name">Tata Nexon '22</div></div>
+        </div>
+        <div class="mockup-main">
+          <div class="mm-row">
+            <span class="mm-label">Causal Analysis</span>
+            <span class="dtc-badge">P0300 · Random Misfire</span>
+          </div>
+          <div class="causes">
+            <div class="cause">
+              <div class="cause-head">
+                <span class="cause-name">Ignition Coil Failure (Cyl 2/3)</span>
+                <span class="cause-pct">87%</span>
+              </div>
+              <div class="bar-bg"><div class="bar-fill" style="--scale:0.87"></div></div>
+            </div>
+            <div class="cause">
+              <div class="cause-head">
+                <span class="cause-name">Clogged Fuel Injector</span>
+                <span class="cause-pct">64%</span>
+              </div>
+              <div class="bar-bg"><div class="bar-fill" style="--scale:0.64"></div></div>
+            </div>
+            <div class="cause">
+              <div class="cause-head">
+                <span class="cause-name">Vacuum Leak — Intake Gasket</span>
+                <span class="cause-pct">41%</span>
+              </div>
+              <div class="bar-bg"><div class="bar-fill" style="--scale:0.41"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn-primary" id="planBtn" style="font-size:12px;padding:9px 18px;">Generate Guided Test Plan</button>
+            <div id="planOut" style="display:none;margin-top:12px;border:1px dashed var(--blue-border);border-radius:6px;padding:14px;background:var(--blue-dim)">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--blue);font-weight:700;letter-spacing:0.1em;margin-bottom:8px">GUIDED TESTS — P0300</div>
+              <div style="font-size:12px;color:var(--text-mid);padding-left:12px;position:relative;margin-bottom:6px"><span style="position:absolute;left:0;color:var(--blue);font-family:var(--mono)">›</span>Swap Coil #2 with Coil #1 — re-run scan. Misfire shifts = coil confirmed.</div>
+              <div style="font-size:12px;color:var(--text-mid);padding-left:12px;position:relative;margin-bottom:6px"><span style="position:absolute;left:0;color:var(--blue);font-family:var(--mono)">›</span>Check fuel rail pressure: target 3.8 bar. Scope CKP waveform at ECU pin 24.</div>
+              <div style="font-size:12px;color:var(--text-mid);padding-left:12px;position:relative"><span style="position:absolute;left:0;color:var(--blue);font-family:var(--mono)">›</span>Smoke test intake manifold. Check throttle body gasket for vacuum leak.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROBLEM ═══ -->
+<section id="problem">
+  <div class="section-wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">The Problem</div>
+      <h2 class="section-h2">Diagnosis is the bottleneck.</h2>
+      <p class="section-desc">Generic OBD tools stop at reading codes. The real work — tracing root cause — still takes hours of trial-and-error guesswork.</p>
+    </div>
+    <div class="problem-grid stagger">
+      <div class="prob-card tilt-card">
+        <div class="prob-num"><span class="counter" data-to="3">0</span><span class="prob-accent">h+</span></div>
+        <div class="prob-label">Avg. Diagnostic Time</div>
+        <p class="prob-desc">Hours spent manually debugging complex no-start and drivability faults on every single ticket.</p>
+      </div>
+      <div class="prob-card tilt-card">
+        <div class="prob-num"><span class="counter" data-to="33">0</span><span class="prob-accent">%</span></div>
+        <div class="prob-label">Wasted Parts Spend</div>
+        <p class="prob-desc">Parts-cannoning — swapping components not actually at fault — destroying workshop margins and customer trust.</p>
+      </div>
+      <div class="prob-card tilt-card">
+        <div class="prob-num" style="font-size:32px;align-items:baseline;display:flex;gap:2px">
+          <span style="font-size:28px;color:var(--blue)">₹</span><span class="counter" data-to="1500">0</span>
+        </div>
+        <div class="prob-label">Lost per Comeback</div>
+        <p class="prob-desc">Bay time and labour revenue lost every time a vehicle returns for an issue that wasn't properly resolved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section id="how">
+  <div class="section-wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">How it works</div>
+      <h2 class="section-h2">Six steps from symptom to fix.</h2>
+      <p class="section-desc">IgnitionAI orchestrates the complete diagnostic workflow — turning every technician into a master diagnostician from day one.</p>
+    </div>
+    <div class="steps-container reveal">
+      <div class="steps-nav">
+        <button class="step-btn active" data-step="0"><span class="step-num">1</span><span class="step-label">Symptom Intake</span></button>
+        <button class="step-btn" data-step="1"><span class="step-num">2</span><span class="step-label">OBD Connect</span></button>
+        <button class="step-btn" data-step="2"><span class="step-num">3</span><span class="step-label">Causal AI</span></button>
+        <button class="step-btn" data-step="3"><span class="step-num">4</span><span class="step-label">Guided Tests</span></button>
+        <button class="step-btn" data-step="4"><span class="step-num">5</span><span class="step-label">Repair Plan</span></button>
+        <button class="step-btn" data-step="5"><span class="step-num">6</span><span class="step-label">Verify</span></button>
+      </div>
+      <div class="step-content-area">
+        <div class="step-panel active" data-content="0">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <div class="step-content-title">Symptom Intake</div>
+          <p class="step-content-body">Register vehicle and record customer-reported symptoms — rough idle, crank no-start, warning lights. IgnitionAI structures the context before any tool is connected.</p>
+        </div>
+        <div class="step-panel" data-content="1">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+          <div class="step-content-title">OBD-II Connection</div>
+          <p class="step-content-body">Connect any standard scanner to the DLC. IgnitionAI reads DTCs, live PIDs, and freeze-frame data — building a complete vehicle state snapshot automatically.</p>
+        </div>
+        <div class="step-panel" data-content="2">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+          <div class="step-content-title">Causal AI Reasoning</div>
+          <p class="step-content-body">Our causal physics engine reasons through vehicle subsystems — not keyword matching. Produces ranked root causes with probability scores in under 30 seconds.</p>
+        </div>
+        <div class="step-panel" data-content="3">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="step-content-title">Guided Diagnostic Tests</div>
+          <p class="step-content-body">Step-by-step tests designed to confirm the root cause — coil swaps, fuel pressure checks, smoke tests. Systematic confirmation, zero guesswork.</p>
+        </div>
+        <div class="step-panel" data-content="4">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+          <div class="step-content-title">Structural Repair Plan</div>
+          <p class="step-content-body">Clear mechanical repair checklist with torque specs, Indian supplier part numbers, and estimated labour time — ready to hand straight to the technician.</p>
+        </div>
+        <div class="step-panel" data-content="5">
+          <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="step-content-title">Post-Repair Verification</div>
+          <p class="step-content-body">Re-run diagnostics to confirm all ECU parameters are back in factory range. Generates a digital verification report — proof of quality against any comeback claim.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section id="features">
+  <div class="section-wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">Features</div>
+      <h2 class="section-h2">Built for India's workshop floor.</h2>
+      <p class="section-desc">Not an imported product fitted into an Indian context — designed from the ground up for Indian vehicles, mechanics, and conditions.</p>
+    </div>
+    <div class="features-grid stagger">
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+        <h3 class="feat-title">Works Offline</h3>
+        <p class="feat-desc">Core diagnostic trees and vehicle data cached locally. Spotty bay internet is never a blocker.</p>
+      </div>
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+        <h3 class="feat-title">Hindi & English</h3>
+        <p class="feat-desc">Full UI, voice input, and diagnostic steps in both Hindi and English. Every tech on your floor can use it natively.</p>
+      </div>
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <h3 class="feat-title">India-First Data</h3>
+        <p class="feat-desc">Parts, labour times, and fault frequencies calibrated for vehicles actually sold in India — not copied from global databases.</p>
+      </div>
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3 class="feat-title">Confidence Scoring</h3>
+        <p class="feat-desc">Every diagnostic path ranked by probability. Techs always know how confident the system is before committing to a repair.</p>
+      </div>
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+        <h3 class="feat-title">Cross-Brand</h3>
+        <p class="feat-desc">Maruti Suzuki, Hyundai, Tata, Honda, Renault — one platform for the cars that actually fill Indian workshops.</p>
+      </div>
+      <div class="feat-card tilt-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3 class="feat-title">Any Device</h3>
+        <p class="feat-desc">Browser-based, mobile-first. Works on any Android phone, tablet, or laptop — no app install or proprietary hardware needed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PILOT CTA ═══ -->
+<section id="pilot">
+  <div class="cta-wrap">
+    <div class="reveal">
+      <div class="section-eyebrow" style="justify-content:center">Join the Pilot</div>
+      <h2 class="cta-h2">150 workshops.<br>3 cities. 90 days.</h2>
+      <p class="cta-sub">Exclusive early access. Be among the first to close every diagnostic ticket in under 30 seconds.</p>
+    </div>
+
+    <div class="pilot-form reveal">
+      <form id="pilotForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="fn">Your Name</label>
+            <input class="form-input" id="fn" type="text" placeholder="Rajesh Kumar" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fw">Workshop Name</label>
+            <input class="form-input" id="fw" type="text" placeholder="Auto Care Centre" required />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="fc">City</label>
+            <input class="form-input" id="fc" type="text" placeholder="Delhi" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fb">Number of Bays</label>
+            <input class="form-input" id="fb" type="number" placeholder="4" min="1" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fp">Phone / WhatsApp</label>
+          <input class="form-input" id="fp" type="tel" placeholder="+91 98765 43210" required />
+        </div>
+        <button type="submit" class="btn-primary form-submit">Request Pilot Access →</button>
+      </form>
+      <div class="form-success" id="formSuccess">
+        <div class="success-ring">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 class="success-title">You're on the list.</h3>
+        <p class="success-sub">Our team will reach you on WhatsApp within 24 hours.</p>
+      </div>
+    </div>
+
+    <div class="contact-strip reveal">
+      <div class="contact-item">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38a2 2 0 0 1 2-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>Call or WhatsApp:</span>
+        <a href="tel:+918610815472">+91 86108 15472</a>
+      </div>
+      <div class="contact-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Email:</span>
+        <a href="mailto:founder@ignitionai.in">founder@ignitionai.in</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-logo">
+      <img src="logo_transparent.png" alt="ignitionAI" />
+      <p class="footer-desc">Cross-brand AI diagnostic intelligence. The fastest path from symptom to fix for Indian passenger vehicles.</p>
+      <div class="footer-contacts">
+        <a href="tel:+918610815472">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38a2 2 0 0 1 2-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          +91 86108 15472
+        </a>
+        <a href="mailto:founder@ignitionai.in">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          founder@ignitionai.in
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-h">Product</div>
+      <ul>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Workshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A">Enquire Pricing</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-h">Company</div>
+      <ul>
+        <li><a href="#pilot">Join Pilot</a></li>
+        <li><a href="mailto:founder@ignitionai.in">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-h">Legal</div>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 IgnitionAI. All rights reserved.</span>
+    <span class="udyam">UDYAM-TN-02-0444115</span>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════
+   PARTICLE CANVAS  (reactive to mouse)
+═══════════════════════════════════════════════ */
+(function() {
+  const c = document.getElementById('bg-canvas');
+  const ctx = c.getContext('2d');
+  let W, H, pts, mouse = {x:0, y:0}, isDark = true;
+
+  function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+
+  function mkPt() {
+    return {
+      x: Math.random()*W, y: Math.random()*H,
+      vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+      r: Math.random()*1.4+.4
+    };
+  }
+
+  function init() { resize(); pts = Array.from({length:90}, mkPt); }
+
+  function tick() {
+    ctx.clearRect(0,0,W,H);
+    isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
+    // Grid
+    ctx.strokeStyle = isDark ? 'rgba(30,111,232,0.04)' : 'rgba(30,111,232,0.06)';
+    ctx.lineWidth = 1;
+    const gs = 52;
+    for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    for(const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+
+      // Mouse repel
+      const dx=mouse.x-p.x, dy=mouse.y-p.y;
+      const d=Math.hypot(dx,dy);
+      if(d<130) { p.x-=dx*.012; p.y-=dy*.012; }
+
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = isDark ? 'rgba(30,111,232,0.45)' : 'rgba(30,111,232,0.3)';
+      ctx.fill();
+    }
+
+    // Lines between nearby pts
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const d=Math.hypot(pts[i].x-pts[j].x, pts[i].y-pts[j].y);
+        if(d<110){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle = isDark
+            ? `rgba(30,111,232,${.18*(1-d/110)})`
+            : `rgba(30,111,232,${.12*(1-d/110)})`;
+          ctx.lineWidth=.7;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', e => { mouse.x=e.clientX; mouse.y=e.clientY; });
+  init(); tick();
+})();
+
+/* ═══════════════════════════════════════════════
+   MAGNETIC CURSOR
+═══════════════════════════════════════════════ */
+(function() {
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let rx=0,ry=0, dx=0, dy=0;
+
+  document.addEventListener('mousemove', e => {
+    dx = e.clientX; dy = e.clientY;
+    dot.style.left = dx+'px'; dot.style.top = dy+'px';
+  });
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  function loop(){
+    rx = lerp(rx, dx, 0.12);
+    ry = lerp(ry, dy, 0.12);
+    ring.style.left = rx+'px';
+    ring.style.top  = ry+'px';
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // Hover effect on interactive elements
+  const hoverEls = document.querySelectorAll('a, button, .tilt-card, input');
+  hoverEls.forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   TYPEWRITER
+═══════════════════════════════════════════════ */
+(function() {
+  const words = ['workshop.', 'mechanic.', 'technician.', 'service bay.'];
+  const el = document.getElementById('typewriter');
+  let wi=0, ci=0, deleting=false;
+
+  function type() {
+    const word = words[wi];
+    if(!deleting) {
+      el.textContent = word.slice(0, ++ci);
+      if(ci === word.length) { deleting=true; setTimeout(type, 1800); return; }
+    } else {
+      el.textContent = word.slice(0, --ci);
+      if(ci === 0) { deleting=false; wi=(wi+1)%words.length; }
+    }
+    setTimeout(type, deleting ? 55 : 95);
+  }
+  setTimeout(type, 1200);
+})();
+
+/* ═══════════════════════════════════════════════
+   3D TILT CARDS
+═══════════════════════════════════════════════ */
+document.querySelectorAll('.tilt-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const cx = r.width/2, cy = r.height/2;
+    const rx = -(y-cy)/cy*8, ry = (x-cx)/cx*8;
+    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+    // Shimmer position
+    card.style.setProperty('--mx', `${x/r.width*100}%`);
+    card.style.setProperty('--my', `${y/r.height*100}%`);
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   NAV SCROLL
+═══════════════════════════════════════════════ */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.style.background = window.scrollY > 10
+    ? `color-mix(in srgb, var(--bg) 92%, transparent)`
+    : `color-mix(in srgb, var(--bg) 75%, transparent)`;
+});
+
+/* ═══════════════════════════════════════════════
+   MOBILE DRAWER
+═══════════════════════════════════════════════ */
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mob-drawer').classList.add('open');
+  document.getElementById('mob-overlay').classList.add('open');
+});
+document.getElementById('mob-overlay').addEventListener('click', closeDrawer);
+function closeDrawer() {
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-overlay').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════
+   DARK / LIGHT THEME TOGGLE
+═══════════════════════════════════════════════ */
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.addEventListener('click', () => {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('icon-sun').style.display  = isDark ? 'none'  : '';
+  document.getElementById('icon-moon').style.display = isDark ? ''      : 'none';
+});
+
+/* ═══════════════════════════════════════════════
+   STEPPER
+═══════════════════════════════════════════════ */
+document.querySelectorAll('.step-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = btn.getAttribute('data-step');
+    document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.step-panel[data-content="${idx}"]`).classList.add('active');
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   PLAN TOGGLE
+═══════════════════════════════════════════════ */
+document.getElementById('planBtn').addEventListener('click', function() {
+  const o = document.getElementById('planOut');
+  const vis = o.style.display !== 'none';
+  o.style.display = vis ? 'none' : 'block';
+  this.textContent = vis ? 'Generate Guided Test Plan' : 'Hide Test Plan';
+});
+
+/* ═══════════════════════════════════════════════
+   SCROLL REVEAL + COUNTERS
+═══════════════════════════════════════════════ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+
+      // Animate counters inside this element
+      e.target.querySelectorAll('.counter').forEach(el => animCount(el));
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+
+// Also observe standalone counters in hero
+const heroIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) { animCount(e.target); heroIO.unobserve(e.target); }
+  });
+}, {threshold:0.1});
+document.querySelectorAll('.hero-stats .counter').forEach(el => heroIO.observe(el));
+
+function animCount(el) {
+  const target = parseInt(el.getAttribute('data-to'));
+  let cur = 0;
+  const step = target / 45;
+  const t = setInterval(() => {
+    cur += step;
+    if(cur >= target) { el.textContent = target.toLocaleString(); clearInterval(t); }
+    else { el.textContent = Math.floor(cur).toLocaleString(); }
+  }, 28);
+}
+
+/* ═══════════════════════════════════════════════
+   FORM SUBMIT
+═══════════════════════════════════════════════ */
+document.getElementById('pilotForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const n = document.getElementById('fn').value;
+  const w = document.getElementById('fw').value;
+  const c = document.getElementById('fc').value;
+  const b = document.getElementById('fb').value;
+  const p = document.getElementById('fp').value;
+  const sub = encodeURIComponent(`Pilot Access Request — ${w}`);
+  const body = encodeURIComponent(`Hi Shashank,\n\nI'd like to request pilot access for IgnitionAI.\n\nName: ${n}\nWorkshop: ${w}\nCity: ${c}\nNumber of Bays: ${b}\nPhone / WhatsApp: ${p}\n\nLooking forward to hearing from you.`);
+  window.location.href = `mailto:founder@ignitionai.in?subject=${sub}&body=${body}`;
+  e.target.style.display = 'none';
+  document.getElementById('formSuccess').classList.add('show');
+});
+</script>
+</body>
+</html>

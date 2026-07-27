@@ -3,14 +3,13 @@ IgnitionAI — Gemini AI Integration
 Uses gemini-1.5-flash-latest for fast, cost-effective AI explanations.
 """
 
-from google import genai
-from google.genai import types
-from app.config import GEMINI_API_KEY, GEMINI_MODEL_NAME
+from openai import OpenAI
+from app.config import NVIDIA_API_KEY, NVIDIA_MODEL_NAME
 
 
 def _get_client():
-    """Return a configured Gemini client."""
-    return genai.Client(api_key=GEMINI_API_KEY)
+    """Return a configured OpenAI client for Nvidia API."""
+    return OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=NVIDIA_API_KEY)
 
 
 def generate_plain_english_diagnosis(
@@ -47,11 +46,14 @@ Keep it professional but conversational. Max 150 words."""
 
     try:
         client = _get_client()
-        response = client.models.generate_content(
-            model=GEMINI_MODEL_NAME,
-            contents=prompt,
+        completion = client.chat.completions.create(
+            model=NVIDIA_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1024,
+            stream=False
         )
-        return response.text.strip()
+        return completion.choices[0].message.content.strip()
     except Exception as e:
         return f"[AI Unavailable] Could not generate diagnosis: {str(e)}\n\nManual Review Required: Root cause identified as '{final_root_cause}' based on DTC analysis."
 
@@ -86,11 +88,14 @@ Format as a clean, professional guide. Max 200 words."""
 
     try:
         client = _get_client()
-        response = client.models.generate_content(
-            model=GEMINI_MODEL_NAME,
-            contents=prompt,
+        completion = client.chat.completions.create(
+            model=NVIDIA_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1024,
+            stream=False
         )
-        return response.text.strip()
+        return completion.choices[0].message.content.strip()
     except Exception as e:
         # Fallback to the raw steps
         fallback = "\n".join(f"• {s}" for s in repair_steps)
@@ -119,10 +124,13 @@ Start with "IgnitionAI has detected..." """
 
     try:
         client = _get_client()
-        response = client.models.generate_content(
-            model=GEMINI_MODEL_NAME,
-            contents=prompt,
+        completion = client.chat.completions.create(
+            model=NVIDIA_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1024,
+            stream=False
         )
-        return response.text.strip()
+        return completion.choices[0].message.content.strip()
     except Exception:
         return f"IgnitionAI has detected a fault in your vehicle's {final_root_cause.lower()}. Please consult a certified technician for immediate attention."

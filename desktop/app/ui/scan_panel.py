@@ -87,14 +87,14 @@ class ScanPanel(QWidget):
         mode_layout.setSpacing(20)
 
         # Real data mode
-        self.real_btn = QPushButton("📡  Real OBD Data")
+        self.real_btn = QPushButton("Real OBD Data")
         self.real_btn.setCheckable(True)
         self.real_btn.setChecked(True)
         self.real_btn.setObjectName("primary_btn")
         self.real_btn.clicked.connect(self._set_real_mode)
 
         # Simulator mode
-        self.sim_btn = QPushButton("🎮  OBD Simulator")
+        self.sim_btn = QPushButton("OBD Simulator")
         self.sim_btn.setCheckable(True)
         self.sim_btn.setObjectName("secondary_btn")
         self.sim_btn.clicked.connect(self._set_sim_mode)
@@ -163,7 +163,7 @@ class ScanPanel(QWidget):
             qb = QPushButton(code)
             qb.setObjectName("secondary_btn")
             qb.setFixedHeight(26)
-            qb.setFixedWidth(68)
+            qb.setMinimumWidth(68)
             qb.setStyleSheet(f"font-size:11px; padding: 2px 6px;")
             qb.clicked.connect(lambda c, code=code: self._quick_add_dtc(code))
             quick_row.addWidget(qb)
@@ -184,7 +184,7 @@ class ScanPanel(QWidget):
         sensor_header.addWidget(sensor_title)
         sensor_header.addStretch()
 
-        load_json_btn = QPushButton("📂 Load JSON")
+        load_json_btn = QPushButton("Load JSON")
         load_json_btn.setObjectName("secondary_btn")
         load_json_btn.setFixedHeight(28)
         load_json_btn.clicked.connect(self._load_json)
@@ -208,19 +208,19 @@ class ScanPanel(QWidget):
         action_row = QHBoxLayout()
         action_row.setSpacing(16)
 
-        self.example_btn = QPushButton("🔧 Load Example")
+        self.example_btn = QPushButton("Load Example")
         self.example_btn.setObjectName("secondary_btn")
         self.example_btn.clicked.connect(self._load_example)
         action_row.addWidget(self.example_btn)
 
-        clear_btn = QPushButton("🗑 Clear")
+        clear_btn = QPushButton("Clear")
         clear_btn.setObjectName("secondary_btn")
         clear_btn.clicked.connect(self._clear_inputs)
         action_row.addWidget(clear_btn)
 
         action_row.addStretch()
 
-        self.run_btn = QPushButton("⚡  Run AI Diagnostic Analysis")
+        self.run_btn = QPushButton("Run AI Diagnostic Analysis")
         self.run_btn.setObjectName("primary_btn")
         self.run_btn.setMinimumWidth(280)
         self.run_btn.setMinimumHeight(48)
@@ -367,7 +367,7 @@ class ScanPanel(QWidget):
             return
 
         self.run_btn.setEnabled(False)
-        self.run_btn.setText("⏳  Analyzing...")
+        self.run_btn.setText("Analyzing...")
         self.progress_bar.show()
         self.status_label.setText("Running diagnostic pipeline... please wait")
         self.status_label.show()
@@ -382,7 +382,7 @@ class ScanPanel(QWidget):
         self.progress_bar.hide()
         self.status_label.hide()
         self.run_btn.setEnabled(True)
-        self.run_btn.setText("⚡  Run AI Diagnostic Analysis")
+        self.run_btn.setText("Run AI Diagnostic Analysis")
         self._thread.quit()
         self.analysis_complete.emit(results)
 
@@ -390,5 +390,5 @@ class ScanPanel(QWidget):
         self.progress_bar.hide()
         self.status_label.hide()
         self.run_btn.setEnabled(True)
-        self.run_btn.setText("⚡  Run AI Diagnostic Analysis")
+        self.run_btn.setText("Run AI Diagnostic Analysis")
         QMessageBox.critical(self, "Analysis Error", f"An error occurred:\n{msg}")

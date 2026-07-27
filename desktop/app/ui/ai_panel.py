@@ -31,6 +31,7 @@ class AIWorker(QObject):
     diagnosis_ready = Signal(str)
     repair_ready = Signal(str)
     error = Signal(str)
+    finished = Signal()
 
     def __init__(self, results: dict, vehicle_info: str):
         super().__init__()
@@ -53,6 +54,8 @@ class AIWorker(QObject):
             self.repair_ready.emit(repair)
         except Exception as e:
             self.error.emit(str(e))
+        finally:
+            self.finished.emit()
 
 
 class AIThread(QThread):
@@ -99,9 +102,9 @@ class AIPanel(QWidget):
         header_layout.setContentsMargins(24, 18, 24, 18)
 
         hdr_text = QVBoxLayout()
-        gem_title = QLabel("🤖  Gemini AI Diagnosis")
+        gem_title = QLabel("Gemini AI Diagnosis")
         gem_title.setStyleSheet(f"font-size: 20px; font-weight: 800; color: {COLOR_TEXT_PRIMARY};")
-        gem_sub = QLabel("Powered by gemini-1.5-flash-latest  •  Plain-English vehicle health report")
+        gem_sub = QLabel("Powered by gemini-2.0-flash-lite  •  Plain-English vehicle health report")
         gem_sub.setStyleSheet(f"font-size: 12px; color: {COLOR_TEXT_SECONDARY};")
         hdr_text.addWidget(gem_title)
         hdr_text.addWidget(gem_sub)
@@ -109,7 +112,7 @@ class AIPanel(QWidget):
         header_layout.addStretch(1)
 
         # Generate button
-        self.gen_btn = QPushButton("⚡ Generate AI Report")
+        self.gen_btn = QPushButton("Generate AI Report")
         self.gen_btn.setObjectName("primary_btn")
         self.gen_btn.setMinimumWidth(200)
         self.gen_btn.setMinimumHeight(44)
@@ -146,7 +149,7 @@ class AIPanel(QWidget):
         diag_hdr.addWidget(diag_title)
         diag_hdr.addStretch()
 
-        self.diag_badge = QLabel("  ⚡ AI Generated  ")
+        self.diag_badge = QLabel("  AI Generated  ")
         self.diag_badge.setObjectName("ai_badge")
         self.diag_badge.hide()
         diag_hdr.addWidget(self.diag_badge)
@@ -187,7 +190,7 @@ class AIPanel(QWidget):
         repair_hdr.addWidget(repair_title)
         repair_hdr.addStretch()
 
-        self.pdf_btn = QPushButton("📄 Export PDF")
+        self.pdf_btn = QPushButton("Export PDF")
         self.pdf_btn.setObjectName("secondary_btn")
         self.pdf_btn.setFixedHeight(28)
         self.pdf_btn.clicked.connect(self._export_pdf)
@@ -224,7 +227,7 @@ class AIPanel(QWidget):
         info_layout.setContentsMargins(20, 12, 20, 12)
 
         info_text = QLabel(
-            f"ℹ️  Using <b>gemini-1.5-flash-latest</b> — optimized for fast, accurate technical text generation. "
+            f"Using <b>gemini-2.0-flash-lite</b> — optimized for fast, accurate technical text generation. "
             f"Results are AI-generated suggestions. Always validate with a certified mechanic."
         )
         info_text.setStyleSheet(f"font-size: 11px; color: {COLOR_TEXT_SECONDARY};")
@@ -263,7 +266,7 @@ class AIPanel(QWidget):
             return
 
         self.gen_btn.setEnabled(False)
-        self.gen_btn.setText("⏳ Generating...")
+        self.gen_btn.setText("Generating...")
         self.progress.show()
         self.progress_label.setText("Connecting to Gemini AI... this may take 5-10 seconds")
         self.progress_label.show()
@@ -275,7 +278,7 @@ class AIPanel(QWidget):
         self._worker.diagnosis_ready.connect(self._on_diagnosis)
         self._worker.repair_ready.connect(self._on_repair)
         self._worker.error.connect(self._on_error)
-        self._thread.finished.connect(self._on_thread_done)
+        self._worker.finished.connect(self._on_thread_done)
         self._thread.start()
 
     def _on_diagnosis(self, text: str):
@@ -290,7 +293,7 @@ class AIPanel(QWidget):
 
     def _on_error(self, msg: str):
         self.diagnosis_output.setPlainText(
-            f"⚠️ Gemini AI connection failed:\n{msg}\n\n"
+            f"Gemini AI connection failed:\n{msg}\n\n"
             "Please check your API key in app/config.py and ensure you have internet access.\n\n"
             "The rule-based diagnostic results are available in the Results tab."
         )
@@ -299,7 +302,7 @@ class AIPanel(QWidget):
         self.progress.hide()
         self.progress_label.hide()
         self.gen_btn.setEnabled(True)
-        self.gen_btn.setText("⚡ Generate AI Report")
+        self.gen_btn.setText("Generate AI Report")
         self._thread.quit()
 
     def _export_pdf(self):

@@ -4,6 +4,49 @@ Dark Blue + Light Blue premium theme
 """
 
 from app.config import *
+from PySide6.QtGui import QPixmap, QPainter, QColor
+from PySide6.QtCore import Qt
+
+
+def get_outlined_logo(logo_path: str, height: int) -> QPixmap:
+    """Load, scale, and add a clean white outline to the logo for dark backgrounds."""
+    logo_pix = QPixmap(logo_path)
+    if logo_pix.isNull():
+        return QPixmap()
+    
+    # Scale the logo first
+    logo_scaled = logo_pix.scaledToHeight(height, Qt.SmoothTransformation)
+    
+    # Create a canvas with extra padding for the outline (e.g. 4px padding)
+    pad = 4
+    canvas = QPixmap(logo_scaled.width() + pad * 2, logo_scaled.height() + pad * 2)
+    canvas.fill(Qt.transparent)
+    
+    painter = QPainter(canvas)
+    painter.setRenderHint(QPainter.Antialiasing)
+    
+    # Create white silhouette of the logo
+    silhouette = QPixmap(logo_scaled.size())
+    silhouette.fill(Qt.transparent)
+    s_painter = QPainter(silhouette)
+    s_painter.drawPixmap(0, 0, logo_scaled)
+    s_painter.setCompositionMode(QPainter.CompositionMode_SourceIn)
+    s_painter.fillRect(silhouette.rect(), QColor(255, 255, 255))
+    s_painter.end()
+    
+    # Draw silhouette in all 8 directions to create outline
+    offsets = [
+        (-2, 0), (2, 0), (0, -2), (0, 2),
+        (-1, -1), (-1, 1), (1, -1), (1, 1)
+    ]
+    for dx, dy in offsets:
+        painter.drawPixmap(pad + dx, pad + dy, silhouette)
+        
+    # Draw original logo in the center
+    painter.drawPixmap(pad, pad, logo_scaled)
+    painter.end()
+    
+    return canvas
 
 
 def get_stylesheet() -> str:
@@ -132,6 +175,8 @@ def get_stylesheet() -> str:
         color: {COLOR_LIGHT_BLUE};
         border: 1px solid {COLOR_LIGHT_BLUE};
         border-radius: 8px;
+        padding: 4px 12px;
+        min-height: 24px;
     }}
     QPushButton#secondary_btn:hover {{
         background-color: rgba(91, 155, 213, 0.1);
@@ -144,7 +189,7 @@ def get_stylesheet() -> str:
     }}
     QPushButton#sim_active {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #00897B, stop:1 #00695C);
+            stop:0 #1565C0, stop:1 #00D4FF);
         color: white;
         border-radius: 8px;
         font-weight: 700;

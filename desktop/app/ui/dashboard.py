@@ -8,14 +8,15 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
     QPushButton, QScrollArea
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 
 from app.config import (
     COLOR_BG_PANEL, COLOR_BG_CARD, COLOR_BORDER, COLOR_CYAN,
-    COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_SUCCESS,
+    COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_MUTED, COLOR_SUCCESS,
     COLOR_WARNING, COLOR_DANGER, COLOR_ACCENT_BLUE, COLOR_LIGHTER_BLUE
 )
+from app.ui.styles import get_outlined_logo
 
 LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
 
@@ -40,6 +41,8 @@ def _make_stat_card(value: str, label: str, color: str = None) -> QFrame:
 
 
 class DashboardPanel(QWidget):
+    navigate_requested = Signal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._build_ui()
@@ -77,11 +80,11 @@ class DashboardPanel(QWidget):
         wc_text.addWidget(sub)
         wc_layout.addLayout(wc_text, 3)
 
-        # Logo on the right
-        logo_pix = QPixmap(LOGO_PATH)
-        if not logo_pix.isNull():
+        # Logo on the right (outlined)
+        logo_outlined = get_outlined_logo(LOGO_PATH, 110)
+        if not logo_outlined.isNull():
             logo_lbl = QLabel()
-            logo_lbl.setPixmap(logo_pix.scaledToHeight(72, Qt.SmoothTransformation))
+            logo_lbl.setPixmap(logo_outlined)
             logo_lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             wc_layout.addWidget(logo_lbl, 1)
 
@@ -95,10 +98,10 @@ class DashboardPanel(QWidget):
         stats_row = QHBoxLayout()
         stats_row.setSpacing(16)
 
-        self.stat_dtcs = _make_stat_card("—", "DTCs Detected", COLOR_DANGER)
-        self.stat_root = _make_stat_card("—", "Root Causes Found", COLOR_WARNING)
-        self.stat_conf = _make_stat_card("—", "AI Confidence", COLOR_SUCCESS)
-        self.stat_sev  = _make_stat_card("—", "Severity Level", COLOR_CYAN)
+        self.stat_dtcs = _make_stat_card("—", "DTCs Detected", COLOR_TEXT_MUTED)
+        self.stat_root = _make_stat_card("—", "Root Causes Found", COLOR_TEXT_MUTED)
+        self.stat_conf = _make_stat_card("—", "AI Confidence", COLOR_TEXT_MUTED)
+        self.stat_sev  = _make_stat_card("—", "Severity Level", COLOR_TEXT_MUTED)
 
         for card in [self.stat_dtcs, self.stat_root, self.stat_conf, self.stat_sev]:
             stats_row.addWidget(card)
@@ -114,9 +117,9 @@ class DashboardPanel(QWidget):
         qs_row.setSpacing(16)
 
         actions = [
-            ("🔍  Start New Scan", "Connect to OBD simulator or load real data", COLOR_ACCENT_BLUE, 1),
-            ("📊  View Last Results", "See ranked root causes and sensor analysis", "#0D47A1", 2),
-            ("🤖  AI Diagnosis", "Get Gemini AI explanation and repair narrative", "#1565C0", 3),
+            ("Start New Scan", "Connect to OBD simulator or load real data", COLOR_ACCENT_BLUE, 1),
+            ("View Last Results", "See ranked root causes and sensor analysis", "#0D47A1", 2),
+            ("AI Diagnosis", "Get Gemini AI explanation and repair narrative", "#1565C0", 3),
         ]
 
         for title_text, desc, color, nav_idx in actions:
@@ -144,14 +147,13 @@ class DashboardPanel(QWidget):
             d.setWordWrap(True)
             btn = QPushButton("Open →")
             btn.setObjectName("secondary_btn")
-            btn.setFixedWidth(80)
             btn.setFixedHeight(28)
             nav_i = nav_idx  # capture
-            btn.clicked.connect(lambda checked, i=nav_i: self.parent().parent().parent()._nav_to(i) if self.parent() else None)
+            btn.clicked.connect(lambda checked, i=nav_i: self.navigate_requested.emit(i))
             cl.addWidget(t)
             cl.addWidget(d)
             cl.addStretch()
-            cl.addWidget(btn)
+            cl.addWidget(btn, 0, Qt.AlignLeft)
             qs_row.addWidget(card)
 
         layout.addLayout(qs_row)
@@ -232,14 +234,21 @@ class DashboardPanel(QWidget):
             pw = results["dtc_rankings"][0].get("points_weight", 0)
         sev = "Critical" if pw >= 9 else "High" if pw >= 7 else "Medium" if pw >= 5 else "Low"
 
-        self.stat_dtcs.findChild(QLabel, None).setText(str(dtc_count))
-        # Quick update via layout items
-        for card, val, label in [
-            (self.stat_dtcs, str(dtc_count), None),
-            (self.stat_root, str(root_count), None),
-            (self.stat_conf, f"{confidence*100:.0f}%", None),
-            (self.stat_sev, sev, None),
-        ]:
+        # Determine semantic colors from fixed palette based on values
+        dtc_color = COLOR_DANGER if dtc_count > 0 else COLOR_CYAN
+        root_color = COLOR_WARNING if root_count > 0 else COLOR_CYAN
+        conf_color = COLOR_SUCCESS if confidence >= 0.75 else COLOR_WARNING if confidence >= 0.5 else COLOR_DANGER
+        sev_color = COLOR_DANGER if sev == "Critical" else COLOR_WARNING if sev in ("High", "Medium") else COLOR_SUCCESS
+
+        updates = [
+            (self.stat_dtcs, str(dtc_count), dtc_color),
+            (self.stat_root, str(root_count), root_color),
+            (self.stat_conf, f"{confidence*100:.0f}%", conf_color),
+            (self.stat_sev, sev, sev_color),
+        ]
+
+        for card, val, color in updates:
             lbl = card.layout().itemAt(0).widget()
             if isinstance(lbl, QLabel):
                 lbl.setText(val)
+                lbl.setStyleSheet(f"font-size: 32px; font-weight: 800; color: {color};")

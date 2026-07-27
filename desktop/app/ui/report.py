@@ -4,6 +4,7 @@ Generates a branded professional report using ReportLab.
 """
 
 import os
+import re
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -29,9 +30,13 @@ C_SUCCESS    = HexColor("#00897B")
 C_DANGER     = HexColor("#C62828")
 C_WARNING    = HexColor("#F57F17")
 C_WHITE      = colors.white
-C_LIGHT_BG   = HexColor("#F0F6FF")
-C_CARD_BG    = HexColor("#E8F0FC")
+C_CARD_BG    = HexColor("#F8F9FA")
+C_LIGHT_BG   = HexColor("#FFFFFF")
 
+def _parse_markdown(text: str) -> str:
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
+    return text
 
 def generate_pdf_report(
     path: str,
@@ -164,7 +169,7 @@ def generate_pdf_report(
     # ── AI Diagnosis Section ──────────────────────────────────────────────
     if diagnosis_text:
         diag_header = Table(
-            [[Paragraph("🤖  AI DIAGNOSIS — PLAIN ENGLISH", section_style)]],
+            [[Paragraph("AI DIAGNOSIS — PLAIN ENGLISH", section_style)]],
             colWidths=[17.5 * cm],
         )
         diag_header.setStyle(TableStyle([
@@ -178,14 +183,14 @@ def generate_pdf_report(
 
         for para in diagnosis_text.split("\n\n"):
             if para.strip():
-                story.append(Paragraph(para.strip(), body_style))
+                story.append(Paragraph(_parse_markdown(para.strip()), body_style))
         story.append(Spacer(1, 0.3 * cm))
 
     # ── DTC Rankings Table ────────────────────────────────────────────────
     dtc_rankings = results.get("dtc_rankings", [])
     if dtc_rankings:
         dtc_header = Table(
-            [[Paragraph("📊  RANKED FAULT CODES", section_style)]],
+            [[Paragraph("RANKED FAULT CODES", section_style)]],
             colWidths=[17.5 * cm],
         )
         dtc_header.setStyle(TableStyle([
@@ -231,7 +236,7 @@ def generate_pdf_report(
     root_rankA = results.get("root_rankA", [])
     if root_rankA:
         rc_header = Table(
-            [[Paragraph("🔍  ROOT CAUSE ANALYSIS", section_style)]],
+            [[Paragraph("ROOT CAUSE ANALYSIS", section_style)]],
             colWidths=[17.5 * cm],
         )
         rc_header.setStyle(TableStyle([
@@ -269,7 +274,7 @@ def generate_pdf_report(
     repair_steps = results.get("repair_steps", [])
     if repair_steps:
         rs_header = Table(
-            [[Paragraph("🔧  RECOMMENDED REPAIR STEPS", section_style)]],
+            [[Paragraph("RECOMMENDED REPAIR STEPS", section_style)]],
             colWidths=[17.5 * cm],
         )
         rs_header.setStyle(TableStyle([
@@ -288,7 +293,7 @@ def generate_pdf_report(
     # ── AI Repair Narrative ────────────────────────────────────────────────
     if repair_text:
         rn_header = Table(
-            [[Paragraph("📋  AI REPAIR NARRATIVE", section_style)]],
+            [[Paragraph("AI REPAIR NARRATIVE", section_style)]],
             colWidths=[17.5 * cm],
         )
         rn_header.setStyle(TableStyle([
@@ -301,7 +306,7 @@ def generate_pdf_report(
         story.append(Spacer(1, 0.2 * cm))
         for para in repair_text.split("\n\n"):
             if para.strip():
-                story.append(Paragraph(para.strip(), body_style))
+                story.append(Paragraph(_parse_markdown(para.strip()), body_style))
         story.append(Spacer(1, 0.3 * cm))
 
     # ── Footer Disclaimer ──────────────────────────────────────────────────

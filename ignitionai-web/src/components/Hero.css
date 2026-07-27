@@ -1,4 +1,66 @@
+/* ─── Big transparent hero logo ─── */
+.hero-logo-bg-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -56%);
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-logo-bg-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 540px; height: 540px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30, 111, 232, 0.14) 0%, transparent 70%);
+  animation: heroLogoBreath 4s ease-in-out infinite;
+}
+
+@keyframes heroLogoBreath {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50%       { transform: translate(-50%, -50%) scale(1.12); opacity: 0.9; }
+}
+
+.hero-logo-bg {
+  width: 380px;
+  height: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.055;
+  user-select: none;
+}
+
+/* ─── Ghost button ─── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: var(--font);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .hero {
+
   position: relative;
   min-height: 100vh;
   display: flex;

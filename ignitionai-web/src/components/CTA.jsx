@@ -2,8 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './CTA.css';
 
-const mailPilot = "mailto:founder@ignitionai.in?subject=Request%20for%20Early%20Access%20-%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%20came%20across%20IgnitionAI%20and%20I'm%20very%20interested%20in%20the%20early%20access%20pilot.%0A%0AHere's%20a%20bit%20about%20our%20workshop%3A%0A%0AWorkshop%20Name%3A%20%0ALocation%3A%20%0ANumber%20of%20Bays%3A%20%0A%0APlease%20let%20me%20know%20the%20next%20steps.%0A%0ARegards%2C";
-const mailDemo = "mailto:founder@ignitionai.in?subject=Demo%20Request%20-%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI'd%20love%20to%20see%20a%20live%20demo%20of%20the%20IgnitionAI%20diagnostic%20platform.%0A%0AAvailability%3A%20%0APreferred%20mode%20(call%2Fin-person)%3A%20%0A%0ARegards%2C";
+const mailPilot   = "mailto:founder@ignitionai.in?subject=Request%20for%20Early%20Access%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%20came%20across%20IgnitionAI%20and%20I%27m%20very%20interested%20in%20the%20early%20access%20pilot.%0A%0AHere%27s%20a%20bit%20about%20our%20workshop%3A%0A%0AWorkshop%20Name%3A%20%0ALocation%3A%20%0ANumber%20of%20Bays%3A%20%0A%0APlease%20let%20me%20know%20the%20next%20steps.%0A%0ARegards%2C";
+const mailDemo    = "mailto:founder@ignitionai.in?subject=Demo%20Request%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27d%20love%20to%20see%20a%20live%20demo%20of%20the%20IgnitionAI%20diagnostic%20platform.%0A%0AAvailability%3A%20%0APreferred%20mode%20(call%2Fin-person)%3A%20%0A%0ARegards%2C";
+const mailPricing = "mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27m%20interested%20in%20learning%20more%20about%20IgnitionAI%20pricing%20for%20my%20workshop.%0A%0AWorkshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A%0APhone%2FWhatsApp%3A%0A%0ALooking%20forward%20to%20hearing%20from%20you.";
 
 export default function CTA() {
   return (
@@ -30,6 +31,9 @@ export default function CTA() {
               </a>
               <a href={mailDemo} className="btn btn-secondary btn-lg">
                 Request a Demo
+              </a>
+              <a href={mailPricing} className="btn btn-ghost btn-lg" style={{ fontSize: '0.9rem' }}>
+                Enquire Pricing
               </a>
             </div>
             <p className="cta-note">No commitment required. Just a conversation.</p>

@@ -7,7 +7,7 @@ NEVER commit config.py with real API keys.
 # ─── Gemini AI Configuration ───────────────────────────────────────────────
 # Get your key from: https://aistudio.google.com/app/apikey
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
-GEMINI_MODEL_NAME = "gemini-1.5-flash-latest"
+GEMINI_MODEL_NAME = "gemini-2.0-flash-lite"
 
 # ─── App Metadata ──────────────────────────────────────────────────────────
 APP_NAME = "IgnitionAI"

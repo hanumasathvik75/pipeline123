@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QPushButton, QListWidget, QListWidgetItem, QTableWidget,
     QTableWidgetItem, QTextEdit, QSplitter, QScrollArea, QProgressBar
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QFont
 
 from app.config import (
@@ -99,6 +99,8 @@ class AnomalyChart(FigureCanvas):
 
 
 class ResultsPanel(QWidget):
+    navigate_requested = Signal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._current_results = {}
@@ -126,7 +128,7 @@ class ResultsPanel(QWidget):
         banner_layout.setContentsMargins(20, 14, 20, 14)
 
         banner_left = QVBoxLayout()
-        self.banner_title = QLabel("🔍 Run a scan to see results")
+        self.banner_title = QLabel("Run a scan to see results")
         self.banner_title.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {COLOR_TEXT_PRIMARY};")
         self.banner_subtitle = QLabel("No analysis data available")
         self.banner_subtitle.setStyleSheet(f"font-size: 12px; color: {COLOR_TEXT_SECONDARY};")
@@ -205,7 +207,7 @@ class ResultsPanel(QWidget):
         repair_hdr.addWidget(repair_title)
         repair_hdr.addStretch()
 
-        self.ai_btn = QPushButton("🤖 Get AI Explanation")
+        self.ai_btn = QPushButton("Get AI Explanation")
         self.ai_btn.setObjectName("secondary_btn")
         self.ai_btn.setFixedHeight(28)
         self.ai_btn.clicked.connect(self._go_to_ai)
@@ -239,7 +241,7 @@ class ResultsPanel(QWidget):
                 border-radius: 12px;
             }}
         """)
-        self.banner_title.setText(f"⚡ Root Cause: {final_root}")
+        self.banner_title.setText(f"Root Cause: {final_root}")
         dtc_list = ", ".join(results.get("input_dtcs", []))
         self.banner_subtitle.setText(f"DTCs: {dtc_list}  •  Method: {method}")
         self.confidence_label.setText(f"{confidence*100:.0f}%")
@@ -278,7 +280,7 @@ class ResultsPanel(QWidget):
         for i, rc in enumerate(results.get("root_rankA", [])[:8]):
             root = rc.get("root", "")
             score = rc.get("score", 0)
-            prefix = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"{i+1}."
+            prefix = f"{i+1}."
             item = QListWidgetItem(f"{prefix}  {root}  ({score:.1f})")
             item.setData(Qt.UserRole, rc)
             if i == 0:
@@ -331,9 +333,9 @@ class ResultsPanel(QWidget):
                         category = e.get("root_cause_category", "")
                         break
 
-            txt = f"📍 Root Cause: {root}\n"
+            txt = f"Root Cause: {root}\n"
             if category:
-                txt += f"📂 Category: {category}\n"
+                txt += f"Category: {category}\n"
             txt += f"\n{'─'*40}\n\nRepair Procedure:\n\n"
             for i, step in enumerate(steps, 1):
                 txt += f"Step {i}: {step}\n\n"
@@ -343,8 +345,4 @@ class ResultsPanel(QWidget):
         self.repair_text.setPlainText(txt)
 
     def _go_to_ai(self):
-        main = self.parent()
-        if hasattr(main, "navigate_to_ai"):
-            main.navigate_to_ai()
-        elif hasattr(main, "parent") and hasattr(main.parent(), "navigate_to_ai"):
-            main.parent().navigate_to_ai()
+        self.navigate_requested.emit(3)

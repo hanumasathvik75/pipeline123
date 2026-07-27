@@ -13,6 +13,7 @@ from app.config import (
     APP_NAME, APP_VERSION, APP_SUBTITLE,
     COLOR_BG_DARKEST, COLOR_CYAN, COLOR_TEXT_SECONDARY, COLOR_ACCENT_BLUE, COLOR_TEXT_PRIMARY
 )
+from app.ui.styles import get_outlined_logo
 
 
 LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
@@ -46,29 +47,28 @@ class IgnitionSplash(QSplashScreen):
         for y in range(0, 500, 60):
             painter.drawLine(0, y, 900, y)
 
-        # Logo
-        logo_pix = QPixmap(LOGO_PATH)
-        if not logo_pix.isNull():
-            logo_scaled = logo_pix.scaledToHeight(100, Qt.SmoothTransformation)
-            # Tint dark logo to light blue for dark background
-            x = (900 - logo_scaled.width()) // 2
-            painter.drawPixmap(x, 140, logo_scaled)
+        # Logo (outlined)
+        logo_outlined = get_outlined_logo(LOGO_PATH, 150)
+        if not logo_outlined.isNull():
+            # Center horizontally, place at y=70
+            x = (900 - logo_outlined.width()) // 2
+            painter.drawPixmap(x, 70, logo_outlined)
 
         # App name
         font = QFont("Segoe UI", 38, QFont.Bold)
         painter.setFont(font)
         painter.setPen(QColor(COLOR_TEXT_PRIMARY))
-        painter.drawText(0, 270, 900, 60, Qt.AlignHCenter | Qt.AlignVCenter, APP_NAME)
+        painter.drawText(0, 240, 900, 60, Qt.AlignHCenter | Qt.AlignVCenter, APP_NAME)
 
         # Subtitle
         font2 = QFont("Segoe UI", 13)
         painter.setFont(font2)
         painter.setPen(QColor(COLOR_TEXT_SECONDARY))
-        painter.drawText(0, 320, 900, 30, Qt.AlignHCenter | Qt.AlignVCenter, APP_SUBTITLE)
+        painter.drawText(0, 300, 900, 30, Qt.AlignHCenter | Qt.AlignVCenter, APP_SUBTITLE)
 
         # Cyan accent line under title
         painter.setPen(QColor(COLOR_CYAN))
-        painter.drawLine(350, 355, 550, 355)
+        painter.drawLine(350, 340, 550, 340)
 
         painter.end()
         self.setPixmap(pixmap)

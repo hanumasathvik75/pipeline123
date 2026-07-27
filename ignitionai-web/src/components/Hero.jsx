@@ -2,19 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './Hero.css';
 
-const mailPilot = "mailto:founder@ignitionai.in?subject=Request%20for%20Early%20Access%20-%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%20came%20across%20IgnitionAI%20and%20I'm%20very%20interested%20in%20the%20early%20access%20pilot.%0A%0AHere's%20a%20bit%20about%20our%20workshop%3A%0A%0AWorkshop%20Name%3A%20%0ALocation%3A%20%0ANumber%20of%20Bays%3A%20%0A%0APlease%20let%20me%20know%20the%20next%20steps.%0A%0ARegards%2C";
-const mailDemo = "mailto:founder@ignitionai.in?subject=Demo%20Request%20-%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI'd%20love%20to%20see%20a%20live%20demo%20of%20the%20IgnitionAI%20diagnostic%20platform.%0A%0AAvailability%3A%20%0APreferred%20mode%20(call%2Fin-person)%3A%20%0A%0ARegards%2C";
+const mailPilot = "mailto:founder@ignitionai.in?subject=Request%20for%20Early%20Access%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%20came%20across%20IgnitionAI%20and%20I%27m%20very%20interested%20in%20the%20early%20access%20pilot.%0A%0AHere%27s%20a%20bit%20about%20our%20workshop%3A%0A%0AWorkshop%20Name%3A%20%0ALocation%3A%20%0ANumber%20of%20Bays%3A%20%0A%0APlease%20let%20me%20know%20the%20next%20steps.%0A%0ARegards%2C";
+const mailDemo  = "mailto:founder@ignitionai.in?subject=Demo%20Request%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27d%20love%20to%20see%20a%20live%20demo%20of%20the%20IgnitionAI%20diagnostic%20platform.%0A%0AAvailability%3A%20%0APreferred%20mode%20(call%2Fin-person)%3A%20%0A%0ARegards%2C";
+const mailPricing = "mailto:founder@ignitionai.in?subject=Pricing%20Enquiry%20%E2%80%94%20IgnitionAI&body=Hi%20Shashank%2C%0A%0AI%27m%20interested%20in%20learning%20more%20about%20IgnitionAI%20pricing%20for%20my%20workshop.%0A%0AWorkshop%20Name%3A%0ACity%3A%0ANumber%20of%20Bays%3A%0APhone%2FWhatsApp%3A%0A%0ALooking%20forward%20to%20hearing%20from%20you.";
 
 const steps = [
-  { label: 'Vehicle', value: '2020 Hyundai Creta 1.5 CRDi', color: '#3b82f6' },
-  { label: 'Symptom', value: 'Crank No Start', color: '#f97316' },
-  { label: 'Confidence', value: '92% Match', color: '#10b981' },
+  { label: 'Vehicle',    value: '2020 Hyundai Creta 1.5 CRDi', color: '#3b82f6' },
+  { label: 'Symptom',   value: 'Crank No Start',                color: '#f97316' },
+  { label: 'Confidence',value: '92% Match',                     color: '#10b981' },
 ];
 
 const diagnosis = [
-  { step: 1, active: true, title: 'Check Fuel Rail Pressure', desc: 'Crank and observe PID — min. 250 Bar required.' },
-  { step: 2, active: false, title: 'Verify CKP Sensor Signal', desc: 'Check waveform at ECU pin 24 using oscilloscope.' },
-  { step: 3, active: false, title: 'Inspect Injector Pulse', desc: 'Use noid light on injector #1 harness connector.' },
+  { step: 1, active: true,  title: 'Check Fuel Rail Pressure', desc: 'Crank and observe PID — min. 250 Bar required.' },
+  { step: 2, active: false, title: 'Verify CKP Sensor Signal',  desc: 'Check waveform at ECU pin 24 using oscilloscope.' },
+  { step: 3, active: false, title: 'Inspect Injector Pulse',    desc: 'Use noid light on injector #1 harness connector.' },
 ];
 
 export default function Hero() {
@@ -23,6 +24,17 @@ export default function Hero() {
       {/* Background glows */}
       <div className="hero-glow hero-glow--left" />
       <div className="hero-glow hero-glow--right" />
+
+      {/* Big transparent logo watermark */}
+      <div className="hero-logo-bg-wrap">
+        <div className="hero-logo-bg-glow" />
+        <img
+          src="/logo_transparent_white.png"
+          alt=""
+          aria-hidden="true"
+          className="hero-logo-bg"
+        />
+      </div>
 
       <div className="container hero-inner">
         {/* ─── Left copy ─── */}
@@ -43,7 +55,8 @@ export default function Hero() {
           </motion.div>
 
           <h1 className="hero-title">
-            The AI Diagnostic Assistant for <span className="text-gradient">No-Start & Drivability</span>
+            The AI Diagnostic Assistant for{' '}
+            <span className="text-gradient">No-Start &amp; Drivability</span>
           </h1>
 
           <p className="hero-subtitle">
@@ -58,17 +71,20 @@ export default function Hero() {
             <a href={mailDemo} className="btn btn-secondary btn-lg">
               Watch a Demo
             </a>
+            <a href={mailPricing} className="btn btn-ghost btn-lg">
+              Enquire Pricing
+            </a>
           </div>
 
           <div className="hero-social-proof">
             <div className="sp-item">
               <strong>Cross-brand</strong>
-              <span>Maruti, Hyundai, Tata & more</span>
+              <span>Maruti, Hyundai, Tata &amp; more</span>
             </div>
             <div className="sp-divider" />
             <div className="sp-item">
               <strong>Bilingual</strong>
-              <span>Hindi & English</span>
+              <span>Hindi &amp; English</span>
             </div>
             <div className="sp-divider" />
             <div className="sp-item">

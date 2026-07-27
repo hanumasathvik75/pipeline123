@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple
 
 # ─── Predefined Simulation Scenarios ──────────────────────────────────────────
 SIMULATION_SCENARIOS = {
-    "🔥 Random Misfire Engine": {
+    "Random Misfire Engine": {
         "dtcs": ["P0300", "P0301"],
         "description": "Multiple cylinder misfires with poor ignition",
         "sensors": {
@@ -24,7 +24,7 @@ SIMULATION_SCENARIOS = {
             "short_term_fuel_trim_b1": (-8.0, 8.0),
         },
     },
-    "⛽ Fuel Starvation (Lean)": {
+    "Fuel Starvation (Lean)": {
         "dtcs": ["P0087", "P0171"],
         "description": "Low fuel pressure causing lean condition",
         "sensors": {
@@ -37,7 +37,7 @@ SIMULATION_SCENARIOS = {
             "maf_sensor": (3.5, 18.0),
         },
     },
-    "🌡️ Engine Overheating": {
+    "Engine Overheating": {
         "dtcs": ["P0115", "P0116"],
         "description": "Cooling system fault / stuck thermostat",
         "sensors": {
@@ -49,7 +49,7 @@ SIMULATION_SCENARIOS = {
             "maf_sensor": (4.0, 12.0),
         },
     },
-    "💡 Catalytic Converter Fail": {
+    "Catalytic Converter Fail": {
         "dtcs": ["P0420"],
         "description": "Catalyst efficiency below threshold Bank 1",
         "sensors": {
@@ -59,7 +59,7 @@ SIMULATION_SCENARIOS = {
             "catalyst_efficiency": (15, 55),
         },
     },
-    "🔌 Crankshaft Sensor Fault": {
+    "Crankshaft Sensor Fault": {
         "dtcs": ["P0335", "P0336"],
         "description": "CKP signal lost — potential no-start condition",
         "sensors": {
@@ -70,7 +70,7 @@ SIMULATION_SCENARIOS = {
             "engine_load": (0, 15),
         },
     },
-    "🚗 Throttle Body Malfunction": {
+    "Throttle Body Malfunction": {
         "dtcs": ["P0120", "P0505"],
         "description": "TPS circuit fault causing idle instability",
         "sensors": {
