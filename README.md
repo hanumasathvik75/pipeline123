@@ -226,6 +226,28 @@ refactor(simulator): extract scenario loader to separate module
 
 ---
 
+## Telemetry diagnostic engine (v0.1)
+
+The durable signal-processing engine is in `serving/diagnostics/`. It normalizes
+real CSV/JSON OBD logs, derives combustion, fuel, thermal, load-response, and
+charging virtual sensors, then fuses only available signals into a Vehicle
+Health Index and evidence-backed candidate list. It is exercised against real
+Opel and winter-condition OBD logs, not a fabricated dashboard feed.
+
+All PID aliases, windows, thresholds, and VHI weights are configurable in
+`serving/diagnostics/config/defaults.json`. Missing PIDs return
+`insufficient_data`; they are never zero-filled or faked. `VirtualSensorOutput`
+and `FaultDiagnosis` are persisted through the FastAPI schema when an analysis
+is associated with a diagnostic session.
+
+Gemini is only an optional final reporting endpoint. It receives `{ VHI,
+fault_candidates }` after fusion, never raw telemetry. Put its key in the local
+server environment using `serving/.env.example`; do not commit it. Demo-only
+fault injection belongs in a separately labeled `demo/` package and has not
+been added to the core engine.
+
+---
+
 <div align="center">
 <sub>Built with ❤️ by the IgnitionAI team</sub>
 </div>

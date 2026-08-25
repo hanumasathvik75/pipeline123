@@ -51,6 +51,8 @@ desktop/app/config.py
 
 # Gradle / Android
 .gradle/
+.kotlin/
+.staging/
 /local.properties
 /build/
 /captures/
@@ -125,3 +127,14 @@ IgnitionAI_Report*.pdf
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# DVC
+/data_gen/data/
+*.dvc
+.dvc/config.local
+.dvc/cache/
+.dvc/tmp/
+
+# MLflow
+mlruns/
+mlartifacts/

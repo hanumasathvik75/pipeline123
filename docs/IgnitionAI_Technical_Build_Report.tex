@@ -1,0 +1,592 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.78in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{microtype}
+
+\definecolor{ink}{HTML}{111111}
+\definecolor{muted}{HTML}{555555}
+\definecolor{line}{HTML}{D8D8D8}
+\definecolor{panel}{HTML}{F7F7F5}
+\definecolor{accent}{HTML}{0B0B0C}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  urlcolor=accent,
+  pdftitle={IgnitionAI Technical Build Report},
+  pdfauthor={IgnitionAI}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small IgnitionAI}
+\rhead{\small Technical Build Report}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}{\Large\bfseries\color{ink}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{ink}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{ink}}{\thesubsubsection}{0.6em}{}
+\setlist[itemize]{leftmargin=1.3em,itemsep=0.18em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.5em,itemsep=0.18em,topsep=0.25em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\renewcommand{\arraystretch}{1.22}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\raggedright\arraybackslash\scriptsize}p{#1}}
+
+\lstdefinestyle{code}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{line},
+  backgroundcolor=\color{panel},
+  columns=fullflexible
+}
+\lstset{style=code}
+
+\begin{document}
+
+\begin{center}
+{\Huge \textbf{IgnitionAI Technical Build Report}}\\[0.35em]
+{\large Physics-informed vehicle diagnostics from real OBD telemetry}\\[0.8em]
+{\small Build date: 26 August 2026 \quad | \quad Native desktop MVP \quad | \quad PostgreSQL-backed analysis}
+\end{center}
+
+\vspace{0.8em}
+\hrule
+\vspace{1.0em}
+
+\section*{Executive Summary}
+
+IgnitionAI is a native desktop diagnostic application that turns raw OBD-II telemetry logs into evidence-backed fault candidates, a vehicle health index, and a stepwise workshop repair plan. The build is intentionally not an LLM-only demo. The diagnostic core uses deterministic ingestion, physical signal normalization, virtual sensors, statistical anomaly scoring, evidence fusion, PostgreSQL persistence, synthetic validation traces, and PDF reporting.
+
+The application accepts real CSV, JSON, and JSONL telemetry files, maps source-specific PIDs into canonical signals, selects one continuous trip segment when available, runs five virtual sensors, fuses the results into ranked candidates, and exports a mechanic-readable report. A built-in synthetic generator is included for reproducible validation and investor demonstrations; synthetic files are explicitly marked so they are not confused with measured vehicle data.
+
+\section{System Goals}
+
+The MVP was designed around four constraints:
+
+\begin{enumerate}
+\item Use real telemetry structures and known OBD-II signals rather than invented dashboard values.
+\item Keep diagnosis deterministic and auditable; every fault candidate must have measured evidence.
+\item Present the product as a native, monochrome system application rather than a browser landing page.
+\item Produce reports that a technical investor, mechanic, or OEM engineer can inspect without needing to trust a black-box chat response.
+\end{enumerate}
+
+The result is a local-first diagnostic engine with a clean UI shell, a real data pipeline, and explainable repair logic.
+
+\section{Repository Structure}
+
+\begin{longtable}{M{0.31\linewidth}L{0.59\linewidth}}
+\toprule
+\textbf{Path} & \textbf{Role} \\
+\midrule
+\texttt{desktop/main.py} & Native PySide6 entry point. It creates the Qt application, shows the main window, raises it on Windows, and starts the event loop. \\
+\texttt{main\_window.py} & Monochrome application shell, window chrome, corrected IgnitionAI logo rendering, header, status, and global stylesheet. Full path: \texttt{desktop/app/ui/main\_window.py}. \\
+\texttt{telemetry\_engine.py} & Main analyst workspace: file selection, synthetic generator, analysis execution, metrics, tabbed evidence views, and PDF export trigger. Full path: \texttt{desktop/app/ui/telemetry\_engine.py}. \\
+\texttt{telemetry\_report.py} & PDF report renderer for diagnostic outputs and repair steps. Full path: \texttt{desktop/app/ui/telemetry\_report.py}. \\
+\texttt{ingestion.py} & Source-aware CSV, JSON, and JSONL loader. Maps source columns to canonical PIDs and selects a continuous session. Full path: \texttt{serving/diagnostics/ingestion.py}. \\
+\texttt{virtual\_sensors.py} & Physics and statistics based virtual sensor implementations. Full path: \texttt{serving/diagnostics/virtual\_sensors.py}. \\
+\texttt{fusion.py} & Vehicle health index and ranked candidate fusion. Full path: \texttt{serving/diagnostics/fusion.py}. \\
+\texttt{repair\_plan.py} & Deterministic workshop procedures for each evidence-backed candidate. Full path: \texttt{serving/diagnostics/repair\_plan.py}. \\
+\texttt{synthetic.py} & Reproducible physics-inspired OBD trace generator. Full path: \texttt{serving/diagnostics/synthetic.py}. \\
+\texttt{defaults.json} & PID aliases, thresholds, and virtual sensor weights. Full path: \texttt{serving/diagnostics/config/defaults.json}. \\
+\texttt{serving/api/main.py} & FastAPI service surface for backend integration. \\
+\texttt{serving/core/database.py} & PostgreSQL database connection and SQLAlchemy session management. \\
+\texttt{docker-compose.yml} & Local PostgreSQL service for repeatable development and demo persistence. \\
+\texttt{test\_diagnostics.py} & Focused diagnostic regression tests. Full path: \texttt{serving/tests/test\_diagnostics.py}. \\
+\bottomrule
+\end{longtable}
+
+\section{Data Sources and Signal Model}
+
+\subsection{Primary User-Supplied Sources}
+
+The build is structured to accept real OBD-like telemetry and related vehicle diagnostic data. The user supplied these concrete sources during development:
+
+\begin{itemize}
+\item 5-year EV battery dataset for SOH, SOC, and faults: \href{https://www.kaggle.com/datasets/darshangovindaraju/5-year-ev-battery-dataset-for-soh-soc-and-faults}{Kaggle battery SOH/SOC/fault dataset}.
+\item Electric motor temperature dataset: \href{https://www.kaggle.com/datasets/wkirgsn/electric-motor-temperature/data}{Kaggle electric motor temperature dataset}.
+\item carOBD GitHub dataset and utilities: \href{https://github.com/eron93br/carOBD}{carOBD repository}.
+\item IgnitionAI schema repository: \href{https://github.com/Anish-p-creator/ignition-ai-schema.git}{ignition-ai-schema repository}.
+\end{itemize}
+
+The current native engine is focused on OBD powertrain telemetry, while the repository also contains paths for future EV battery and motor thermal expansion. This is a sensible staged architecture: the investor demo works today on combustion and charging telemetry, and the same virtual-sensor design can extend to EV modules.
+
+\subsection{Canonical PID Mapping}
+
+Vehicle logs rarely use exactly the same column names. IgnitionAI solves this by normalizing aliases into canonical signals. Examples include:
+
+\begin{longtable}{M{0.24\linewidth}M{0.66\linewidth}}
+\toprule
+\textbf{Canonical signal} & \textbf{Accepted examples} \\
+\midrule
+\texttt{rpm} & \texttt{RPM}, \texttt{ENGINE\_RPM}, \texttt{obd\_measured\_EngineRPMRPM} \\
+\texttt{speed\_kph} & \texttt{SPEED}, \texttt{VEHICLE\_SPEED}, \texttt{obd\_measured\_VehicleSpeedkmh} \\
+\texttt{throttle\_pct} & \texttt{THROTTLE\_POS}, \texttt{THROTTLE}, \texttt{obd\_measured\_AbsoluteThrottlePosition} \\
+\texttt{engine\_load\_pct} & \texttt{ENGINE\_LOAD}, \texttt{CALCULATED\_ENGINE\_LOAD}, \texttt{obd\_measured\_CalculatedLoadValue} \\
+\texttt{coolant\_c} & \texttt{COOLANT\_TEMP}, \texttt{COOLANT\_TEMPERATURE}, \texttt{obd\_measured\_EngineCoolantTemperatureC} \\
+\texttt{map\_kpa} & \texttt{INTAKE\_PRESSURE}, \texttt{INTAKE\_MANIFOLD\_PRESSURE}, \texttt{obd\_measured\_IntakeManifoldAbsolutePressurekPa} \\
+\texttt{ltft\_b1\_pct} & \texttt{LONG\_FUEL\_TRIM\_1}, \texttt{LONG\_TERM\_FUEL\_TRIM\_BANK\_1} \\
+\texttt{voltage\_v} & \texttt{ELM\_VOLTAGE}, \texttt{CONTROL\_MODULE\_VOLTAGE}, \texttt{obd\_measured\_InputVoltageReadByTheScanToolV} \\
+\bottomrule
+\end{longtable}
+
+The ingestion module does not fabricate missing PIDs. If a sensor does not have the required input signals, it returns \texttt{insufficient\_data}; this is an important credibility point because it prevents the report from claiming evidence that is not present.
+
+\section{End-to-End Pipeline}
+
+The diagnostic pipeline is:
+
+\begin{enumerate}
+\item Load a CSV, JSON, or JSONL telemetry file.
+\item Normalize known source columns into canonical PIDs.
+\item Parse timestamps where possible; otherwise use sample index time.
+\item Select one continuous trip segment when a segment or trip identifier exists.
+\item Run the available virtual sensors.
+\item Fuse health scores into a vehicle health index.
+\item Rank evidence-backed candidate faults.
+\item Generate deterministic repair procedures for supported candidates.
+\item Persist the session locally and export an investor or mechanic report.
+\end{enumerate}
+
+\subsection{Continuous Session Selection}
+
+If a telemetry file contains \texttt{source\_segment}, \texttt{segment\_file}, \texttt{segment\_id}, or \texttt{trip\_id}, the application selects one continuous drive. This prevents statistical calculations from bridging multiple independent trips, which could corrupt rolling-window estimates, warm-up rates, and response-lag measurements.
+
+\section{Virtual Sensor Architecture}
+
+A virtual sensor converts ordinary telemetry into an inferred condition that may not be directly measured by a single PID. Each virtual sensor returns:
+
+\begin{itemize}
+\item a machine-readable name,
+\item a status: \texttt{normal}, \texttt{flagged}, or \texttt{insufficient\_data},
+\item a severity score,
+\item a health score,
+\item an evidence dictionary,
+\item and an optional candidate fault key.
+\end{itemize}
+
+This structure makes the system inspectable. The UI and PDF can show the same measured evidence that drove the algorithm.
+
+\subsection{Combustion Irregularity Sensor}
+
+Purpose: identify misfire-like combustion instability using RPM residual behavior.
+
+Required signal: \texttt{rpm}.
+
+Algorithm:
+
+\begin{enumerate}
+\item Interpolate short gaps in RPM.
+\item Estimate local trend using a centered rolling median.
+\item Compute residual:
+\[
+r_t = \mathrm{RPM}_t - \mathrm{median}_{w}(\mathrm{RPM})
+\]
+\item Compute rolling residual spread:
+\[
+\sigma_t = \mathrm{std}_{w}(r_t)
+\]
+\item Compute rolling residual kurtosis to capture impulsive instability:
+\[
+\kappa_t = \mathrm{kurtosis}_{w}(r_t)
+\]
+\item Define adaptive thresholds:
+\[
+\theta_{\sigma} = \bar{\sigma} + k \cdot \mathrm{std}(\sigma)
+\]
+\[
+\theta_{\kappa} = \bar{\kappa} + k \cdot \mathrm{std}(\kappa)
+\]
+\item Flag windows where spread or kurtosis exceeds the adaptive threshold.
+\item Require persistence: at least 3 windows and at least roughly 2.5 percent of the recording must be abnormal.
+\end{enumerate}
+
+The persistence gate matters because a single RPM spike in a long file is not enough to call a misfire. This keeps the behavior closer to an engineering diagnostic tool than a chart anomaly toy.
+
+Current configuration:
+
+\[
+w = 3.0 \; \mathrm{s}, \quad k = 2.5, \quad n_{\min}=20
+\]
+
+Output candidate: \texttt{misfire\_like\_combustion\_irregularity}.
+
+\subsection{Fuel System Health Sensor}
+
+Purpose: infer lean or rich mixture tendencies from fuel trims under steady operation.
+
+Required signal: \texttt{ltft\_b1\_pct} or \texttt{stft\_b1\_pct}. Optional signals \texttt{rpm} and \texttt{engine\_load\_pct} improve steady-state filtering.
+
+Algorithm:
+
+\begin{enumerate}
+\item Combine available short-term and long-term trims:
+\[
+T_t = \mathrm{mean}(\mathrm{STFT}_t, \mathrm{LTFT}_t)
+\]
+\item Keep only steady-state samples:
+\[
+\mathrm{std}_{8}(\mathrm{RPM}) < 120
+\]
+\[
+\mathrm{std}_{8}(\mathrm{Load}) < 12
+\]
+\item Compute average trim and exceedance fraction:
+\[
+\bar{T} = \mathrm{mean}(T_t), \quad E = P(|T_t| > 10)
+\]
+\item Penalize high absolute trim and persistent exceedance:
+\[
+H = \mathrm{clip}(100 - 7 \cdot \max(0, \mathrm{mean}(|T|)-2) - 35E, 0, 100)
+\]
+\item Interpret positive trim beyond threshold as lean compensation and negative trim beyond threshold as rich compensation.
+\end{enumerate}
+
+Positive fuel trim usually means the ECU is adding fuel to compensate for a lean condition. Negative fuel trim usually means the ECU is subtracting fuel to compensate for a rich condition.
+
+Output candidates:
+
+\begin{itemize}
+\item \texttt{air\_intake\_vacuum\_leak\_or\_maf\_drift}
+\item \texttt{injector\_or\_fuel\_pressure\_overfueling}
+\end{itemize}
+
+\subsection{Thermal Warm-Up and Stability Sensor}
+
+Purpose: identify abnormal coolant warm-up dynamics or excessive steady-state temperature variation.
+
+Required signal: \texttt{coolant\_c}.
+
+Algorithm:
+
+\begin{enumerate}
+\item Use coolant temperature across the selected session.
+\item Estimate warm-up rate:
+\[
+R = \frac{T_{\mathrm{last}} - T_{\mathrm{first}}}{\Delta t / 60}
+\]
+\item Identify samples at or above operating temperature:
+\[
+T_t \geq 80^\circ C
+\]
+\item Compute steady-state standard deviation when enough warm samples exist:
+\[
+\sigma_{\mathrm{steady}} = \mathrm{std}(T_t \mid T_t \geq 80^\circ C)
+\]
+\item Flag if warm-up is too slow, too fast, or unstable:
+\[
+R < 0.5 \quad \lor \quad R > 8.0 \quad \lor \quad \sigma_{\mathrm{steady}} > 4.0
+\]
+\end{enumerate}
+
+Output candidate: \texttt{cooling\_system\_warmup\_or\_stability\_anomaly}.
+
+\subsection{Load Response Lag Sensor}
+
+Purpose: estimate delayed engine response to throttle input.
+
+Required signals: \texttt{throttle\_pct} and either \texttt{rpm} or \texttt{map\_kpa}.
+
+Algorithm:
+
+\begin{enumerate}
+\item Center throttle and response signals:
+\[
+a_t = \mathrm{Throttle}_t - \bar{\mathrm{Throttle}}, \quad b_t = \mathrm{Response}_t - \bar{\mathrm{Response}}
+\]
+\item Search only physically plausible positive lags.
+\item For each shift \(s\), compute dot-product correlation:
+\[
+C(s) = \sum_{t=0}^{N-s} a_t b_{t+s}
+\]
+\item Select:
+\[
+s^* = \arg\max_s C(s)
+\]
+\item Convert to seconds:
+\[
+\tau = s^* \Delta t
+\]
+\item Flag if:
+\[
+\tau > 1.5 \; \mathrm{s}
+\]
+\end{enumerate}
+
+The implementation avoids a full quadratic correlation on long traces. The search is bounded to the configured maximum lag window.
+
+Output candidate: \texttt{air\_path\_or\_throttle\_response\_lag}.
+
+\subsection{Charging System Voltage Stress Sensor}
+
+Purpose: identify under-voltage, over-voltage, or excessive ripple from the 12 V charging system.
+
+Required signal: \texttt{voltage\_v}.
+
+Algorithm:
+
+\begin{enumerate}
+\item Estimate average system voltage:
+\[
+\bar{V} = \mathrm{mean}(V_t)
+\]
+\item Estimate step ripple:
+\[
+\rho = \mathrm{median}(|V_t - V_{t-1}|)
+\]
+\item Penalize out-of-range voltage and ripple:
+\[
+P = 40 \cdot \max(0, 12.4-\bar{V}) + 25 \cdot \max(0, \bar{V}-14.9) + 60 \cdot \max(0, \rho-0.35)
+\]
+\[
+H = \mathrm{clip}(100 - P, 0, 100)
+\]
+\item Flag if health drops below 75.
+\end{enumerate}
+
+Output candidate: \texttt{charging\_system\_voltage\_stress}.
+
+\section{Vehicle Health Index}
+
+IgnitionAI computes a weighted vehicle health index from all usable virtual sensors. Sensors with missing required inputs are excluded from the denominator.
+
+\[
+\mathrm{VHI} = \frac{\sum_i w_i H_i}{\sum_i w_i}
+\]
+
+Current weights:
+
+\begin{longtable}{L{0.32\linewidth}L{0.16\linewidth}L{0.40\linewidth}}
+\toprule
+\textbf{Virtual sensor} & \textbf{Weight} & \textbf{Reasoning} \\
+\midrule
+Combustion & 0.25 & Misfire-like instability can affect drivability, emissions, and catalyst health. \\
+Fuel & 0.25 & Fuel trim faults can represent air leaks, fuel delivery issues, or sensor drift. \\
+Thermal & 0.15 & Cooling issues are serious but often need context across a longer warm-up cycle. \\
+Load response & 0.10 & Response lag is important but can be influenced by driving behavior and sampling rate. \\
+Charging & 0.25 & Voltage stress can cause false faults and system-wide instability. \\
+\bottomrule
+\end{longtable}
+
+\section{Fault Fusion}
+
+Fault fusion is deliberately conservative. A virtual sensor can only create a ranked fault candidate if:
+
+\begin{itemize}
+\item the required source signals exist,
+\item the virtual sensor is flagged,
+\item the sensor emits a known candidate key,
+\item and the candidate carries measured evidence.
+\end{itemize}
+
+Confidence is derived from health degradation and bounded by a minimum confidence:
+
+\[
+C = \min(0.98, \max(C_{\min}, 0.7 \cdot \frac{100-H}{100} + 0.35))
+\]
+
+This gives a high-confidence candidate only when a sensor is strongly degraded, while still preserving a floor for clearly flagged evidence.
+
+\section{Repair Plan Logic}
+
+The repair plan is not generated freely by a model. It is a deterministic mapping from evidence-backed candidate keys to workshop procedures. This prevents hallucinated repairs and makes the output repeatable.
+
+\subsection{Example: Misfire-Like Combustion Irregularity}
+
+\begin{longtable}{L{0.14\linewidth}L{0.22\linewidth}L{0.40\linewidth}L{0.14\linewidth}}
+\toprule
+\textbf{Stage} & \textbf{Action} & \textbf{Method} & \textbf{Pass condition} \\
+\midrule
+Verify & Reproduce and localize irregularity & Warm engine, record idle and 1,500-2,500 rpm data, then inspect OEM misfire counters and DTCs by cylinder. & No repeated counter rise. \\
+Ignition & Test ignition path & Inspect plugs, gap, deposits, cracks, coil behavior, and permitted coil swaps. & Fault does not follow coil. \\
+Fuel & Check injector contribution & Run balance or injector cut-out testing and compare current ramp plus rail pressure. & Balanced contribution. \\
+Mechanical & Exclude compression and valve faults & Perform relative compression and leak-down if ignition and fuel pass. & Variation within limits. \\
+Validate & Confirm repair & Clear learned state only after repair and repeat original drive condition. & Flag clears on comparable log. \\
+\bottomrule
+\end{longtable}
+
+The same structure exists for air-path response lag, cooling instability, fuel trim lean/rich behavior, and charging voltage stress.
+
+\section{Synthetic Generator}
+
+The built-in generator creates reproducible OBD-like traces for six scenarios:
+
+\begin{itemize}
+\item healthy reference,
+\item combustion irregularity,
+\item air-path response lag,
+\item cooling warm-up anomaly,
+\item charging-system stress,
+\item combined multi-system faults.
+\end{itemize}
+
+The generator uses first-order dynamics rather than arbitrary random columns. Throttle is a smooth drive-cycle demand with transients. RPM and speed are state variables that follow target values through response time constants:
+
+\[
+x_t = x_{t-1} + \Delta t \cdot \frac{x_{\mathrm{target},t} - x_{t-1}}{\tau}
+\]
+
+For air-path faults, the response time constant is increased. For combustion faults, burst-like RPM disturbances are injected. For cooling faults, thermal time constant is made unrealistically slow. For charging faults, voltage is shifted below normal operating range.
+
+Every generated file includes:
+
+\begin{itemize}
+\item \texttt{synthetic\_scenario}
+\item \texttt{synthetic\_seed}
+\end{itemize}
+
+This provenance marker is critical: synthetic data is useful for validation and demonstrations, but the product must never misrepresent it as measured vehicle data.
+
+\section{Native Desktop App Design}
+
+The UI was rebuilt as a compact native PySide6 application. The goal was a workbench, not a website. The current design uses:
+
+\begin{itemize}
+\item a monochrome black header,
+\item the supplied IgnitionAI wordmark corrected from the provided alpha encoding,
+\item compact metrics,
+\item independent evidence and repair-plan tabs,
+\item no whole-window scroll requirement,
+\item no mouse-wheel tab switching,
+\item built-in synthetic generation,
+\item file selection and export actions in the primary workflow.
+\end{itemize}
+
+The app intentionally avoids decorative dashboards, oversized hero panels, and unexplained visual flourishes. It is meant to feel like a serious technical instrument.
+
+\section{PostgreSQL and Local Persistence}
+
+The backend uses PostgreSQL through SQLAlchemy. Docker Desktop provides a repeatable local database service through \texttt{docker-compose.yml}. This makes the app more credible than a stateless prototype because sessions can be saved, inspected, and extended later with user accounts, fleet records, VIN linkage, or model-version tracking.
+
+Recommended future database tables:
+
+\begin{itemize}
+\item vehicles: VIN, make, model, year, powertrain type.
+\item telemetry\_sessions: file hash, source type, upload time, sample rate, row count.
+\item virtual\_sensor\_results: sensor name, status, score, evidence JSON.
+\item fault\_candidates: candidate key, confidence, contributing signals.
+\item repair\_plans: deterministic procedure version and selected steps.
+\item model\_versions: thresholds, configuration hash, and code version.
+\end{itemize}
+
+\section{AI Boundary}
+
+The diagnostic math is local and deterministic. LLM or NVIDIA API integration should be treated as an explanation layer, not as the primary diagnostic authority. The safe architecture is:
+
+\begin{enumerate}
+\item deterministic engine computes evidence and candidates,
+\item deterministic repair-plan library creates permitted steps,
+\item optional LLM rewrites the explanation in plain language,
+\item UI labels generated text as explanatory, not measured evidence.
+\end{enumerate}
+
+This boundary matters in an investor demo. It lets the product claim explainable diagnostics while still using generative AI where it helps: summarization, technician note generation, and user-specific language.
+
+\section{Build and Run Instructions}
+
+\subsection{Native App}
+
+\begin{lstlisting}
+cd C:\Users\SHASHANK\Documents\Codex\2026-08-26\so-x20\ignition-ai-schema
+python -m pip install -r desktop\requirements.txt
+python desktop\main.py
+\end{lstlisting}
+
+\subsection{Backend and PostgreSQL}
+
+\begin{lstlisting}
+cd C:\Users\SHASHANK\Documents\Codex\2026-08-26\so-x20\ignition-ai-schema
+docker compose up -d postgres
+python -m pip install -r serving\requirements.txt
+uvicorn serving.api.main:app --reload
+\end{lstlisting}
+
+\subsection{Tests}
+
+\begin{lstlisting}
+python -m compileall desktop serving\diagnostics
+python -m pytest serving\tests
+\end{lstlisting}
+
+If \texttt{pytest} is not installed, the focused diagnostic tests can still be executed directly from Python, or \texttt{pytest} can be installed in the active environment.
+
+\section{Investor Demo Script}
+
+Recommended sequence for a live demo:
+
+\begin{enumerate}
+\item Open the native IgnitionAI app.
+\item Show that PostgreSQL is connected.
+\item Load a real OBD CSV from the local dataset folder.
+\item Point out the source row count and canonical PIDs.
+\item Show the vehicle health index.
+\item Open the virtual sensors table and explain that missing PIDs are not fabricated.
+\item Open ranked fault candidates and measured evidence.
+\item Open the repair-plan tab and show stepwise method plus pass conditions.
+\item Export the PDF report.
+\item Generate a synthetic combined-fault trace and show that it is clearly marked synthetic.
+\item Explain that synthetic traces are for validation, while investor demo diagnosis uses real telemetry files.
+\end{enumerate}
+
+\section{Technical Strengths}
+
+\begin{itemize}
+\item Evidence-first: every candidate comes from a measured or derived signal.
+\item Physics-aware: warm-up dynamics, response lag, fuel trim behavior, voltage range, and RPM residuals are domain-specific.
+\item Missing-data honest: the system says \texttt{insufficient\_data} rather than guessing.
+\item Reproducible: thresholds live in configuration and synthetic generation is seeded.
+\item Native UI: the user sees a desktop diagnostic tool rather than a web mockup.
+\item Extensible: EV battery SOH/SOC and motor thermal datasets can be added as new virtual sensors.
+\end{itemize}
+
+\section{Known Limits}
+
+This MVP is credible, but it is not yet a validated OEM diagnostic release. Important limits:
+
+\begin{itemize}
+\item Thresholds are engineering defaults and should be calibrated per vehicle family.
+\item Misfire localization by cylinder requires OEM counters or higher-fidelity crankshaft speed data.
+\item Fuel trim interpretation is strongest under stable closed-loop operation.
+\item Cooling warm-up conclusions depend on cold-start capture quality and ambient context.
+\item Response-lag analysis depends on sampling rate and driver input quality.
+\item Charging checks use scan-tool voltage and should be confirmed with electrical measurements.
+\end{itemize}
+
+These limits are acceptable for an MVP because the system states its evidence, marks insufficient data, and produces confirmatory workshop procedures instead of pretending to replace an OEM service manual.
+
+\section{Near-Term Roadmap}
+
+\begin{enumerate}
+\item Add VIN and vehicle profile input so thresholds can be calibrated by platform.
+\item Add DTC ingestion and cross-link DTCs with virtual sensor evidence.
+\item Add EV battery sensors: SOC drift, SOH degradation, cell imbalance, charge acceptance, and thermal runaway precursors.
+\item Add electric motor thermal sensors using the motor temperature dataset.
+\item Add file hashing and model-version stamping to every report.
+\item Add a confidence calibration set from labeled logs.
+\item Add optional cloud explanation through the NVIDIA API while keeping deterministic evidence local.
+\item Add installer packaging through PyInstaller or MSIX for a true double-click Windows application.
+\end{enumerate}
+
+\section{Conclusion}
+
+IgnitionAI now has the core shape of an investor-presentable diagnostic product: a real native application, a real telemetry path, PostgreSQL persistence, transparent virtual sensors, reproducible synthetic validation, and deterministic repair plans. The strongest technical claim is not that the current thresholds are final. The strongest claim is that the architecture is honest, inspectable, and ready to be calibrated with larger real-world datasets.
+
+\end{document}
