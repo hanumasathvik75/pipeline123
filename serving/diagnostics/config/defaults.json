@@ -1,0 +1,25 @@
+{
+  "pid_aliases": {
+    "timestamp": ["timestamp", "time", "datetime"],
+    "rpm": ["RPM", "ENGINE_RPM", "obd_measured_EngineRPMRPM"],
+    "speed_kph": ["SPEED", "VEHICLE_SPEED", "obd_measured_VehicleSpeedkmh"],
+    "throttle_pct": ["THROTTLE_POS", "THROTTLE", "obd_measured_AbsoluteThrottlePosition"],
+    "engine_load_pct": ["ENGINE_LOAD", "CALCULATED_ENGINE_LOAD", "obd_measured_CalculatedLoadValue"],
+    "coolant_c": ["COOLANT_TEMP", "COOLANT_TEMPERATURE", "obd_measured_EngineCoolantTemperatureC"],
+    "intake_air_c": ["INTAKE_TEMP", "INTAKE_AIR_TEMPERATURE", "obd_measured_IntakeAirTemperatureC"],
+    "maf_gps": ["MAF", "MASS_AIR_FLOW", "obd_measured_MassAirFlowRategs"],
+    "map_kpa": ["INTAKE_PRESSURE", "INTAKE_MANIFOLD_PRESSURE", "obd_measured_IntakeManifoldAbsolutePressurekPa"],
+    "stft_b1_pct": ["SHORT_FUEL_TRIM_1", "SHORT_TERM_FUEL_TRIM_BANK_1", "obd_measured_ShortTermFuelTrimBank1"],
+    "ltft_b1_pct": ["LONG_FUEL_TRIM_1", "LONG_TERM_FUEL_TRIM_BANK_1", "obd_measured_LongTermFuelTrimBank1"],
+    "o2_b1s1_v": ["O2_B1S1", "obd_measured_O2SensorVoltageWideRangeBank1Sensor1V"],
+    "voltage_v": ["ELM_VOLTAGE", "CONTROL_MODULE_VOLTAGE", "obd_measured_ControlModuleVoltageV", "obd_measured_InputVoltageReadByTheScanToolV"],
+    "source_segment": ["segment_file", "segment_id", "trip_id"]
+  },
+  "combustion": {"window_seconds": 3.0, "threshold_k": 2.5, "min_samples": 20},
+  "fuel": {"ltft_limit_pct": 10.0, "steady_rpm_std": 120.0, "steady_load_std": 12.0, "minimum_duration_seconds": 10.0},
+  "thermal": {"operating_temp_c": 80.0, "min_warmup_rate_c_per_min": 0.5, "max_warmup_rate_c_per_min": 8.0, "max_steady_std_c": 4.0, "min_samples": 20},
+  "load_response": {"max_lag_seconds": 1.5, "max_search_seconds": 10.0, "min_samples": 30},
+  "charging": {"low_voltage_v": 12.4, "high_voltage_v": 14.9, "max_ripple_v": 0.35, "min_samples": 20},
+  "vhi_weights": {"combustion": 0.25, "fuel": 0.25, "thermal": 0.15, "load_response": 0.10, "charging": 0.25},
+  "fusion": {"minimum_confidence": 0.45, "ewma_alpha": 0.25}
+}
