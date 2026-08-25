@@ -1,246 +1,119 @@
-"""
-IgnitionAI — Main Window
-Professional multi-panel UI with sidebar navigation.
-"""
+"""Minimal monochrome native shell for IgnitionAI's telemetry engine."""
+from __future__ import annotations
 
+import ctypes
 import os
-from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-    QPushButton, QLabel, QFrame, QStackedWidget, QSizePolicy, QSpacerItem
-)
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QPixmap, QFont, QIcon
+import sys
 
-from app.config import (
-    APP_NAME, APP_SUBTITLE, APP_VERSION,
-    COLOR_BG_DARKEST, COLOR_SIDEBAR, COLOR_BORDER,
-    COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_CYAN,
-)
-from app.ui.styles import get_stylesheet, get_outlined_logo
-from app.ui.scan_panel import ScanPanel
-from app.ui.results_panel import ResultsPanel
-from app.ui.ai_panel import AIPanel
-from app.ui.dashboard import DashboardPanel
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QIcon, QImage, QPixmap
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QWidget
+
+from app.config import APP_NAME, APP_VERSION
+from app.ui.telemetry_engine import TelemetryEnginePanel
 
 
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo_transparent_white.png")
+
+
+def exact_wordmark(path: str, width: int, height: int) -> QPixmap:
+    image = QImage(path)
+    if image.isNull():
+        return QPixmap()
+    # In this supplied PNG the canvas is opaque and the white logo is encoded
+    # as inverse alpha. Correct that encoding without changing its geometry.
+    crop = image.copy(203, 174, 621, 213)
+    corrected = QImage(crop.size(), QImage.Format_ARGB32)
+    corrected.fill(Qt.transparent)
+    for y in range(crop.height()):
+        for x in range(crop.width()):
+            source_alpha = crop.pixelColor(x, y).alpha()
+            corrected_alpha = min(255, (255 - source_alpha) * 6)
+            corrected.setPixelColor(x, y, QColor(246, 246, 244, corrected_alpha))
+    return QPixmap.fromImage(corrected.scaled(width, height, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle(f"{APP_NAME} — AI Diagnostic Portal")
-        self.resize(1440, 880)
-        self.setMinimumSize(1200, 720)
-        self.setStyleSheet(get_stylesheet())
-
-        # Set window icon
-        icon_pix = QPixmap(LOGO_PATH)
-        if not icon_pix.isNull():
-            self.setWindowIcon(QIcon(icon_pix))
-
-        # State shared across panels
-        self.last_results: dict = {}
-
+        self.setWindowTitle(f"{APP_NAME} — Telemetry Engine")
+        self.resize(1440, 900)
+        self.setMinimumSize(1120, 720)
+        self.setStyleSheet(self._stylesheet())
+        logo = exact_wordmark(LOGO_PATH, 128, 128)
+        if not logo.isNull():
+            self.setWindowIcon(QIcon(logo))
         self._build_ui()
 
-    def _build_ui(self):
-        central = QWidget()
-        self.setCentralWidget(central)
-        root_layout = QHBoxLayout(central)
-        root_layout.setContentsMargins(0, 0, 0, 0)
-        root_layout.setSpacing(0)
+    def _build_ui(self) -> None:
+        central = QWidget(); self.setCentralWidget(central)
+        root = QVBoxLayout(central); root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
+        header = QFrame(); header.setObjectName("header")
+        header.setFixedHeight(94)
+        header_layout = QHBoxLayout(header); header_layout.setContentsMargins(34, 0, 34, 0)
+        logo = exact_wordmark(LOGO_PATH, 280, 74)
+        if not logo.isNull():
+            logo_label = QLabel(); logo_label.setPixmap(logo); header_layout.addWidget(logo_label)
+        header_layout.addStretch()
+        status = QLabel("LOCAL ENGINE   /   POSTGRESQL CONNECTED")
+        status.setObjectName("status"); header_layout.addWidget(status)
+        root.addWidget(header)
+        self.telemetry_engine = TelemetryEnginePanel(self)
+        self.telemetry_engine.analysis_ready.connect(self._set_complete)
+        root.addWidget(self.telemetry_engine, 1)
 
-        # ── Sidebar ──────────────────────────────────────────────────────────
-        sidebar = QFrame()
-        sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(220)
-        sidebar_layout = QVBoxLayout(sidebar)
-        sidebar_layout.setContentsMargins(0, 0, 0, 0)
-        sidebar_layout.setSpacing(0)
+    def _set_complete(self, _result: dict) -> None:
+        self.statusBar().showMessage("Analysis saved locally in PostgreSQL", 5000)
 
-        # Logo area in sidebar
-        logo_frame = QFrame()
-        logo_frame.setObjectName("header")
-        logo_frame.setFixedHeight(120)
-        logo_layout = QHBoxLayout(logo_frame)
-        logo_layout.setContentsMargins(16, 16, 16, 16)
-        logo_layout.setAlignment(Qt.AlignCenter)
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        if sys.platform != "win32":
+            return
+        try:
+            hwnd = int(self.winId())
+            dark = ctypes.c_int(1)
+            caption = ctypes.c_int(0x00101010)
+            text = ctypes.c_int(0x00F4F4F2)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(dark), ctypes.sizeof(dark))
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 35, ctypes.byref(caption), ctypes.sizeof(caption))
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 36, ctypes.byref(text), ctypes.sizeof(text))
+        except (AttributeError, OSError):
+            pass
 
-        logo_outlined = get_outlined_logo(LOGO_PATH, 75)
-        if not logo_outlined.isNull():
-            logo_label = QLabel()
-            logo_label.setPixmap(logo_outlined)
-            logo_layout.addWidget(logo_label)
-        else:
-            name_label = QLabel(APP_NAME)
-            name_label.setStyleSheet(f"font-size:22px; font-weight:800; color: {COLOR_CYAN};")
-            logo_layout.addWidget(name_label)
-
-        sidebar_layout.addWidget(logo_frame)
-
-        # Version tag
-        ver_label = QLabel(f"  {APP_VERSION}")
-        ver_label.setStyleSheet(f"color: #2A4A6A; font-size: 10px; padding: 4px 20px;")
-        sidebar_layout.addWidget(ver_label)
-
-        sidebar_layout.addSpacing(12)
-
-        # ── Nav Section Label ─────────────────────────────────────────────
-        nav_section = QLabel("  NAVIGATION")
-        nav_section.setObjectName("section_header")
-        nav_section.setStyleSheet(f"color: #2A4A6A; font-size: 10px; font-weight:600; letter-spacing:1.5px; padding: 4px 20px;")
-        sidebar_layout.addWidget(nav_section)
-
-        # Nav buttons
-        self.nav_buttons: list[QPushButton] = []
-        nav_items = [
-            ("Dashboard", 0),
-            ("Scan Vehicle", 1),
-            ("Results & Analysis", 2),
-            ("AI Diagnosis", 3),
-        ]
-
-        for label, idx in nav_items:
-            btn = QPushButton(label)
-            btn.setObjectName("nav_btn")
-            btn.clicked.connect(lambda checked, i=idx: self._nav_to(i))
-            sidebar_layout.addWidget(btn)
-            self.nav_buttons.append(btn)
-
-        sidebar_layout.addSpacing(20)
-        sep = QFrame()
-        sep.setFrameShape(QFrame.HLine)
-        sep.setStyleSheet(f"color: {COLOR_BORDER}; margin: 0 20px;")
-        sidebar_layout.addWidget(sep)
-        sidebar_layout.addSpacing(8)
-
-        # Tools section
-        tools_label = QLabel("  TOOLS")
-        tools_label.setStyleSheet(f"color: #2A4A6A; font-size: 10px; font-weight:600; letter-spacing:1.5px; padding: 4px 20px;")
-        sidebar_layout.addWidget(tools_label)
-
-        dtc_btn = QPushButton("DTC Reference")
-        dtc_btn.setObjectName("nav_btn")
-        dtc_btn.clicked.connect(self._show_dtc_reference)
-        sidebar_layout.addWidget(dtc_btn)
-
-        sidebar_layout.addStretch()
-
-        # Bottom status
-        status_frame = QFrame()
-        status_frame.setStyleSheet(f"border-top: 1px solid {COLOR_BORDER};")
-        status_layout = QVBoxLayout(status_frame)
-        status_layout.setContentsMargins(16, 12, 16, 12)
-
-        self.status_dot = QLabel("● Live")
-        self.status_dot.setStyleSheet(f"color: #00E676; font-size: 11px; font-weight:600;")
-        status_layout.addWidget(self.status_dot)
-
-        self.status_label = QLabel("Ready for scan")
-        self.status_label.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 10px;")
-        status_layout.addWidget(self.status_label)
-
-        sidebar_layout.addWidget(status_frame)
-        root_layout.addWidget(sidebar)
-
-        # ── Main Content ──────────────────────────────────────────────────
-        content_area = QWidget()
-        content_layout = QVBoxLayout(content_area)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(0)
-
-        # Top header bar
-        header_bar = QFrame()
-        header_bar.setObjectName("header")
-        header_bar.setFixedHeight(64)
-        header_h = QHBoxLayout(header_bar)
-        header_h.setContentsMargins(28, 0, 28, 0)
-
-        self.page_title = QLabel("Dashboard")
-        self.page_title.setObjectName("title")
-        self.page_title.setStyleSheet(f"font-size:20px; font-weight:700; color:{COLOR_TEXT_PRIMARY};")
-        header_h.addWidget(self.page_title)
-        header_h.addStretch()
-
-        # AI status badge
-        ai_badge = QLabel("  Gemini AI Active  ")
-        ai_badge.setObjectName("ai_badge")
-        header_h.addWidget(ai_badge)
-
-        content_layout.addWidget(header_bar)
-
-        # ── Stacked pages ─────────────────────────────────────────────────
-        self.stack = QStackedWidget()
-
-        self.dashboard = DashboardPanel(self)
-        self.scan_panel = ScanPanel(self)
-        self.results_panel = ResultsPanel(self)
-        self.ai_panel = AIPanel(self)
-
-        self.stack.addWidget(self.dashboard)   # index 0
-        self.stack.addWidget(self.scan_panel)  # index 1
-        self.stack.addWidget(self.results_panel)  # index 2
-        self.stack.addWidget(self.ai_panel)    # index 3
-
-        content_layout.addWidget(self.stack)
-        root_layout.addWidget(content_area)
-
-        # Connect navigation and scan signals
-        self.dashboard.navigate_requested.connect(self._nav_to)
-        self.results_panel.navigate_requested.connect(self._nav_to)
-        self.scan_panel.analysis_complete.connect(self._on_analysis_complete)
-
-        # Default nav
-        self._nav_to(0)
-
-    def _nav_to(self, index: int):
-        self.stack.setCurrentIndex(index)
-        page_titles = ["Dashboard", "Scan Vehicle", "Results & Analysis", "AI Diagnosis"]
-        self.page_title.setText(page_titles[index])
-
-        for i, btn in enumerate(self.nav_buttons):
-            btn.setObjectName("nav_btn_active" if i == index else "nav_btn")
-            btn.setStyleSheet("")  # Force re-apply via Qt object name
-            self.style().polish(btn)
-
-    def _on_analysis_complete(self, results: dict):
-        """Called when scan panel finishes analysis. Propagate to other panels."""
-        self.last_results = results
-        self.results_panel.load_results(results)
-        self.ai_panel.load_results(results)
-        self.dashboard.update_stats(results)
-        self.status_label.setText(f"Last scan: {results.get('final_root', 'Unknown')[:30]}...")
-        self._nav_to(2)  # Auto-navigate to results
-
-    def _show_dtc_reference(self):
-        from PySide6.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel
-        from app.data.dtc_database import obd2_dtc_diagnostic_database
-
-        dialog = QDialog(self)
-        dialog.setWindowTitle("DTC Reference Database")
-        dialog.resize(700, 500)
-        dialog.setStyleSheet(get_stylesheet())
-        layout = QVBoxLayout(dialog)
-        layout.addWidget(QLabel("<b>OBD-II DTC Reference</b>"))
-
-        table = QTableWidget(len(obd2_dtc_diagnostic_database), 3)
-        table.setHorizontalHeaderLabels(["Code", "Description", "Severity"])
-        for i, (code, spec) in enumerate(obd2_dtc_diagnostic_database.items()):
-            table.setItem(i, 0, QTableWidgetItem(code))
-            desc = spec.get("description", "")[:80]
-            table.setItem(i, 1, QTableWidgetItem(desc))
-            pw = spec.get("points_weight", 0)
-            sev = "Critical" if pw >= 9 else "High" if pw >= 7 else "Medium" if pw >= 5 else "Low"
-            table.setItem(i, 2, QTableWidgetItem(sev))
-        table.resizeColumnsToContents()
-        layout.addWidget(table)
-        dialog.exec()
-
-    def navigate_to_ai(self):
-        self._nav_to(3)
-
-    def set_status(self, message: str, active: bool = True):
-        self.status_label.setText(message)
-        color = "#00E676" if active else COLOR_TEXT_SECONDARY
-        self.status_dot.setStyleSheet(f"color: {color}; font-size: 11px; font-weight:600;")
+    @staticmethod
+    def _stylesheet() -> str:
+        return """
+        QMainWindow, QWidget { background: #0A0A0B; color: #ECEDEB; font-family: 'Segoe UI'; font-size: 13px; }
+        QFrame#header { background: #000000; border-bottom: 1px solid #262628; }
+        QLabel { background: transparent; }
+        QLabel#status { color: #85858A; font-size: 9px; font-weight: 700; letter-spacing: 1.2px; }
+        QLabel#pageTitle { color: #F4F4F2; font-size: 25px; font-weight: 650; }
+        QLabel#dialogTitle { color: #F4F4F2; font-size: 18px; font-weight: 650; }
+        QLabel#pageSubtitle { color: #85858A; font-size: 12px; }
+        QLabel#engineBadge { color: #A4A4A8; background: #141416; border: 1px solid #2A2A2D; border-radius: 14px; padding: 7px 12px; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+        QLabel#eyebrow, QLabel#metricLabel { color: #7F8085; font-size: 9px; font-weight: 700; letter-spacing: 1.3px; }
+        QLabel#statusText, QLabel#tabIntro, QLabel#metricNote { color: #838389; font-size: 11px; }
+        QLabel#metricValue { color: #F3F3F1; font-size: 27px; font-weight: 650; }
+        QFrame#card, QFrame#metricCard { background: #111113; border: 1px solid #28282B; border-radius: 9px; }
+        QLineEdit, QTextEdit, QComboBox, QSpinBox, QDoubleSpinBox { background: #0C0C0D; color: #EDEDEB; border: 1px solid #303034; border-radius: 6px; padding: 9px 11px; selection-background-color: #EDEDEB; selection-color: #111113; }
+        QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus { border-color: #77777C; }
+        QComboBox::drop-down, QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button { border: 0; width: 22px; }
+        QPushButton { border-radius: 6px; padding: 9px 14px; font-size: 11px; font-weight: 650; min-height: 32px; }
+        QPushButton#primaryButton { background: #F0F0EE; color: #111113; border: 1px solid #F0F0EE; }
+        QPushButton#primaryButton:hover { background: #FFFFFF; }
+        QPushButton#secondaryButton { background: #171719; color: #E5E5E3; border: 1px solid #353539; }
+        QPushButton#secondaryButton:hover { background: #222225; border-color: #5A5A60; }
+        QPushButton:disabled { background: #131315; color: #545459; border-color: #252528; }
+        QTabWidget::pane { background: #101012; border: 1px solid #28282B; border-radius: 8px; top: -1px; }
+        QTabBar::tab { background: transparent; color: #77777D; border: 0; padding: 11px 20px; font-size: 11px; font-weight: 600; }
+        QTabBar::tab:selected { color: #F1F1EF; border-bottom: 2px solid #F1F1EF; }
+        QTabBar::tab:hover { color: #C7C7C4; }
+        QTableWidget { background: #0D0D0F; alternate-background-color: #111113; border: 1px solid #262629; border-radius: 6px; gridline-color: #242427; color: #DEDEDC; }
+        QTableWidget::item { padding: 7px 9px; }
+        QHeaderView::section { background: #151517; color: #85858A; border: 0; border-bottom: 1px solid #303034; padding: 9px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        QScrollArea { border: 0; }
+        QSplitter::handle { background: #29292C; height: 1px; }
+        QScrollBar:vertical { background: transparent; width: 8px; margin: 2px; }
+        QScrollBar::handle:vertical { background: #3B3B3F; border-radius: 4px; min-height: 30px; }
+        QStatusBar { background: #0D0D0E; color: #77777D; border-top: 1px solid #242426; }
+        """
