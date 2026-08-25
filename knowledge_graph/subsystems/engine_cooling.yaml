@@ -1,0 +1,54 @@
+subsystem_name: "Engine Cooling"
+components:
+  - name: "Coolant Thermostat"
+    fault_modes:
+      - name: "Stuck Open"
+        description: "Thermostat fails to close, causing the engine to run cold and not reach operating temperature."
+        typical_dtcs:
+          - "P0128"
+        typical_pids:
+          - pid_name: "Engine Coolant Temperature"
+            condition: "< 160"
+            unit: "°F"
+            description: "Temperature remains below 160°F after 15 minutes of driving"
+        typical_symptoms:
+          - phrasing: "Heater blows cold air"
+            category: "hvac"
+          - phrasing: "Temperature gauge reads low"
+            category: "visual"
+        prior_probability: 0.15
+
+      - name: "Stuck Closed"
+        description: "Thermostat fails to open, preventing coolant from reaching the radiator and causing severe overheating."
+        typical_dtcs:
+          - "P0217"
+          - "P1258"
+        typical_pids:
+          - pid_name: "Engine Coolant Temperature"
+            condition: "> 230"
+            unit: "°F"
+            description: "Temperature rapidly exceeds 230°F under load"
+        typical_symptoms:
+          - phrasing: "Engine is overheating"
+            category: "drivability"
+          - phrasing: "Steam coming from under the hood"
+            category: "visual"
+        prior_probability: 0.05
+
+  - name: "Water Pump"
+    fault_modes:
+      - name: "Impeller Failure / Leak"
+        description: "Water pump fails to circulate coolant efficiently or leaks coolant, leading to gradual overheating."
+        typical_dtcs:
+          - "P0217"
+        typical_pids:
+          - pid_name: "Engine Coolant Temperature"
+            condition: "> 220"
+            unit: "°F"
+            description: "Temperature rises slowly and steadily above 220°F"
+        typical_symptoms:
+          - phrasing: "Coolant puddle under car"
+            category: "visual"
+          - phrasing: "Whining noise from engine belt area"
+            category: "drivability"
+        prior_probability: 0.10
