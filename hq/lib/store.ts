@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { 
   Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, 
-  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog
+  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData
 } from './types';
 
 interface HQStore {
@@ -29,6 +29,7 @@ interface HQStore {
   progressCategories: ProgressCategory[];
   progressLogs: DailyLog[];
   pendingUsers: Omit<TeamMember, 'passwordHash'>[];
+  financeData: FinanceData | null;
 
   // Real-time synchronization
   lastSyncTime: number;
@@ -101,6 +102,9 @@ interface HQStore {
   updateProgressCategory: (categoryId: string, updates: Partial<ProgressCategory>) => void;
   deleteProgressCategory: (categoryId: string) => void;
   addProgressLog: (log: Omit<DailyLog, 'id' | 'submittedAt'>) => void;
+
+  // Finance
+  updateFinanceData: (updates: Partial<FinanceData>) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useHQStore = create<HQStore>()(
@@ -123,6 +127,7 @@ export const useHQStore = create<HQStore>()(
       progressCategories: [],
       progressLogs: [],
       pendingUsers: [],
+      financeData: null,
 
       login: async (username: string, password: string) => {
         try {
@@ -166,7 +171,11 @@ export const useHQStore = create<HQStore>()(
 
       syncWithServer: async () => {
         try {
-          const res = await fetch('/api/sync');
+          const [res, financeRes] = await Promise.all([
+            fetch('/api/sync'),
+            fetch('/api/finance')
+          ]);
+          
           if (res.ok) {
             const data = await res.json();
             set({
@@ -188,6 +197,13 @@ export const useHQStore = create<HQStore>()(
             // Also fetch pending users if c_level
             if (get().currentUser?.role === 'c_level') {
                 get().fetchPendingUsers();
+            }
+          }
+          
+          if (financeRes.ok) {
+            const financeData = await financeRes.json();
+            if (financeData.financeData) {
+              set({ financeData: financeData.financeData });
             }
           }
         } catch (err) {
@@ -611,6 +627,25 @@ export const useHQStore = create<HQStore>()(
               return { progressLogs: [newLog, ...s.progressLogs] };
           });
           get().broadcastUpdates({ progressLogs: [newLog] });
+      },
+      updateFinanceData: async (updates) => {
+        try {
+          const res = await fetch('/api/finance', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+          });
+          if (res.ok) {
+            set(s => ({
+              financeData: s.financeData ? { ...s.financeData, ...updates, updatedAt: new Date().toISOString() } : null
+            }));
+            return { success: true };
+          }
+          const data = await res.json();
+          return { success: false, error: data.error };
+        } catch (e: any) {
+          return { success: false, error: e.message };
+        }
       },
     }),
     {

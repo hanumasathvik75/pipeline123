@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
@@ -62,6 +63,11 @@ export default function Sidebar() {
   const [newPassword, setNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,7 +225,7 @@ export default function Sidebar() {
       </div>
 
       {/* Change Password Modal */}
-      {showPasswordModal && (
+      {mounted && showPasswordModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => !isSubmitting && setShowPasswordModal(false)} />
           <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 400, padding: '2rem', zIndex: 1 }}>
@@ -262,7 +268,8 @@ export default function Sidebar() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </aside>
   );

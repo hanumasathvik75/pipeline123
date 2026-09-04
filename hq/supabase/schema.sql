@@ -211,6 +211,31 @@ CREATE TABLE IF NOT EXISTS public.hq_progress_logs (
   UNIQUE (user_id, date)
 );
 
+-- ── 14. Finance Data ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_finance (
+  id TEXT PRIMARY KEY,
+  runway_months NUMERIC DEFAULT 0,
+  monthly_burn NUMERIC DEFAULT 0,
+  cash_balance NUMERIC DEFAULT 0,
+  committed_arr NUMERIC DEFAULT 0,
+  expenses JSONB DEFAULT '[]',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed initial finance data
+INSERT INTO public.hq_finance (
+  id, runway_months, monthly_burn, cash_balance, committed_arr, expenses
+) VALUES (
+  'hq-finance-1', 14, 420000, 5880000, 2600000,
+  '[
+    {"category": "Engineering & ML Payroll", "amount": 280000, "percentage": 67},
+    {"category": "Cloud Infrastructure & GPU Compute", "amount": 65000, "percentage": 15},
+    {"category": "Hardware Testbeds & OBD-II Simulators", "amount": 35000, "percentage": 8},
+    {"category": "Legal, Compliance & Patents", "amount": 25000, "percentage": 6},
+    {"category": "SaaS Tooling & Admin", "amount": 15000, "percentage": 4}
+  ]'::jsonb
+) ON CONFLICT (id) DO NOTHING;
+
 -- ── Seed founder account ─────────────────────────────────────
 -- Password: Ignition@2026 (bcrypt hashed)
 INSERT INTO public.hq_users (
@@ -254,3 +279,4 @@ ALTER TABLE public.hq_goals DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_wiki_docs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_progress_categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_progress_logs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_finance DISABLE ROW LEVEL SECURITY;

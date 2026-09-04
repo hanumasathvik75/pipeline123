@@ -210,6 +210,18 @@ function rowToDailyLog(row: Record<string, unknown>): DailyLog {
   };
 }
 
+function rowToFinanceData(row: Record<string, unknown>): any {
+  return {
+    id: row.id as string,
+    runwayMonths: Number(row.runway_months),
+    monthlyBurn: Number(row.monthly_burn),
+    cashBalance: Number(row.cash_balance),
+    committedArr: Number(row.committed_arr),
+    expenses: (row.expenses as any[]) || [],
+    updatedAt: row.updated_at as string,
+  };
+}
+
 // ── Main serverDb object ──────────────────────────────────────
 
 export const serverDb = {
