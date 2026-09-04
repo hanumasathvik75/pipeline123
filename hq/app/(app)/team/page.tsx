@@ -41,7 +41,7 @@ export default function TeamPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [designation, setDesignation] = useState('');
-  const [role, setRole] = useState<UserRole>('engineering');
+  const [role, setRole] = useState<UserRole>('intern');
   const [department, setDepartment] = useState('Engineering');
   const [skills, setSkills] = useState('');
 
@@ -515,12 +515,9 @@ export default function TeamPage() {
                     System Role
                   </label>
                   <select className="input" value={role} onChange={e => setRole(e.target.value as UserRole)}>
-                    <option value="founder">Founder / Executive</option>
-                    <option value="engineering">Engineering</option>
-                    <option value="ml_rd">R&D / Machine Learning</option>
-                    <option value="coo">Operations</option>
-                    <option value="bizdev">Business Development</option>
-                    <option value="intern">Intern</option>
+                    <option value="c_level">Founder & CEO (Full Access)</option>
+                    <option value="executive">Executive Team (Manager)</option>
+                    <option value="intern">Intern / Team Member</option>
                   </select>
                 </div>
 
