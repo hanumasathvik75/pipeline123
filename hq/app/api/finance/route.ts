@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { serverDb } from '@/lib/serverDb';
 import { FinanceData } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const data = await serverDb.getFinanceData();
