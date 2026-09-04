@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { serverDb } from '@/lib/serverDb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     
     // Insert directly into hq_users since an admin is provisioning it
     const id = `user-${Date.now()}`;
-    const { error } = await serverDb.supabaseAdmin.from('hq_users').insert({
+    const { error } = await supabaseAdmin.from('hq_users').insert({
       id,
       name: name.trim(),
       username: username.trim(),
