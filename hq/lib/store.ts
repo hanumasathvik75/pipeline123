@@ -53,6 +53,9 @@ interface HQStore {
   updateInvestorStage: (investorId: string, stage: Investor['stage']) => void;
   addLead: (lead: Omit<Lead, 'id'>) => void;
   addInvestor: (investor: Omit<Investor, 'id'>) => void;
+  addProject: (project: Omit<Project, 'id'>) => void;
+  addMeeting: (meeting: Omit<Meeting, 'id'>) => void;
+  addRDProject: (rdProject: Omit<RDProject, 'id'>) => void;
   addExperiment: (projectId: string, exp: Omit<Experiment, 'id' | 'number'>) => void;
 }
 
@@ -136,6 +139,7 @@ export const useHQStore = create<HQStore>()(
               meetings: state.meetings,
               leads: state.leads,
               investors: state.investors,
+              rdProjects: state.rdProjects,
               ...partialUpdates,
             }),
           });
@@ -273,6 +277,46 @@ export const useHQStore = create<HQStore>()(
         const updated = [newInvestor, ...get().investors];
         set({ investors: updated });
         get().broadcastUpdates({ investors: updated });
+      },
+
+      addProject: (projectData) => {
+        const newProject: Project = {
+          ...projectData,
+          id: `proj-${Date.now()}`,
+          progress: projectData.progress ?? 0,
+          objectives: projectData.objectives ?? [],
+          milestones: projectData.milestones ?? [],
+          risks: projectData.risks ?? [],
+          tags: projectData.tags ?? ['active'],
+        };
+        const updated = [newProject, ...get().projects];
+        set({ projects: updated });
+        get().broadcastUpdates({ projects: updated });
+      },
+
+      addMeeting: (meetingData) => {
+        const newMeeting: Meeting = {
+          ...meetingData,
+          id: `meet-${Date.now()}`,
+          actionItems: meetingData.actionItems ?? [],
+          agenda: meetingData.agenda ?? [],
+          participants: meetingData.participants ?? [],
+        };
+        const updated = [newMeeting, ...get().meetings];
+        set({ meetings: updated });
+        get().broadcastUpdates({ meetings: updated });
+      },
+
+      addRDProject: (rdProjectData) => {
+        const newRDProject: RDProject = {
+          ...rdProjectData,
+          id: `rd-${Date.now()}`,
+          experiments: rdProjectData.experiments ?? [],
+          progress: rdProjectData.progress ?? 0,
+        };
+        const updated = [newRDProject, ...get().rdProjects];
+        set({ rdProjects: updated });
+        get().broadcastUpdates({ rdProjects: updated });
       },
 
       addExperiment: (projectId, expData) => {

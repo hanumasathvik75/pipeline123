@@ -19,13 +19,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const updates = await request.json();
-    const { tasks, projects, meetings, leads, investors } = updates;
+    const { tasks, projects, meetings, leads, investors, rdProjects } = updates;
 
     if (tasks) serverDb.updateTasks(tasks);
     if (projects) serverDb.updateProjects(projects);
     if (meetings) serverDb.updateMeetings(meetings);
     if (leads) serverDb.updateLeads(leads);
     if (investors) serverDb.updateInvestors(investors);
+    if (rdProjects) serverDb.updateRDProjects(rdProjects);
 
     const state = serverDb.getState();
     const safeUsers = state.users.map(({ passwordHash, ...u }) => u);

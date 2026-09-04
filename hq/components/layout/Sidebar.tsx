@@ -59,22 +59,38 @@ export default function Sidebar() {
     <aside className="sidebar" style={{ width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)' }}>
       {/* Logo */}
       <div style={{
-        padding: collapsed ? '1rem 0' : '1rem 0.875rem',
+        padding: collapsed ? '0 0.5rem' : '0 1.25rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
         borderBottom: '1px solid var(--border)',
         height: 'var(--topbar-height)',
         flexShrink: 0,
         justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          height: '100%', width: collapsed ? '100%' : '140px',
-        }}>
+        <Link
+          href="/dashboard"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            height: '100%',
+            width: '100%',
+          }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="IgnitionAI Logo" style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '36px' }} />
-        </div>
+          <img
+            src="/logo.png"
+            alt="IgnitionAI"
+            style={{
+              maxHeight: collapsed ? '26px' : '36px',
+              maxWidth: collapsed ? '38px' : '170px',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+              display: 'block',
+            }}
+          />
+        </Link>
       </div>
 
       {/* Nav */}

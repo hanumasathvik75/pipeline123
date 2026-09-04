@@ -6,7 +6,7 @@ import { formatDate, getInitials, avatarColor } from '@/lib/utils';
 import type { Meeting } from '@/lib/types';
 import {
   Calendar, Clock, Users, CheckCircle2, ArrowRight, Plus, ChevronDown,
-  ChevronRight, ListTodo, FileText, CheckSquare, Sparkles, ExternalLink, Check
+  ChevronRight, ListTodo, FileText, CheckSquare, Sparkles, ExternalLink, Check, X
 } from 'lucide-react';
 
 const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> = {
@@ -17,10 +17,22 @@ const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export default function MeetingsPage() {
-  const { meetings, team, convertActionItemToTask } = useHQStore();
+  const { meetings, team, projects, convertActionItemToTask, addMeeting } = useHQStore();
   const [filterType, setFilterType] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(meetings[0]?.id || null);
   const [convertedToast, setConvertedToast] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newMeeting, setNewMeeting] = useState({
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    time: '14:00',
+    duration: 45,
+    type: 'internal' as Meeting['type'],
+    projectId: '',
+    participants: [] as string[],
+    agenda: '',
+    notes: '',
+  });
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -62,7 +74,7 @@ export default function MeetingsPage() {
             Executive control for decisions, agendas, and auto-converting meeting action items into project tasks.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => alert('Add Meeting feature coming in next iteration!')}>
+        <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
           <Plus size={15} />
           Schedule Meeting
         </button>
@@ -132,6 +144,211 @@ export default function MeetingsPage() {
           {renderMeetingDetail()}
         </div>
       </div>
+
+      {/* Schedule Meeting Modal */}
+      {isAddModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 540, padding: '1.75rem', background: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Schedule Executive Meeting</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sync with founders, venture investors, OEM partners, or internal leads.</p>
+              </div>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsAddModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newMeeting.title.trim() || !newMeeting.date) return;
+
+              const agendaList = newMeeting.agenda
+                ? newMeeting.agenda.split('\n').map(a => a.trim()).filter(Boolean)
+                : ['Review key deliverables & roadmaps', 'Align on timeline and unblock dependencies'];
+
+              const selectedParticipants = newMeeting.participants.length > 0
+                ? newMeeting.participants
+                : team.slice(0, 3).map(m => m.id);
+
+              addMeeting({
+                title: newMeeting.title.trim(),
+                date: newMeeting.date,
+                time: newMeeting.time || '14:00',
+                duration: Number(newMeeting.duration) || 45,
+                type: newMeeting.type,
+                projectId: newMeeting.projectId || undefined,
+                participants: selectedParticipants,
+                agenda: agendaList,
+                notes: newMeeting.notes.trim() || 'Session agenda established. Awaiting live notes and action item capture.',
+                actionItems: [],
+              });
+
+              setIsAddModalOpen(false);
+              setNewMeeting({
+                title: '',
+                date: new Date().toISOString().split('T')[0],
+                time: '14:00',
+                duration: 45,
+                type: 'internal',
+                projectId: '',
+                participants: [],
+                agenda: '',
+                notes: '',
+              });
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Meeting Title *
+                </label>
+                <input
+                  className="input"
+                  placeholder="e.g. Seed VC Partner Pitch & Physical-AI Demo"
+                  value={newMeeting.title}
+                  onChange={e => setNewMeeting({ ...newMeeting, title: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={newMeeting.date}
+                    onChange={e => setNewMeeting({ ...newMeeting, date: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Time
+                  </label>
+                  <input
+                    type="time"
+                    className="input"
+                    value={newMeeting.time}
+                    onChange={e => setNewMeeting({ ...newMeeting, time: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Duration
+                  </label>
+                  <select
+                    className="input"
+                    value={newMeeting.duration}
+                    onChange={e => setNewMeeting({ ...newMeeting, duration: Number(e.target.value) })}
+                  >
+                    <option value={15}>15 mins</option>
+                    <option value={30}>30 mins</option>
+                    <option value={45}>45 mins</option>
+                    <option value={60}>60 mins</option>
+                    <option value={90}>90 mins</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Meeting Type
+                  </label>
+                  <select
+                    className="input"
+                    value={newMeeting.type}
+                    onChange={e => setNewMeeting({ ...newMeeting, type: e.target.value as Meeting['type'] })}
+                  >
+                    <option value="internal">Internal Sync</option>
+                    <option value="investor">Investor Pitch / Diligence</option>
+                    <option value="external">Client / OEM Partner</option>
+                    <option value="mentor">Advisory / Mentor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Related Initiative
+                  </label>
+                  <select
+                    className="input"
+                    value={newMeeting.projectId}
+                    onChange={e => setNewMeeting({ ...newMeeting, projectId: e.target.value })}
+                  >
+                    <option value="">General / Company-wide</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Select Attendees
+                </label>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.375rem',
+                  maxHeight: '120px', overflowY: 'auto', padding: '0.5rem',
+                  background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)'
+                }}>
+                  {team.map(m => {
+                    const isChecked = newMeeting.participants.includes(m.id);
+                    return (
+                      <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            const updated = isChecked
+                              ? newMeeting.participants.filter(id => id !== m.id)
+                              : [...newMeeting.participants, m.id];
+                            setNewMeeting({ ...newMeeting, participants: updated });
+                          }}
+                        />
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Agenda (one point per line)
+                </label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  placeholder="Key discussion topics..."
+                  value={newMeeting.agenda}
+                  onChange={e => setNewMeeting({ ...newMeeting, agenda: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  <Calendar size={14} />
+                  Schedule & Invite
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 

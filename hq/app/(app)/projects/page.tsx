@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, daysUntil, getInitials } from '@/lib/utils';
-import { Plus, LayoutGrid, Table, List, Search, Filter, ArrowUpRight } from 'lucide-react';
+import { Plus, LayoutGrid, Table, List, Search, Filter, ArrowUpRight, X } from 'lucide-react';
 import Link from 'next/link';
+import type { Project, Priority, ProjectStatus } from '@/lib/types';
 
 const STATUS_ORDER = ['in_progress', 'review', 'testing', 'planned', 'backlog', 'done', 'on_hold'];
 
@@ -19,10 +20,21 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function ProjectsPage() {
-  const { projects, team } = useHQStore();
+  const { projects, team, addProject } = useHQStore();
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('all');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newProject, setNewProject] = useState({
+    name: '',
+    description: '',
+    category: 'product' as Project['category'],
+    priority: 'high' as Priority,
+    status: 'in_progress' as ProjectStatus,
+    targetDate: '',
+    ownerId: '',
+    objectives: '',
+  });
 
   const filtered = projects.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -43,7 +55,7 @@ export default function ProjectsPage() {
           <h1 className="page-title">Projects</h1>
           <p className="page-subtitle">{projects.length} projects · {projects.filter(p => p.status === 'in_progress').length} active</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
           <Plus size={15} />
           New Project
         </button>
@@ -199,6 +211,198 @@ export default function ProjectsPage() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* New Project Modal */}
+      {isAddModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 520, padding: '1.75rem', background: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Create New Initiative</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Define a new engineering, R&D, product, or business milestone.</p>
+              </div>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsAddModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newProject.name.trim()) return;
+
+              const objList = newProject.objectives
+                ? newProject.objectives.split('\n').map(o => o.trim()).filter(Boolean)
+                : ['Deliver baseline implementation'];
+
+              const owner = newProject.ownerId || (team[0]?.id ?? 'user-1');
+
+              addProject({
+                name: newProject.name.trim(),
+                description: newProject.description.trim() || 'Core initiative for IgnitionAI platform',
+                category: newProject.category,
+                priority: newProject.priority,
+                status: newProject.status,
+                ownerId: owner,
+                memberIds: [owner],
+                startDate: new Date().toISOString().split('T')[0],
+                targetDate: newProject.targetDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+                progress: newProject.status === 'in_progress' ? 10 : 0,
+                objectives: objList,
+                milestones: [],
+                risks: [],
+                tags: [newProject.category, 'active'],
+              });
+
+              setIsAddModalOpen(false);
+              setNewProject({
+                name: '',
+                description: '',
+                category: 'product',
+                priority: 'high',
+                status: 'in_progress',
+                targetDate: '',
+                ownerId: '',
+                objectives: '',
+              });
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Project Name *
+                </label>
+                <input
+                  className="input"
+                  placeholder="e.g. Next-Gen CAN Telematics Edge Hub"
+                  value={newProject.name}
+                  onChange={e => setNewProject({ ...newProject, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Description
+                </label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  placeholder="Scope, technical specs, and deliverables..."
+                  value={newProject.description}
+                  onChange={e => setNewProject({ ...newProject, description: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Category Pillar
+                  </label>
+                  <select
+                    className="input"
+                    value={newProject.category}
+                    onChange={e => setNewProject({ ...newProject, category: e.target.value as Project['category'] })}
+                  >
+                    <option value="product">Product & Engineering</option>
+                    <option value="rd">R&D / Physical-AI</option>
+                    <option value="bizdev">Business Development / OEM</option>
+                    <option value="operations">Operations & Testing</option>
+                    <option value="fundraising">Fundraising & Cap Table</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Lead Owner
+                  </label>
+                  <select
+                    className="input"
+                    value={newProject.ownerId}
+                    onChange={e => setNewProject({ ...newProject, ownerId: e.target.value })}
+                  >
+                    {team.map(m => (
+                      <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Priority
+                  </label>
+                  <select
+                    className="input"
+                    value={newProject.priority}
+                    onChange={e => setNewProject({ ...newProject, priority: e.target.value as Priority })}
+                  >
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Status
+                  </label>
+                  <select
+                    className="input"
+                    value={newProject.status}
+                    onChange={e => setNewProject({ ...newProject, status: e.target.value as ProjectStatus })}
+                  >
+                    <option value="in_progress">In Progress</option>
+                    <option value="planned">Planned</option>
+                    <option value="review">Review</option>
+                    <option value="testing">Testing</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Target Completion
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={newProject.targetDate}
+                    onChange={e => setNewProject({ ...newProject, targetDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Objectives (one per line)
+                </label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  placeholder="Key measurable outcomes..."
+                  value={newProject.objectives}
+                  onChange={e => setNewProject({ ...newProject, objectives: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  <Plus size={14} />
+                  Launch Project
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

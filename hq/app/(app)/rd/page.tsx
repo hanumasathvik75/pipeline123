@@ -341,8 +341,9 @@ export default function RDWorkspacePage() {
             
             <form onSubmit={(e) => { 
               e.preventDefault(); 
-              if (selectedProjectId) {
-                addExperiment(selectedProjectId, {
+              const targetTrack = selectedProjectId || rdProjects[0]?.id;
+              if (targetTrack) {
+                addExperiment(targetTrack, {
                   model: newExp.model,
                   dataset: newExp.dataset,
                   result: newExp.result,
@@ -356,15 +357,27 @@ export default function RDWorkspacePage() {
               setNewExp({ model: '', dataset: '', result: '' }); 
             }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Model Architecture</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Research Track</label>
+                <select
+                  className="input"
+                  value={selectedProjectId || rdProjects[0]?.id}
+                  onChange={e => setSelectedProjectId(e.target.value)}
+                >
+                  {rdProjects.map(p => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Model Architecture *</label>
                 <input className="input" placeholder="e.g. LSTM-Transformer v4" required value={newExp.model} onChange={e => setNewExp({...newExp, model: e.target.value})} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Dataset Used</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Dataset Used *</label>
                 <input className="input" placeholder="e.g. Battery Cycle 400x" required value={newExp.dataset} onChange={e => setNewExp({...newExp, dataset: e.target.value})} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Early Results / Verdict</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Early Results / Verdict *</label>
                 <input className="input" placeholder="e.g. Shows 4% better RMSE" required value={newExp.result} onChange={e => setNewExp({...newExp, result: e.target.value})} />
               </div>
               

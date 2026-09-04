@@ -101,6 +101,14 @@ export const serverDb = {
     return s;
   },
 
+  updateRDProjects(rdProjects: RDProject[]) {
+    const s = loadState();
+    s.rdProjects = rdProjects;
+    s.lastUpdated = Date.now();
+    saveState(s);
+    return s;
+  },
+
   updateLeads(leads: Lead[]) {
     const s = loadState();
     s.leads = leads;
