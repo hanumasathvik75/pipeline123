@@ -227,16 +227,12 @@ export default function TeamPage() {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {['all', 'founder', 'engineering', 'ml_rd', 'coo', 'intern'].map(r => (
+          {['all', 'c_level', 'executive', 'intern'].map(r => (
             <button
               key={r}
               onClick={() => setRoleFilter(r)}
-              className="btn btn-sm"
-              style={{
-                background: roleFilter === r ? 'var(--accent-muted)' : 'var(--bg-elevated)',
-                color: roleFilter === r ? '#818cf8' : 'var(--text-secondary)',
-                border: `1px solid ${roleFilter === r ? 'rgba(99,102,241,0.3)' : 'var(--border)'}`,
-              }}
+              className={roleFilter === r ? 'btn btn-primary' : 'btn'}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}
             >
               {r === 'all' ? 'All Roles' : ROLE_LABELS[r]?.label || r}
             </button>
