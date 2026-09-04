@@ -65,7 +65,7 @@ export function leadStageColor(stage: LeadStage): string {
   }
 }
 
-export function formatCurrency(value: number, currency: 'INR' | 'USD' = 'INR'): string {
+export function formatCurrency(value: number, currency: string = 'INR'): string {
   if (currency === 'INR') {
     if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
     if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
