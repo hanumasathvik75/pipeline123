@@ -212,8 +212,7 @@ CREATE TABLE IF NOT EXISTS public.hq_progress_logs (
 );
 
 -- ── Seed founder account ─────────────────────────────────────
--- Password: Ignition@2026 (bcrypt hashed — replace hash below with actual hash from bcryptjs)
--- Run: const bcrypt = require('bcryptjs'); bcrypt.hashSync('Ignition@2026', 10)
+-- Password: Ignition@2026 (bcrypt hashed)
 INSERT INTO public.hq_users (
   id, name, username, email, password_hash, role, status,
   designation, department, joining_date, skills
@@ -222,7 +221,7 @@ INSERT INTO public.hq_users (
   'Shashank',
   'shashank',
   'shashank@ignitionai.in',
-  '$REPLACE_WITH_BCRYPT_HASH$',
+  '$2b$10$FjBa.qpJksQjIJ18aFavPeTmrVQwb74BJtFgZK926koyTmxNhdAgW',
   'c_level',
   'active',
   'Founder & CEO',
