@@ -79,7 +79,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  placeholder="e.g. shashank"
+                  placeholder="your.username"
                   style={{ paddingLeft: '2.25rem' }}
                   required
                 />
