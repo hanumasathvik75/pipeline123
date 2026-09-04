@@ -67,7 +67,7 @@ export default function TeamPage() {
     const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean);
 
     try {
-      const resp = await fetch('/api/auth/register', {
+      const resp = await fetch('/api/users/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
