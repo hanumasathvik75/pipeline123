@@ -11,7 +11,7 @@ interface HQStore {
   // Auth
   currentUser: TeamMember | null;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 
   // Data
