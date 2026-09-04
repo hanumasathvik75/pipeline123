@@ -1,21 +1,8 @@
 import { NextResponse } from 'next/server';
 import { serverDb } from '@/lib/serverDb';
-import { cookies } from 'next/headers';
-import { verifyJwt } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('hq_token')?.value;
-    
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await verifyJwt(token);
-    if (!session || session.role !== 'c_level') {
-      return NextResponse.json({ error: 'Forbidden. Only C-Level can directly provision accounts.' }, { status: 403 });
-    }
 
     const { name, username, password, designation, department, skills, role } = await request.json();
 
