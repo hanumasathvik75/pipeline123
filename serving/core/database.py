@@ -6,11 +6,16 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parents[1] / ".env")
 
-# PostgreSQL connection string
-# Defaults to a local postgres instance if not specified in environment
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ignitionai")
+# Default to SQLite for zero-config local development.
+# Set DATABASE_URL in .env for PostgreSQL in production / Docker.
+_default_db = f"sqlite:///{Path(__file__).parents[1] / 'ignitionai_local.db'}"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", _default_db)
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+_connect_args = {}
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    _connect_args["check_same_thread"] = False
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=_connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

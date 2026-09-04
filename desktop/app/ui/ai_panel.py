@@ -283,13 +283,13 @@ class AIPanel(QWidget):
 
     def _on_diagnosis(self, text: str):
         self._diagnosis_text = text
-        self.diagnosis_output.setPlainText(text)
+        self.diagnosis_output.setMarkdown(text)
         self.diag_badge.show()
         self.progress_label.setText("Generating repair narrative...")
 
     def _on_repair(self, text: str):
         self._repair_text = text
-        self.repair_output.setPlainText(text)
+        self.repair_output.setMarkdown(text)
 
     def _on_error(self, msg: str):
         self.diagnosis_output.setPlainText(

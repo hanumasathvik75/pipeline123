@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 # -- Telemetry & Sessions --
 
@@ -48,11 +49,27 @@ class VirtualSensorOutput(BaseModel):
     candidate: Optional[str] = None
 
 
+class RepairPlanStep(BaseModel):
+    stage: str
+    action: str
+    method: str
+    pass_criteria: Optional[str] = None
+
+
+class RepairPlanEntry(BaseModel):
+    rank: int
+    candidate: str
+    confidence: Optional[float] = None
+    evidence: Dict[str, Any] = {}
+    steps: List[RepairPlanStep] = []
+
+
 class AnalysisResult(BaseModel):
     source: Dict[str, Any]
     raw_signal_preview: List[Dict[str, Any]]
     virtual_sensors: List[VirtualSensorOutput]
     fusion: Dict[str, Any]
+    repair_plan: List[RepairPlanEntry] = []
 
 
 class ExplanationRequest(BaseModel):
@@ -62,6 +79,24 @@ class ExplanationRequest(BaseModel):
 
 class ExplanationResponse(BaseModel):
     report: str
+
+
+# -- Mechanic Feedback --
+
+class MechanicFeedbackCreate(BaseModel):
+    session_id: int
+    candidate: str
+    verdict: str  # "confirmed", "rejected", "alternative"
+    actual_cause: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class MechanicFeedback(MechanicFeedbackCreate):
+    id: int
+    created_at: str
+
+    class Config:
+        from_attributes = True
 
 # -- Graph Logic Schema --
 

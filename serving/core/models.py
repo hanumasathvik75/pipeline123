@@ -103,3 +103,15 @@ class RepairStep(Base):
     instruction = Column(String) # e.g., "Replace fuel pump relay"
     
     root_cause = relationship("RootCause", back_populates="repair_steps")
+
+
+class MechanicFeedback(Base):
+    """Mechanic's verdict on a diagnostic candidate — closes the learning loop."""
+    __tablename__ = "mechanic_feedback"
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("diagnostic_sessions.id"), index=True)
+    candidate = Column(String, nullable=False)
+    verdict = Column(String, nullable=False)  # "confirmed", "rejected", "alternative"
+    actual_cause = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)

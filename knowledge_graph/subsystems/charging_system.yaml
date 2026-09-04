@@ -1,0 +1,19 @@
+subsystem_name: "Charging System"
+components:
+  - name: "Alternator / Voltage Regulator"
+    fault_modes:
+      - name: "Diode Rectifier Failure / Low Output"
+        description: "Failed diode reduces current capacity and introduces AC ripple voltage into DC electrical bus."
+        typical_dtcs:
+          - "P0562"
+        typical_pids:
+          - pid_name: "Control Module Voltage"
+            condition: "< 12.4"
+            unit: "V"
+            description: "System voltage below minimum threshold under electrical load"
+        typical_symptoms:
+          - phrasing: "Battery light illuminated on dashboard"
+            category: "visual"
+          - phrasing: "Headlights dim at idle"
+            category: "visual"
+        prior_probability: 0.11

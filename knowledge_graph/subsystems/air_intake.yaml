@@ -1,0 +1,39 @@
+subsystem_name: "Air Intake System"
+components:
+  - name: "Mass Air Flow (MAF) Sensor"
+    fault_modes:
+      - name: "Sensor Element Contamination / Drift"
+        description: "Dust and oil film on hot wire element causes under-reporting of airflow, resulting in lean air/fuel mixture."
+        typical_dtcs:
+          - "P0171"
+          - "P0101"
+        typical_pids:
+          - pid_name: "Mass Air Flow"
+            condition: "< 2.0"
+            unit: "g/s"
+            description: "MAF reading at hot idle below specification"
+        typical_symptoms:
+          - phrasing: "Hesitation on initial throttle tip-in"
+            category: "drivability"
+          - phrasing: "Poor fuel economy"
+            category: "drivability"
+        prior_probability: 0.14
+
+  - name: "Intake Manifold"
+    fault_modes:
+      - name: "Vacuum Leak / Gasket Deterioration"
+        description: "Unmetered air enters intake tract after MAF sensor, creating uncompensated lean mixture at idle."
+        typical_dtcs:
+          - "P0171"
+          - "P0507"
+        typical_pids:
+          - pid_name: "Short Term Fuel Trim Bank 1"
+            condition: "> 18"
+            unit: "%"
+            description: "Excessively high positive fuel trim at idle that drops at high RPM"
+        typical_symptoms:
+          - phrasing: "High or hunting idle speed"
+            category: "drivability"
+          - phrasing: "Hissing sound from engine bay"
+            category: "auditory"
+        prior_probability: 0.16

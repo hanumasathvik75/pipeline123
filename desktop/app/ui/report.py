@@ -5,6 +5,7 @@ Generates a branded professional report using ReportLab.
 
 import os
 import re
+import html
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -33,9 +34,47 @@ C_WHITE      = colors.white
 C_CARD_BG    = HexColor("#F8F9FA")
 C_LIGHT_BG   = HexColor("#FFFFFF")
 
+def _clean_unicode_for_pdf(text: str) -> str:
+    """Replace emojis and non-Latin-1 characters with clean PDF-safe equivalents."""
+    replacements = {
+        "🛠️": "[TOOLS]",
+        "🛠": "[TOOLS]",
+        "📋": "[PROCEDURE]",
+        "⚠️": "[WARNING]",
+        "⚠": "[WARNING]",
+        "⏱️": "[ESTIMATES]",
+        "⏱": "[ESTIMATES]",
+        "🔧": "[SERVICE]",
+        "✅": "[VERIFIED]",
+        "❌": "[FAULT]",
+        "—": "-",
+        "–": "-",
+        "“": '"',
+        "”": '"',
+        "‘": "'",
+        "’": "'",
+        "•": "*",
+    }
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+    # Remove any remaining emojis / non-ascii symbols that ReportLab Helvetica cannot render
+    return text.encode("latin-1", "replace").decode("latin-1")
+
+
 def _parse_markdown(text: str) -> str:
+    text = _clean_unicode_for_pdf(text)
+    text = html.escape(text)
+    # Convert headings
+    text = re.sub(r'(?m)^###\s+(.*)$', r'<br/><font size="11" color="#1565C0"><b>\1</b></font>', text)
+    text = re.sub(r'(?m)^##\s+(.*)$', r'<br/><font size="12" color="#0A1628"><b>\1</b></font>', text)
+    text = re.sub(r'(?m)^#\s+(.*)$', r'<br/><font size="13" color="#0A1628"><b>\1</b></font>', text)
+    # Convert bullets
+    text = re.sub(r'(?m)^[\*\-]\s+(.*)$', r'&bull; \1', text)
+    # Bold and italics
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
     text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
+    # Newlines to line breaks
+    text = text.replace('\n', '<br/>')
     return text
 
 def generate_pdf_report(

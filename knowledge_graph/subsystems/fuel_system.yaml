@@ -1,0 +1,43 @@
+subsystem_name: "Fuel System"
+components:
+  - name: "Fuel Pump"
+    fault_modes:
+      - name: "Low Pressure Output / Weak Pump"
+        description: "Fuel pump delivers insufficient pressure under load, causing lean fuel trims and power drop."
+        typical_dtcs:
+          - "P0087"
+          - "P0171"
+        typical_pids:
+          - pid_name: "Fuel Rail Pressure"
+            condition: "< 30"
+            unit: "psi"
+            description: "Fuel pressure drops significantly below spec"
+          - pid_name: "Long Term Fuel Trim Bank 1"
+            condition: "> 15"
+            unit: "%"
+            description: "ECM adding excess fuel to compensate for low pressure"
+        typical_symptoms:
+          - phrasing: "Engine stutters or starves under hard acceleration"
+            category: "drivability"
+          - phrasing: "Extended cranking before engine starts"
+            category: "drivability"
+        prior_probability: 0.12
+
+  - name: "Fuel Injector"
+    fault_modes:
+      - name: "Clogged / Fouled Injector Tip"
+        description: "Injector nozzle restricted by carbon or E20 ethanol gum deposits, starving individual cylinder."
+        typical_dtcs:
+          - "P0300"
+          - "P0171"
+        typical_pids:
+          - pid_name: "Short Term Fuel Trim Bank 1"
+            condition: "> 12"
+            unit: "%"
+            description: "Positive trim correction at idle"
+        typical_symptoms:
+          - phrasing: "Rough idle vibration"
+            category: "drivability"
+          - phrasing: "Engine misfire code stored"
+            category: "visual"
+        prior_probability: 0.15

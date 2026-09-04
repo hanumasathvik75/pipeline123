@@ -1,0 +1,39 @@
+subsystem_name: "Ignition System"
+components:
+  - name: "Ignition Coil"
+    fault_modes:
+      - name: "Primary/Secondary Winding Breakdown"
+        description: "Coil insulation breakdown causes intermittent or complete spark loss under high engine load."
+        typical_dtcs:
+          - "P0300"
+          - "P0301"
+        typical_pids:
+          - pid_name: "Engine RPM"
+            condition: "oscillating"
+            unit: "rpm"
+            description: "RPM fluctuation during acceleration"
+        typical_symptoms:
+          - phrasing: "Engine jerk during acceleration"
+            category: "drivability"
+          - phrasing: "Check engine light flashing under load"
+            category: "visual"
+        prior_probability: 0.18
+
+  - name: "Crankshaft Position Sensor (CKP)"
+    fault_modes:
+      - name: "Signal Loss / Circuit Intermittent"
+        description: "CKP sensor hall effect element or wiring harness degrades with engine bay heat."
+        typical_dtcs:
+          - "P0335"
+          - "P0336"
+        typical_pids:
+          - pid_name: "Engine RPM"
+            condition: "< 100"
+            unit: "rpm"
+            description: "Zero or erratic RPM reading while cranking"
+        typical_symptoms:
+          - phrasing: "Engine cranks but will not start"
+            category: "drivability"
+          - phrasing: "Engine stalls suddenly while driving"
+            category: "drivability"
+        prior_probability: 0.10

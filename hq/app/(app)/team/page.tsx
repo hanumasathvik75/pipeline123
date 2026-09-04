@@ -1,0 +1,452 @@
+'use client';
+
+import { useState } from 'react';
+import { useHQStore } from '@/lib/store';
+import { getInitials } from '@/lib/utils';
+import type { UserRole } from '@/lib/types';
+import Link from 'next/link';
+import {
+  Users, UserCheck, AlertCircle, Briefcase, Mail, ArrowUpRight,
+  Search, Shield, CheckCircle2, Award, Plus, Lock, Sparkles, X
+} from 'lucide-react';
+
+const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+  founder: { label: 'Founder & CEO', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
+  coo: { label: 'Operations & BD Lead', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
+  engineering: { label: 'Lead Engineer', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
+  ml_rd: { label: 'Lead AI Scientist', color: '#c084fc', bg: 'rgba(192,132,252,0.12)' },
+  bizdev: { label: 'Business Development', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
+  intern: { label: 'ML / Telematics Intern', color: '#f472b6', bg: 'rgba(244,114,182,0.12)' },
+};
+
+export default function TeamPage() {
+  const { team, tasks, projects, addTeamMember } = useHQStore();
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [designation, setDesignation] = useState('');
+  const [role, setRole] = useState<UserRole>('engineering');
+  const [department, setDepartment] = useState('Engineering');
+  const [skills, setSkills] = useState('');
+
+  const filteredTeam = team.filter(m => {
+    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) ||
+      (m.designation && m.designation.toLowerCase().includes(search.toLowerCase())) ||
+      m.skills.some(s => s.toLowerCase().includes(search.toLowerCase())) ||
+      m.department.toLowerCase().includes(search.toLowerCase());
+    const matchesRole = roleFilter === 'all' || m.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const handleCreateMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim() || !password.trim() || !designation.trim()) {
+      setFeedback({ message: 'Please fill in all required fields.', type: 'error' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedback(null);
+
+    const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean);
+
+    const res = await addTeamMember({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: password.trim(),
+      designation: designation.trim(),
+      role,
+      department: department.trim(),
+      skills: skillsArray.length > 0 ? skillsArray : ['AI/ML', 'Engineering'],
+    });
+
+    setIsSubmitting(false);
+
+    if (res.success) {
+      setFeedback({
+        message: `Member ${name} (${designation}) added successfully! They can now log in with their credentials.`,
+        type: 'success'
+      });
+      setName('');
+      setEmail('');
+      setPassword('');
+      setDesignation('');
+      setSkills('');
+      setTimeout(() => {
+        setShowAddModal(false);
+        setFeedback(null);
+      }, 2500);
+    } else {
+      setFeedback({ message: res.error || 'Failed to create team member', type: 'error' });
+    }
+  };
+
+  return (
+    <div className="page animate-fade-in">
+      {/* Header */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Team & Organizational Directory</h1>
+          <p className="page-subtitle">
+            Core leadership, engineering team, AI/ML researchers, and telematics interns driving IgnitionAI.
+          </p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+          <Plus size={15} />
+          Add Team Member
+        </button>
+      </div>
+
+      {/* KPI Stats */}
+      <div className="grid-stats">
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#818cf8' }}>
+            <Users size={20} />
+          </div>
+          <div>
+            <div className="stat-value">{team.length}</div>
+            <div className="stat-label">Full Roster</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+            <Briefcase size={20} />
+          </div>
+          <div>
+            <div className="stat-value">{projects.length}</div>
+            <div className="stat-label">Total Active Initiatives</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+            <CheckCircle2 size={20} />
+          </div>
+          <div>
+            <div className="stat-value">{tasks.filter(t => t.status === 'done').length}</div>
+            <div className="stat-label">Tasks Completed</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
+            <AlertCircle size={20} />
+          </div>
+          <div>
+            <div className="stat-value">{team.reduce((sum, m) => sum + (m.overdueTasks || 0), 0)}</div>
+            <div className="stat-label">Overdue Tasks</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filters */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: '0 0 280px' }}>
+          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input
+            className="input"
+            placeholder="Search member, designation, skill…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ paddingLeft: '2.25rem', height: 34, fontSize: '0.8rem' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {['all', 'founder', 'engineering', 'ml_rd', 'coo', 'intern'].map(r => (
+            <button
+              key={r}
+              onClick={() => setRoleFilter(r)}
+              className="btn btn-sm"
+              style={{
+                background: roleFilter === r ? 'var(--accent-muted)' : 'var(--bg-elevated)',
+                color: roleFilter === r ? '#818cf8' : 'var(--text-secondary)',
+                border: `1px solid ${roleFilter === r ? 'rgba(99,102,241,0.3)' : 'var(--border)'}`,
+              }}
+            >
+              {r === 'all' ? 'All Roles' : ROLE_LABELS[r]?.label || r}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Team Cards Grid */}
+      <div className="grid-auto">
+        {filteredTeam.map(member => {
+          const roleMeta = ROLE_LABELS[member.role] || ROLE_LABELS.intern;
+          const memberTasks = tasks.filter(t => t.assigneeId === member.id);
+          const inProgressCount = memberTasks.filter(t => t.status === 'in_progress').length;
+
+          return (
+            <Link key={member.id} href={`/team/${member.id}`} style={{ textDecoration: 'none' }}>
+              <div
+                className="card"
+                style={{
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  height: '100%',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease, border-color 0.15s ease',
+                }}
+              >
+                {/* Header with Avatar & Details */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {getInitials(member.name)}
+                  </div>
+
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {member.name}
+                      </h3>
+                      <ArrowUpRight size={14} style={{ color: 'var(--text-muted)' }} />
+                    </div>
+
+                    {/* Explicit Designation */}
+                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#818cf8', marginTop: '0.15rem' }}>
+                      {member.designation || roleMeta.label}
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 600,
+                        padding: '0.1rem 0.45rem',
+                        borderRadius: 4,
+                        color: roleMeta.color,
+                        background: roleMeta.bg,
+                        display: 'inline-block',
+                        marginTop: '0.3rem',
+                      }}
+                    >
+                      {roleMeta.label}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Department & Email */}
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <div>{member.department} · Joined {member.joiningDate}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)' }}>
+                    <Mail size={12} />
+                    <span>{member.email}</span>
+                  </div>
+                </div>
+
+                {/* Skills tags */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                  {member.skills.slice(0, 4).map((s, i) => (
+                    <span key={i} className="badge" style={{ fontSize: '0.65rem' }}>
+                      {s}
+                    </span>
+                  ))}
+                  {member.skills.length > 4 && (
+                    <span className="badge" style={{ fontSize: '0.65rem', background: 'transparent' }}>
+                      +{member.skills.length - 4}
+                    </span>
+                  )}
+                </div>
+
+                {/* Activity Stats Footer */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+                  paddingTop: '0.75rem', borderTop: '1px solid var(--border)',
+                  textAlign: 'center', marginTop: 'auto'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {member.activeTasks}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Tasks</div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8' }}>
+                      {inProgressCount}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Active</div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: member.overdueTasks > 0 ? '#ef4444' : '#10b981' }}>
+                      {member.overdueTasks}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Overdue</div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Add Team Member Modal */}
+      {showAddModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 520, padding: '1.75rem', background: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Add New Team Member</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Provision credentials, title, designation, and department access.</p>
+              </div>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setShowAddModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {feedback && (
+              <div style={{
+                padding: '0.75rem 1rem', borderRadius: 'var(--radius)', marginBottom: '1rem',
+                fontSize: '0.8rem',
+                background: feedback.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                border: `1px solid ${feedback.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                color: feedback.type === 'success' ? '#10b981' : '#f87171',
+              }}>
+                {feedback.message}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateMember} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    Full Name *
+                  </label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Vikramaditya Rao"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    Designation (Title) *
+                  </label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Chief Technology Officer"
+                    value={designation}
+                    onChange={e => setDesignation(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    Work Email *
+                  </label>
+                  <input
+                    type="email"
+                    className="input"
+                    placeholder="name@ignitionai.in"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    Initial Password *
+                  </label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="SecretPass123"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    System Role
+                  </label>
+                  <select className="input" value={role} onChange={e => setRole(e.target.value as UserRole)}>
+                    <option value="founder">Founder / Executive</option>
+                    <option value="engineering">Engineering</option>
+                    <option value="ml_rd">R&D / Machine Learning</option>
+                    <option value="coo">Operations</option>
+                    <option value="bizdev">Business Development</option>
+                    <option value="intern">Intern</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                    Department
+                  </label>
+                  <input
+                    className="input"
+                    placeholder="e.g. R&D / ML or Engineering"
+                    value={department}
+                    onChange={e => setDepartment(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                  Core Skills (comma separated)
+                </label>
+                <input
+                  className="input"
+                  placeholder="e.g. PyTorch, CAN Bus, Battery SOH, Embedded C"
+                  value={skills}
+                  onChange={e => setSkills(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  <Sparkles size={14} />
+                  {isSubmitting ? 'Provisioning…' : 'Create & Provision Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

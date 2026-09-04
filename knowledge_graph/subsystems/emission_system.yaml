@@ -1,0 +1,36 @@
+subsystem_name: "Emission System"
+components:
+  - name: "Catalytic Converter"
+    fault_modes:
+      - name: "Catalyst Substrate Degradation"
+        description: "Precious metal washcoat loses oxygen storage capacity, causing downstream O2 sensor to mimic upstream switching."
+        typical_dtcs:
+          - "P0420"
+        typical_pids:
+          - pid_name: "O2 Sensor Bank 1 Sensor 2"
+            condition: "oscillating"
+            unit: "V"
+            description: "Downstream sensor voltage switches rapidly alongside upstream sensor"
+        typical_symptoms:
+          - phrasing: "Slight loss of engine power"
+            category: "drivability"
+          - phrasing: "Sulfur exhaust odor"
+            category: "visual"
+        prior_probability: 0.12
+
+  - name: "EGR Valve"
+    fault_modes:
+      - name: "Carbon Clogging / Stuck Partially Open"
+        description: "Exhaust soot deposits prevent valve seat sealing, introducing inert exhaust gas at idle."
+        typical_dtcs:
+          - "P0401"
+          - "P0300"
+        typical_pids:
+          - pid_name: "Engine Coolant Temperature"
+            condition: "> 190"
+            unit: "°F"
+            description: "EGR fault active at full operating temperature"
+        typical_symptoms:
+          - phrasing: "Rough idle or stalling when stopping at signals"
+            category: "drivability"
+        prior_probability: 0.14
