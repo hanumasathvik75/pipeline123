@@ -294,7 +294,9 @@ export default function FundraisingPage() {
                 investmentThesis: '',
                 nextAction: 'Initial review',
                 nextActionDate: new Date().toISOString().split('T')[0],
-                notes: ''
+                notes: '',
+                lastContact: new Date().toISOString().split('T')[0],
+                interactions: []
               });
               setIsAddInvestorModalOpen(false); 
               setNewInvestor({ name: '', firm: '', ticketSize: '', stage: 'research' }); 

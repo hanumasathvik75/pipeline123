@@ -322,7 +322,6 @@ export default function CRMPage() {
                 contactPhone: '',
                 assignedTo: team[0]?.id || 'u-1',
                 notes: '',
-                lastContact: new Date().toISOString().split('T')[0],
                 nextFollowUp: '',
                 activities: []
               });

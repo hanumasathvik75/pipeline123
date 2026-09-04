@@ -348,7 +348,8 @@ export default function RDWorkspacePage() {
                   result: newExp.result,
                   features: ['Custom'],
                   parameters: { epochs: 100, batch_size: 32 },
-                  isBest: false
+                  isBest: false,
+                  date: new Date().toISOString().split('T')[0]
                 });
               }
               setIsLogModalOpen(false); 

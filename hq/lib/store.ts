@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, UserRole } from './types';
+import type { Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, UserRole, Experiment } from './types';
 import { PROJECTS, TASKS, MEETINGS, LEADS, INVESTORS, RD_PROJECTS, TEAM_MEMBERS } from './mockData';
 
 interface HQStore {
@@ -278,7 +278,7 @@ export const useHQStore = create<HQStore>()(
       addExperiment: (projectId, expData) => {
         const updated = get().rdProjects.map(p => {
           if (p.id !== projectId) return p;
-          const newExp = { ...expData, id: `exp-${Date.now()}`, number: p.experiments.length + 1 };
+          const newExp: Experiment = { ...expData, id: `exp-${Date.now()}`, number: p.experiments.length + 1 };
           return { ...p, experiments: [newExp, ...p.experiments] };
         });
         set({ rdProjects: updated });

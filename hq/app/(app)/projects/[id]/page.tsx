@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, formatDate, daysUntil, getInitials } from '@/lib/utils';
+import type { Task } from '@/lib/types';
 import {
   ArrowLeft, Users, Calendar, Target, AlertTriangle, CheckSquare,
   ChevronRight, Clock, Tag, Flag, Check,
