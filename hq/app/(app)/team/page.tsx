@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+  c_level: { label: 'Founder & CEO', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
+  executive: { label: 'Executive Team', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
   founder: { label: 'Founder & CEO', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
   coo: { label: 'Operations & BD Lead', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
   engineering: { label: 'Lead Engineer', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
