@@ -20,11 +20,11 @@ export default function LoginPage() {
     setError('');
     
     try {
-      const ok = await login(username, password);
-      if (ok) {
+      const res = await login(username, password);
+      if (res && res.success) {
         router.replace('/dashboard');
       } else {
-        setError('Invalid username or password, or account is pending approval.');
+        setError(res?.error || 'Invalid username or password, or account is pending approval.');
       }
     } catch {
       setError('Authentication failed. Please try again.');

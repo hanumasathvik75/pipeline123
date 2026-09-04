@@ -135,12 +135,13 @@ export const useHQStore = create<HQStore>()(
           if (res.ok && data.success && data.user) {
             set({ currentUser: data.user, isAuthenticated: true });
             get().syncWithServer();
-            return true;
+            return { success: true };
           }
-        } catch (e) {
+          return { success: false, error: data.error || 'Invalid credentials' };
+        } catch (e: any) {
           console.error('Login error:', e);
+          return { success: false, error: e.message || 'Network error' };
         }
-        return false;
       },
 
       logout: () => set({ currentUser: null, isAuthenticated: false }),
