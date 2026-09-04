@@ -5,12 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import { Zap, Mail, Lock, AlertCircle } from 'lucide-react';
 
-const DEMO_USERS = [
-  { email: 'shashank@ignitionai.in', role: 'Founder / CEO', name: 'Shashank' },
-  { email: 'arjun@ignitionai.in', role: 'Engineering', name: 'Arjun K' },
-  { email: 'priya@ignitionai.in', role: 'R&D / ML', name: 'Priya S' },
-  { email: 'dushyanth@ignitionai.in', role: 'Intern', name: 'Dushyanth B' },
-];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -133,32 +127,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Quick Demo Login Credentials */}
-        <div style={{ marginTop: '1.5rem' }}>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '0.75rem' }}>
-            Registered Team Accounts (Default password: <code>ignition2026</code>)
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
-            {DEMO_USERS.map(u => (
-              <button
-                key={u.email}
-                onClick={() => setEmail(u.email)}
-                style={{
-                  background: email === u.email ? 'var(--bg-elevated)' : 'var(--bg-surface)',
-                  border: `1px solid ${email === u.email ? 'var(--text-primary)' : 'var(--border)'}`,
-                  borderRadius: 8,
-                  padding: '0.625rem 0.75rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{u.name}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 1 }}>{u.role}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

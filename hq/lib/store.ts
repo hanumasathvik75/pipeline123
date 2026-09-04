@@ -335,6 +335,14 @@ export const useHQStore = create<HQStore>()(
         currentUser: state.currentUser,
         isAuthenticated: state.isAuthenticated,
         sidebarCollapsed: state.sidebarCollapsed,
+        projects: state.projects,
+        tasks: state.tasks,
+        meetings: state.meetings,
+        leads: state.leads,
+        investors: state.investors,
+        rdProjects: state.rdProjects,
+        team: state.team,
+        lastSyncTime: state.lastSyncTime,
       }),
     }
   )

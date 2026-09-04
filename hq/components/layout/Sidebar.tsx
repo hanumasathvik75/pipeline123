@@ -82,10 +82,8 @@ export default function Sidebar() {
             src="/logo.png"
             alt="IgnitionAI"
             style={{
-              maxHeight: collapsed ? '26px' : '36px',
-              maxWidth: collapsed ? '38px' : '170px',
+              height: collapsed ? '30px' : '46px',
               width: 'auto',
-              height: 'auto',
               objectFit: 'contain',
               display: 'block',
             }}

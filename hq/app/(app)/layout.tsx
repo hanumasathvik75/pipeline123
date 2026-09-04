@@ -18,13 +18,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     // Initial sync from central server
     syncWithServer();
-
-    // Polling interval for live multi-user shared updates
-    const interval = setInterval(() => {
-      syncWithServer();
-    }, 4000);
-
-    return () => clearInterval(interval);
   }, [isAuthenticated, router, syncWithServer]);
 
   if (!isAuthenticated) return null;
