@@ -249,7 +249,7 @@ export const serverDb = {
       .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: true });
-    return (data || []).map(row => {
+    return (data || []).map((row: any) => {
       const { passwordHash, ...user } = rowToUser(row);
       return user;
     });
@@ -333,7 +333,7 @@ export const serverDb = {
       .from('hq_pending_users')
       .select('*')
       .order('requested_at', { ascending: true });
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id as string,
       name: row.name as string,
       username: row.username as string,
