@@ -20,7 +20,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export default function TeamPage() {
-  const { team, tasks, projects, addTeamMember } = useHQStore();
+  const { team, tasks, projects } = useHQStore();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -39,8 +39,8 @@ export default function TeamPage() {
   const filteredTeam = team.filter(m => {
     const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) ||
       (m.designation && m.designation.toLowerCase().includes(search.toLowerCase())) ||
-      m.skills.some(s => s.toLowerCase().includes(search.toLowerCase())) ||
-      m.department.toLowerCase().includes(search.toLowerCase());
+      (m.skills && m.skills.some(s => s.toLowerCase().includes(search.toLowerCase()))) ||
+      (m.department && m.department.toLowerCase().includes(search.toLowerCase()));
     const matchesRole = roleFilter === 'all' || m.role === roleFilter;
     return matchesSearch && matchesRole;
   });
@@ -57,17 +57,24 @@ export default function TeamPage() {
 
     const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean);
 
-    const res = await addTeamMember({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password: password.trim(),
-      designation: designation.trim(),
-      role,
-      department: department.trim(),
-      skills: skillsArray.length > 0 ? skillsArray : ['AI/ML', 'Engineering'],
-    });
-
-    setIsSubmitting(false);
+    try {
+      const resp = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          username: email.trim().toLowerCase(), // Using email as username for login
+          password: password.trim(),
+          email: email.trim().toLowerCase(),
+          designation: designation.trim(),
+          role,
+          department: department.trim(),
+          skills: skillsArray.length > 0 ? skillsArray : ['AI/ML', 'Engineering'],
+        }),
+      });
+      const data = await resp.json();
+      const res = { success: resp.ok && data.success, error: data.error };
+      setIsSubmitting(false);
 
     if (res.success) {
       setFeedback({
@@ -86,6 +93,10 @@ export default function TeamPage() {
     } else {
       setFeedback({ message: res.error || 'Failed to create team member', type: 'error' });
     }
+  } catch (err: any) {
+    setIsSubmitting(false);
+    setFeedback({ message: err.message || 'Network error', type: 'error' });
+  }
   };
 
   return (

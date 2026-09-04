@@ -3,11 +3,9 @@
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, daysUntil, getInitials } from '@/lib/utils';
-import { Plus, LayoutGrid, Table, List, Search, Filter, ArrowUpRight, X } from 'lucide-react';
+import { Plus, LayoutGrid, Table, Search, ArrowUpRight, X, Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Project, Priority, ProjectStatus } from '@/lib/types';
-
-const STATUS_ORDER = ['in_progress', 'review', 'testing', 'planned', 'backlog', 'done', 'on_hold'];
 
 const CATEGORY_LABELS: Record<string, string> = {
   product: 'Product', rd: 'R&D', bizdev: 'Business Dev',
@@ -20,12 +18,15 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function ProjectsPage() {
-  const { projects, team, addProject } = useHQStore();
+  const { projects, team, addProject, updateProject, deleteProject, currentUser } = useHQStore();
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('all');
+  
+  // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newProject, setNewProject] = useState({
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [projectForm, setProjectForm] = useState({
     name: '',
     description: '',
     category: 'product' as Project['category'],
@@ -48,6 +49,89 @@ export default function ProjectsPage() {
     return pa - pb;
   });
 
+  const openAddModal = () => {
+    setProjectForm({
+      name: '',
+      description: '',
+      category: 'product',
+      priority: 'high',
+      status: 'in_progress',
+      targetDate: '',
+      ownerId: currentUser?.id || '',
+      objectives: '',
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const openEditModal = (p: Project, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent Link navigation
+    e.stopPropagation();
+    setEditingProject(p);
+    setProjectForm({
+      name: p.name,
+      description: p.description,
+      category: p.category,
+      priority: p.priority,
+      status: p.status,
+      targetDate: p.targetDate,
+      ownerId: p.ownerId,
+      objectives: p.objectives.join('\n'),
+    });
+  };
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      deleteProject(id);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projectForm.name.trim()) return;
+
+    const objList = projectForm.objectives
+      ? projectForm.objectives.split('\n').map(o => o.trim()).filter(Boolean)
+      : ['Deliver baseline implementation'];
+
+    const owner = projectForm.ownerId || (team[0]?.id ?? 'user-1');
+
+    if (editingProject) {
+      updateProject(editingProject.id, {
+        name: projectForm.name.trim(),
+        description: projectForm.description.trim(),
+        category: projectForm.category,
+        priority: projectForm.priority,
+        status: projectForm.status,
+        ownerId: owner,
+        targetDate: projectForm.targetDate,
+        objectives: objList,
+      });
+      setEditingProject(null);
+    } else {
+      addProject({
+        name: projectForm.name.trim(),
+        description: projectForm.description.trim() || 'Core initiative for IgnitionAI platform',
+        category: projectForm.category,
+        priority: projectForm.priority,
+        status: projectForm.status,
+        ownerId: owner,
+        memberIds: [owner],
+        startDate: new Date().toISOString().split('T')[0],
+        targetDate: projectForm.targetDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        progress: projectForm.status === 'in_progress' ? 10 : 0,
+        objectives: objList,
+        milestones: [],
+        risks: [],
+        tags: [projectForm.category, 'active'],
+      });
+      setIsAddModalOpen(false);
+    }
+  };
+
+  const isModalOpen = isAddModalOpen || !!editingProject;
+
   return (
     <div className="page animate-fade-in">
       <div className="page-header">
@@ -55,7 +139,7 @@ export default function ProjectsPage() {
           <h1 className="page-title">Projects</h1>
           <p className="page-subtitle">{projects.length} projects · {projects.filter(p => p.status === 'in_progress').length} active</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
+        <button className="btn btn-primary" onClick={openAddModal}>
           <Plus size={15} />
           New Project
         </button>
@@ -95,9 +179,20 @@ export default function ProjectsPage() {
             const members = p.memberIds.map(id => team.find(m => m.id === id)).filter(Boolean);
             return (
               <Link key={p.id} href={`/projects/${p.id}`} style={{ textDecoration: 'none' }}>
-                <div className="card" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="card hover-effect" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative' }}>
+                  
+                  {/* Actions overlay */}
+                  <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', gap: '0.25rem' }}>
+                     <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
+                        <Edit2 size={14} />
+                     </button>
+                     <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#ef4444' }}>
+                        <Trash2 size={14} />
+                     </button>
+                  </div>
+
                   {/* Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', paddingRight: '3rem' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
                         <span style={{
@@ -112,7 +207,6 @@ export default function ProjectsPage() {
                         {p.name}
                       </h3>
                     </div>
-                    <ArrowUpRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                   </div>
 
                   {/* Progress */}
@@ -170,13 +264,14 @@ export default function ProjectsPage() {
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Due Date</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map(p => {
                 const owner = team.find(m => m.id === p.ownerId);
                 return (
-                  <tr key={p.id} style={{ cursor: 'pointer' }}>
+                  <tr key={p.id}>
                     <td>
                       <Link href={`/projects/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                         <span style={{ fontWeight: 600 }}>{p.name}</span>
@@ -206,6 +301,16 @@ export default function ProjectsPage() {
                     <td style={{ fontSize: '0.8rem', color: daysUntil(p.targetDate) <= 14 ? '#ef4444' : 'var(--text-secondary)' }}>
                       {new Date(p.targetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </td>
+                    <td style={{ textAlign: 'right' }}>
+                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                          <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
+                            <Edit2 size={14} />
+                          </button>
+                          <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#ef4444' }}>
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -214,8 +319,8 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* New Project Modal */}
-      {isAddModalOpen && (
+      {/* Project Modal */}
+      {isModalOpen && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
@@ -224,53 +329,19 @@ export default function ProjectsPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 520, padding: '1.75rem', background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Create New Initiative</h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Define a new engineering, R&D, product, or business milestone.</p>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {editingProject ? 'Edit Project' : 'Create New Initiative'}
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {editingProject ? 'Update project details and settings.' : 'Define a new engineering, R&D, product, or business milestone.'}
+                </p>
               </div>
-              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsAddModalOpen(false)}>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => { setIsAddModalOpen(false); setEditingProject(null); }}>
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!newProject.name.trim()) return;
-
-              const objList = newProject.objectives
-                ? newProject.objectives.split('\n').map(o => o.trim()).filter(Boolean)
-                : ['Deliver baseline implementation'];
-
-              const owner = newProject.ownerId || (team[0]?.id ?? 'user-1');
-
-              addProject({
-                name: newProject.name.trim(),
-                description: newProject.description.trim() || 'Core initiative for IgnitionAI platform',
-                category: newProject.category,
-                priority: newProject.priority,
-                status: newProject.status,
-                ownerId: owner,
-                memberIds: [owner],
-                startDate: new Date().toISOString().split('T')[0],
-                targetDate: newProject.targetDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-                progress: newProject.status === 'in_progress' ? 10 : 0,
-                objectives: objList,
-                milestones: [],
-                risks: [],
-                tags: [newProject.category, 'active'],
-              });
-
-              setIsAddModalOpen(false);
-              setNewProject({
-                name: '',
-                description: '',
-                category: 'product',
-                priority: 'high',
-                status: 'in_progress',
-                targetDate: '',
-                ownerId: '',
-                objectives: '',
-              });
-            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Project Name *
@@ -278,8 +349,8 @@ export default function ProjectsPage() {
                 <input
                   className="input"
                   placeholder="e.g. Next-Gen CAN Telematics Edge Hub"
-                  value={newProject.name}
-                  onChange={e => setNewProject({ ...newProject, name: e.target.value })}
+                  value={projectForm.name}
+                  onChange={e => setProjectForm({ ...projectForm, name: e.target.value })}
                   required
                 />
               </div>
@@ -292,8 +363,8 @@ export default function ProjectsPage() {
                   className="input"
                   rows={2}
                   placeholder="Scope, technical specs, and deliverables..."
-                  value={newProject.description}
-                  onChange={e => setNewProject({ ...newProject, description: e.target.value })}
+                  value={projectForm.description}
+                  onChange={e => setProjectForm({ ...projectForm, description: e.target.value })}
                   style={{ resize: 'vertical' }}
                 />
               </div>
@@ -305,8 +376,8 @@ export default function ProjectsPage() {
                   </label>
                   <select
                     className="input"
-                    value={newProject.category}
-                    onChange={e => setNewProject({ ...newProject, category: e.target.value as Project['category'] })}
+                    value={projectForm.category}
+                    onChange={e => setProjectForm({ ...projectForm, category: e.target.value as Project['category'] })}
                   >
                     <option value="product">Product & Engineering</option>
                     <option value="rd">R&D / Physical-AI</option>
@@ -322,8 +393,8 @@ export default function ProjectsPage() {
                   </label>
                   <select
                     className="input"
-                    value={newProject.ownerId}
-                    onChange={e => setNewProject({ ...newProject, ownerId: e.target.value })}
+                    value={projectForm.ownerId}
+                    onChange={e => setProjectForm({ ...projectForm, ownerId: e.target.value })}
                   >
                     {team.map(m => (
                       <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
@@ -339,8 +410,8 @@ export default function ProjectsPage() {
                   </label>
                   <select
                     className="input"
-                    value={newProject.priority}
-                    onChange={e => setNewProject({ ...newProject, priority: e.target.value as Priority })}
+                    value={projectForm.priority}
+                    onChange={e => setProjectForm({ ...projectForm, priority: e.target.value as Priority })}
                   >
                     <option value="critical">Critical</option>
                     <option value="high">High</option>
@@ -355,8 +426,8 @@ export default function ProjectsPage() {
                   </label>
                   <select
                     className="input"
-                    value={newProject.status}
-                    onChange={e => setNewProject({ ...newProject, status: e.target.value as ProjectStatus })}
+                    value={projectForm.status}
+                    onChange={e => setProjectForm({ ...projectForm, status: e.target.value as ProjectStatus })}
                   >
                     <option value="in_progress">In Progress</option>
                     <option value="planned">Planned</option>
@@ -372,8 +443,8 @@ export default function ProjectsPage() {
                   <input
                     type="date"
                     className="input"
-                    value={newProject.targetDate}
-                    onChange={e => setNewProject({ ...newProject, targetDate: e.target.value })}
+                    value={projectForm.targetDate}
+                    onChange={e => setProjectForm({ ...projectForm, targetDate: e.target.value })}
                   />
                 </div>
               </div>
@@ -386,19 +457,18 @@ export default function ProjectsPage() {
                   className="input"
                   rows={2}
                   placeholder="Key measurable outcomes..."
-                  value={newProject.objectives}
-                  onChange={e => setNewProject({ ...newProject, objectives: e.target.value })}
+                  value={projectForm.objectives}
+                  onChange={e => setProjectForm({ ...projectForm, objectives: e.target.value })}
                   style={{ resize: 'vertical' }}
                 />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(false)}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setIsAddModalOpen(false); setEditingProject(null); }}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  <Plus size={14} />
-                  Launch Project
+                  {editingProject ? 'Save Changes' : <><Plus size={14} /> Launch Project</>}
                 </button>
               </div>
             </form>

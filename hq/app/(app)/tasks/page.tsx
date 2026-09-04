@@ -7,7 +7,7 @@ import type { Task, TaskStatus, Priority } from '@/lib/types';
 import {
   Plus, Search, Filter, CheckCircle2, Clock, AlertTriangle, ChevronRight,
   User as UserIcon, Calendar, CheckSquare, MoreVertical, LayoutGrid, List,
-  ArrowRight
+  ArrowRight, X, Edit2, Trash2
 } from 'lucide-react';
 
 const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
@@ -21,22 +21,26 @@ const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
 ];
 
 export default function TasksPage() {
-  const { tasks, projects, team, updateTaskStatus, toggleSubtask, addTask } = useHQStore();
+  const { tasks, projects, team, updateTaskStatus, toggleSubtask, addTask, updateTask, deleteTask } = useHQStore();
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [search, setSearch] = useState('');
   const [projectFilter, setProjectFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [showNewModal, setShowNewModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // New task form state
-  const [newTitle, setNewTitle] = useState('');
-  const [newDesc, setNewDesc] = useState('');
-  const [newProjectId, setNewProjectId] = useState(projects[0]?.id || '');
-  const [newAssigneeId, setNewAssigneeId] = useState(team[0]?.id || '');
-  const [newPriority, setNewPriority] = useState<Priority>('medium');
-  const [newDueDate, setNewDueDate] = useState('');
-  const [newEstHours, setNewEstHours] = useState(4);
+  // New/Edit task form state
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    projectId: projects[0]?.id || '',
+    assigneeId: team[0]?.id || '',
+    priority: 'medium' as Priority,
+    dueDate: '',
+    estimatedHours: 4,
+  });
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -47,33 +51,87 @@ export default function TasksPage() {
     return matchesSearch && matchesProject && matchesPriority && matchesAssignee;
   });
 
-  const handleCreateTask = (e: React.FormEvent) => {
+  const openNewModal = () => {
+    setTaskForm({
+      title: '',
+      description: '',
+      projectId: projects[0]?.id || '',
+      assigneeId: team[0]?.id || '',
+      priority: 'medium',
+      dueDate: '',
+      estimatedHours: 4,
+    });
+    setIsEditing(false);
+    setSelectedTask(null);
+    setShowNewModal(true);
+  };
+
+  const openTaskDetail = (task: Task) => {
+    setSelectedTask(task);
+    setIsEditing(false);
+  };
+
+  const startEditing = () => {
+    if (!selectedTask) return;
+    setTaskForm({
+      title: selectedTask.title,
+      description: selectedTask.description,
+      projectId: selectedTask.projectId,
+      assigneeId: selectedTask.assigneeId,
+      priority: selectedTask.priority,
+      dueDate: selectedTask.dueDate || '',
+      estimatedHours: selectedTask.estimatedHours,
+    });
+    setIsEditing(true);
+  };
+
+  const handleDelete = () => {
+    if (!selectedTask) return;
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTask(selectedTask.id);
+      setSelectedTask(null);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!taskForm.title.trim()) return;
 
-    const task: Task = {
-      id: `task-${Date.now()}`,
-      title: newTitle.trim(),
-      description: newDesc.trim() || 'No description provided',
-      projectId: newProjectId || (projects[0]?.id ?? 'proj-1'),
-      assigneeId: newAssigneeId || (team[0]?.id ?? 'user-1'),
-      status: 'planned',
-      priority: newPriority,
-      dueDate: newDueDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-      estimatedHours: Number(newEstHours) || 4,
-      actualHours: 0,
-      tags: ['task'],
-      subtasks: [],
-      dependencies: [],
-      deliverables: [],
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-    };
+    if (isEditing && selectedTask) {
+       updateTask(selectedTask.id, {
+          title: taskForm.title.trim(),
+          description: taskForm.description.trim(),
+          projectId: taskForm.projectId,
+          assigneeId: taskForm.assigneeId,
+          priority: taskForm.priority,
+          dueDate: taskForm.dueDate,
+          estimatedHours: Number(taskForm.estimatedHours) || 0,
+       });
+       setSelectedTask({ ...selectedTask, ...taskForm, estimatedHours: Number(taskForm.estimatedHours) || 0 });
+       setIsEditing(false);
+    } else {
+      const task: Task = {
+        id: `task-${Date.now()}`,
+        title: taskForm.title.trim(),
+        description: taskForm.description.trim() || 'No description provided',
+        projectId: taskForm.projectId || (projects[0]?.id ?? 'proj-1'),
+        assigneeId: taskForm.assigneeId || (team[0]?.id ?? 'user-1'),
+        status: 'planned',
+        priority: taskForm.priority,
+        dueDate: taskForm.dueDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+        estimatedHours: Number(taskForm.estimatedHours) || 4,
+        actualHours: 0,
+        tags: ['task'],
+        subtasks: [],
+        dependencies: [],
+        deliverables: [],
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0],
+      };
 
-    addTask(task);
-    setNewTitle('');
-    setNewDesc('');
-    setShowNewModal(false);
+      addTask(task);
+      setShowNewModal(false);
+    }
   };
 
   return (
@@ -86,7 +144,7 @@ export default function TasksPage() {
             {tasks.length} total tasks · {tasks.filter(t => t.status === 'in_progress').length} in progress · {tasks.filter(t => t.status === 'blocked').length} blocked
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowNewModal(true)}>
+        <button className="btn btn-primary" onClick={openNewModal}>
           <Plus size={15} />
           New Task
         </button>
@@ -189,7 +247,7 @@ export default function TasksPage() {
                     const completedSubtasks = task.subtasks.filter(st => st.completed).length;
 
                     return (
-                      <div key={task.id} className="kanban-card card" style={{ padding: '0.875rem' }}>
+                      <div key={task.id} className="kanban-card card hover-effect" style={{ padding: '0.875rem' }} onClick={() => openTaskDetail(task)}>
                         {/* Top: Project tag & Priority */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
@@ -235,7 +293,7 @@ export default function TasksPage() {
                             <span>{due < 0 ? `${Math.abs(due)}d overdue` : due === 0 ? 'Today' : `${due}d left`}</span>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
                             {assignee && (
                               <div
                                 title={assignee.name}
@@ -316,7 +374,7 @@ export default function TasksPage() {
                 const due = daysUntil(task.dueDate);
 
                 return (
-                  <tr key={task.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <tr key={task.id} style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => openTaskDetail(task)}>
                     <td style={{ padding: '0.75rem' }}>
                       <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{task.title}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{task.description}</div>
@@ -324,7 +382,7 @@ export default function TasksPage() {
                     <td style={{ padding: '0.75rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                       {project?.name || '—'}
                     </td>
-                    <td style={{ padding: '0.75rem' }}>
+                    <td style={{ padding: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
                       <select
                         value={task.status}
                         onChange={e => updateTaskStatus(task.id, e.target.value as TaskStatus)}
@@ -367,95 +425,206 @@ export default function TasksPage() {
         </div>
       )}
 
-      {/* New Task Modal */}
-      {showNewModal && (
+      {/* Task Detail / Edit Modal */}
+      {(showNewModal || selectedTask) && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
           padding: '1rem'
         }}>
-          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 500, padding: '1.5rem', background: 'var(--bg-surface)' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Create New Task</h3>
-            <form onSubmit={handleCreateTask} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Task Title *</label>
-                <input
-                  className="input"
-                  placeholder="e.g. Implement real-time CAN bus telemetry parser"
-                  value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  required
-                />
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: (showNewModal || isEditing) ? 500 : 700, padding: '1.5rem', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                {showNewModal ? 'Create New Task' : isEditing ? 'Edit Task' : selectedTask?.title}
+              </h3>
+              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                {!showNewModal && !isEditing && (
+                  <>
+                    <button className="btn btn-icon btn-ghost btn-sm" onClick={startEditing}>
+                      <Edit2 size={16} />
+                    </button>
+                    <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#ef4444' }}>
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                )}
+                <button className="btn btn-icon btn-ghost btn-sm" onClick={() => { setShowNewModal(false); setSelectedTask(null); setIsEditing(false); }}>
+                  <X size={16} />
+                </button>
               </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Description</label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  placeholder="Objectives and context..."
-                  value={newDesc}
-                  onChange={e => setNewDesc(e.target.value)}
-                  style={{ resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            </div>
+            
+            {(showNewModal || isEditing) ? (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Project</label>
-                  <select className="input" value={newProjectId} onChange={e => setNewProjectId(e.target.value)}>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Assignee</label>
-                  <select className="input" value={newAssigneeId} onChange={e => setNewAssigneeId(e.target.value)}>
-                    {team.map(m => (
-                      <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Priority</label>
-                  <select className="input" value={newPriority} onChange={e => setNewPriority(e.target.value as Priority)}>
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Due Date</label>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Task Title *</label>
                   <input
-                    type="date"
                     className="input"
-                    value={newDueDate}
-                    onChange={e => setNewDueDate(e.target.value)}
+                    placeholder="e.g. Implement real-time CAN bus telemetry parser"
+                    value={taskForm.title}
+                    onChange={e => setTaskForm({ ...taskForm, title: e.target.value })}
+                    required
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Est. Hours</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={200}
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Description</label>
+                  <textarea
                     className="input"
-                    value={newEstHours}
-                    onChange={e => setNewEstHours(Number(e.target.value))}
+                    rows={3}
+                    placeholder="Objectives and context..."
+                    value={taskForm.description}
+                    onChange={e => setTaskForm({ ...taskForm, description: e.target.value })}
+                    style={{ resize: 'vertical' }}
                   />
                 </div>
-              </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowNewModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create Task</button>
-              </div>
-            </form>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Project</label>
+                    <select className="input" value={taskForm.projectId} onChange={e => setTaskForm({ ...taskForm, projectId: e.target.value })}>
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Assignee</label>
+                    <select className="input" value={taskForm.assigneeId} onChange={e => setTaskForm({ ...taskForm, assigneeId: e.target.value })}>
+                      {team.map(m => (
+                        <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Priority</label>
+                    <select className="input" value={taskForm.priority} onChange={e => setTaskForm({ ...taskForm, priority: e.target.value as Priority })}>
+                      <option value="critical">Critical</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Due Date</label>
+                    <input
+                      type="date"
+                      className="input"
+                      value={taskForm.dueDate}
+                      onChange={e => setTaskForm({ ...taskForm, dueDate: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Est. Hours</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={200}
+                      className="input"
+                      value={taskForm.estimatedHours}
+                      onChange={e => setTaskForm({ ...taskForm, estimatedHours: Number(e.target.value) })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setShowNewModal(false); setIsEditing(false); }}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">{isEditing ? 'Save Changes' : 'Create Task'}</button>
+                </div>
+              </form>
+            ) : (
+               selectedTask && (
+                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+                    <div>
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Description</div>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>{selectedTask.description}</p>
+                      </div>
+
+                      {selectedTask.subtasks && selectedTask.subtasks.length > 0 && (
+                        <div>
+                           <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Subtasks</div>
+                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                             {selectedTask.subtasks.map(st => (
+                               <div key={st.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                 <input 
+                                   type="checkbox" 
+                                   checked={st.completed}
+                                   onChange={() => toggleSubtask(selectedTask.id, st.id)}
+                                   style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                                 />
+                                 <span style={{ fontSize: '0.85rem', color: st.completed ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: st.completed ? 'line-through' : 'none' }}>
+                                   {st.title}
+                                 </span>
+                               </div>
+                             ))}
+                           </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid var(--border)' }}>
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Project</div>
+                         <div style={{ fontSize: '0.85rem' }}>{projects.find(p => p.id === selectedTask.projectId)?.name || 'None'}</div>
+                       </div>
+                       
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Assignee</div>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {team.find(m => m.id === selectedTask.assigneeId) ? (
+                              <>
+                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#fff', fontWeight: 700 }}>
+                                  {getInitials(team.find(m => m.id === selectedTask.assigneeId)!.name)}
+                                </div>
+                                <span style={{ fontSize: '0.85rem' }}>{team.find(m => m.id === selectedTask.assigneeId)!.name}</span>
+                              </>
+                            ) : 'Unassigned'}
+                         </div>
+                       </div>
+
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Status</div>
+                         <select
+                            value={selectedTask.status}
+                            onChange={e => {
+                                updateTaskStatus(selectedTask.id, e.target.value as TaskStatus);
+                                setSelectedTask({ ...selectedTask, status: e.target.value as TaskStatus });
+                            }}
+                            className={`badge ${statusColor(selectedTask.status)}`}
+                            style={{ border: 'none', cursor: 'pointer', outline: 'none', padding: '0.25rem 0.5rem' }}
+                          >
+                            {COLUMNS.map(c => (
+                              <option key={c.status} value={c.status} style={{ background: '#1e2230', color: '#fff' }}>
+                                {c.label}
+                              </option>
+                            ))}
+                          </select>
+                       </div>
+
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Priority</div>
+                         <span className={`badge ${priorityColor(selectedTask.priority)}`}>{selectedTask.priority}</span>
+                       </div>
+
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Due Date</div>
+                         <div style={{ fontSize: '0.85rem', color: daysUntil(selectedTask.dueDate) < 0 ? '#ef4444' : 'inherit' }}>
+                           {selectedTask.dueDate || 'No Date'}
+                         </div>
+                       </div>
+                       
+                       <div>
+                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Estimated Hours</div>
+                         <div style={{ fontSize: '0.85rem' }}>{selectedTask.estimatedHours}h</div>
+                       </div>
+                    </div>
+                 </div>
+               )
+            )}
           </div>
         </div>
       )}

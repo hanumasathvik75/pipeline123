@@ -4,13 +4,16 @@ export type TaskStatus = 'backlog' | 'planned' | 'in_progress' | 'review' | 'tes
 export type LeadStage = 'lead' | 'contacted' | 'interested' | 'meeting' | 'pilot' | 'proposal' | 'negotiation' | 'customer';
 export type InvestorStage = 'research' | 'application' | 'intro' | 'first_meeting' | 'partner_meeting' | 'due_diligence' | 'term_sheet' | 'closed' | 'pass';
 export type RDStage = 'hypothesis' | 'methodology' | 'dataset' | 'model_dev' | 'results' | 'published';
-export type UserRole = 'founder' | 'coo' | 'engineering' | 'ml_rd' | 'bizdev' | 'intern';
+export type UserRole = 'c_level' | 'executive' | 'intern' | 'founder' | 'engineering' | 'ml_rd' | 'coo' | 'bizdev';
+export type UserStatus = 'active' | 'pending' | 'rejected';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
+  email?: string;
   role: UserRole;
+  status: UserStatus;
   designation?: string;
   avatar?: string;
   department: string;
@@ -187,4 +190,77 @@ export interface DashboardStats {
   team: { active: number; overdueTasks: number };
   crm: { totalLeads: number; contacted: number; meetings: number; pilots: number };
   fundraising: { investors: number; activeDiscussions: number };
+}
+
+// ── Goals / OKRs ─────────────────────────────────────────────
+export interface KeyResult {
+  id: string;
+  title: string;
+  target: string;
+  current: string;
+  progress: number; // 0–100
+}
+
+export interface Goal {
+  id: string;
+  quarter: string;
+  objective: string;
+  progress: number; // 0–100
+  keyResults: KeyResult[];
+  createdBy: string;
+  createdAt: string;
+}
+
+// ── Knowledge Base / Wiki ────────────────────────────────────
+export interface WikiDoc {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  content: string;
+  readTime?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── CRM Contacts ─────────────────────────────────────────────
+export interface CrmContact {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  designation: string;
+  company: string;
+  notes: string;
+  stage: LeadStage;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Progress Logger ──────────────────────────────────────────
+export interface ProgressSubComponent {
+  id: string;
+  name: string;
+}
+
+export interface ProgressCategory {
+  id: string;
+  name: string;
+  subComponents: ProgressSubComponent[];
+}
+
+export interface LogEntry {
+  subComponentId: string;
+  categoryId: string;
+  hours: number;
+  notes: string;
+}
+
+export interface DailyLog {
+  id: string;
+  userId: string;
+  date: string; // YYYY-MM-DD
+  entries: LogEntry[];
+  submittedAt: string;
 }

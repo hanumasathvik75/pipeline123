@@ -18,6 +18,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       { href: '/projects', icon: FolderKanban, label: 'Projects' },
       { href: '/tasks', icon: CheckSquare, label: 'Tasks' },
+      { href: '/progress', icon: Zap, label: 'Progress Logger' },
     ],
   },
   {

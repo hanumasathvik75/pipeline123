@@ -3,53 +3,50 @@ import { serverDb } from '@/lib/serverDb';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Username and password are required' },
         { status: 400 }
       );
     }
 
-    const user = serverDb.findUserByEmail(email);
+    const user = await serverDb.findUserByUsername(username);
+
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Check password
-    if (user.passwordHash && user.passwordHash !== password) {
+    if (user.status !== 'active') {
+       return NextResponse.json(
+        { error: `Account is ${user.status}. Please contact an administrator.` },
+        { status: 403 }
+      );
+    }
+
+    const isValid = await serverDb.verifyPassword(password, user.passwordHash);
+
+    if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Strip out password hash before sending to client
     const { passwordHash, ...safeUser } = user;
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       user: safeUser,
     });
-
-    // Set auth cookie
-    response.cookies.set('ignition_session', safeUser.id, {
-      httpOnly: false, // accessible to client for sync
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
-
-    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error during login' },
       { status: 500 }
     );
   }

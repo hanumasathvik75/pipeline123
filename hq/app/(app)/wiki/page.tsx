@@ -1,36 +1,96 @@
 'use client';
 
-import { BookOpen, FileText, Search, ExternalLink, Code2, ShieldAlert, Cpu } from 'lucide-react';
+import { BookOpen, FileText, Search, Plus, Edit2, Trash2, X, Eye } from 'lucide-react';
 import { useState } from 'react';
-
-const DOCS = [
-  {
-    category: 'Architecture & Engineering',
-    items: [
-      { title: 'Edge Telematics Agent v2 Protocol', desc: 'Specification for J1939 and OBD-II CAN frame ingestion and virtual sensor inference.', readTime: '6 min read' },
-      { title: 'IgnitionAI Schema & Knowledge Graph Spec', desc: 'Ontology of subsystems, DTC error codes, and diagnostic symptoms.', readTime: '10 min read' },
-      { title: 'Real-time WebSocket Streaming Pipeline', desc: 'Sub-100ms latency telemetry broadcaster connecting edge vehicles to IgnitionAI Cloud.', readTime: '5 min read' },
-    ]
-  },
-  {
-    category: 'R&D & Machine Learning',
-    items: [
-      { title: 'Battery Degradation PINN Architecture', desc: 'Physics-informed neural networks integrating electrochemical diffusion with telemetry time-series.', readTime: '12 min read' },
-      { title: 'Synthetic Telematics Generation Guide', desc: 'Generating anomalous driving cycles using generative models for edge test validation.', readTime: '8 min read' },
-    ]
-  },
-  {
-    category: 'Company & Business Operations',
-    items: [
-      { title: 'IgnitionAI Seed Investor Deck v2.4 Walkthrough', desc: 'Thesis, market TAM, OEM traction slides, and financial model explanations.', readTime: '4 min read' },
-      { title: 'OEM Pilot Agreement Template & SLA', desc: 'Standard terms for 60-day hardware telematics pilot deployments.', readTime: '7 min read' },
-      { title: 'New Engineer & Intern Onboarding Playbook', desc: 'Local environment setup, monorepo architecture, coding standards, and deployment keys.', readTime: '15 min read' },
-    ]
-  }
-];
+import { useHQStore } from '@/lib/store';
+import type { WikiDoc } from '@/lib/types';
 
 export default function WikiPage() {
+  const { wikiDocs, currentUser, addWikiDoc, updateWikiDoc, deleteWikiDoc } = useHQStore();
   const [search, setSearch] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [editingDoc, setEditingDoc] = useState<WikiDoc | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<WikiDoc | null>(null);
+
+  // Form state
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [content, setContent] = useState('');
+  const [readTime, setReadTime] = useState('');
+
+  const isAdmin = currentUser?.role === 'c_level';
+
+  const openNewModal = () => {
+    setTitle('');
+    setDescription('');
+    setCategory('Engineering');
+    setContent('');
+    setReadTime('5 min read');
+    setEditingDoc(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (doc: WikiDoc, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTitle(doc.title);
+    setDescription(doc.description);
+    setCategory(doc.category);
+    setContent(doc.content);
+    setReadTime(doc.readTime || '');
+    setEditingDoc(doc);
+    setIsModalOpen(true);
+  };
+
+  const openViewModal = (doc: WikiDoc) => {
+      setViewingDoc(doc);
+      setIsViewModalOpen(true);
+  };
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      if(window.confirm('Are you sure you want to delete this document?')) {
+          deleteWikiDoc(id);
+      }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if(!title.trim() || !category.trim()) return;
+
+      if(editingDoc) {
+          updateWikiDoc(editingDoc.id, {
+              title: title.trim(),
+              description: description.trim(),
+              category: category.trim(),
+              content: content.trim(),
+              readTime: readTime.trim()
+          });
+      } else {
+          addWikiDoc({
+              title: title.trim(),
+              description: description.trim(),
+              category: category.trim(),
+              content: content.trim(),
+              readTime: readTime.trim() || '5 min read',
+              createdBy: currentUser?.id || 'sys'
+          });
+      }
+      setIsModalOpen(false);
+  };
+
+  // Group by category
+  const docsByCategory = wikiDocs.reduce((acc, doc) => {
+      if (!acc[doc.category]) {
+          acc[doc.category] = [];
+      }
+      acc[doc.category].push(doc);
+      return acc;
+  }, {} as Record<string, WikiDoc[]>);
+
+  const categories = Object.keys(docsByCategory).sort();
 
   return (
     <div className="page animate-fade-in">
@@ -41,6 +101,10 @@ export default function WikiPage() {
             Central repository for engineering architecture, R&D papers, OEM deployment SOPs, and company playbooks.
           </p>
         </div>
+        <button className="btn btn-primary" onClick={openNewModal}>
+          <Plus size={15} />
+          New Document
+        </button>
       </div>
 
       <div style={{ position: 'relative', maxWidth: 400, marginBottom: '1.5rem' }}>
@@ -54,45 +118,206 @@ export default function WikiPage() {
         />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-        {DOCS.map((cat, idx) => (
-          <div key={idx}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
-              {cat.category}
-            </h3>
-            <div className="grid-auto">
-              {cat.items
-                .filter(item => item.title.toLowerCase().includes(search.toLowerCase()) || item.desc.toLowerCase().includes(search.toLowerCase()))
-                .map((doc, i) => (
-                  <div
-                    key={i}
-                    className="card"
-                    style={{
-                      padding: '1.25rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <FileText size={18} style={{ color: '#818cf8' }} />
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{doc.readTime}</span>
-                    </div>
+      {wikiDocs.length === 0 ? (
+          <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <BookOpen size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
+              <h3>No Documents Found</h3>
+              <p>Create the first document for the knowledge base.</p>
+          </div>
+      ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            {categories.map((cat, idx) => {
+              const filteredItems = docsByCategory[cat].filter(item => 
+                  item.title.toLowerCase().includes(search.toLowerCase()) || 
+                  item.description.toLowerCase().includes(search.toLowerCase())
+              );
 
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-                      {doc.title}
-                    </h4>
+              if (filteredItems.length === 0) return null;
 
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                      {doc.desc}
-                    </p>
+              return (
+              <div key={idx}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
+                  {cat}
+                </h3>
+                <div className="grid-auto">
+                  {filteredItems.map((doc, i) => (
+                      <div
+                        key={doc.id}
+                        className="card hover-effect"
+                        onClick={() => openViewModal(doc)}
+                        style={{
+                          padding: '1.25rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem',
+                          position: 'relative'
+                        }}
+                      >
+                        <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.25rem' }}>
+                           {(isAdmin || doc.createdBy === currentUser?.id) && (
+                               <>
+                                <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(doc, e)}>
+                                    <Edit2 size={14} />
+                                </button>
+                                <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(doc.id, e)} style={{ color: '#ef4444' }}>
+                                    <Trash2 size={14} />
+                                </button>
+                               </>
+                           )}
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '3rem' }}>
+                          <FileText size={18} style={{ color: '#818cf8' }} />
+                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{doc.readTime}</span>
+                        </div>
+
+                        <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                          {doc.title}
+                        </h4>
+
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                          {doc.description}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )})}
+          </div>
+      )}
+
+      {/* View Document Modal */}
+      {isViewModalOpen && viewingDoc && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+            padding: '1rem'
+          }}>
+            <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 800, padding: '2rem', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <div>
+                  <span className="badge" style={{ marginBottom: '0.5rem', background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>{viewingDoc.category}</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{viewingDoc.title}</h3>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                      {viewingDoc.readTime} · Last updated {new Date(viewingDoc.updatedAt).toLocaleDateString()}
                   </div>
-                ))}
+                </div>
+                <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsViewModalOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+                 <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '1.5rem' }}>{viewingDoc.description}</p>
+                 <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                     {viewingDoc.content || 'No detailed content provided.'}
+                 </div>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 700, padding: '1.75rem', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {editingDoc ? 'Edit Document' : 'New Knowledge Base Document'}
+                </h3>
+              </div>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                        Title *
+                    </label>
+                    <input
+                        className="input"
+                        placeholder="e.g. Edge Telematics Agent v2 Protocol"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                     <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                            Category *
+                        </label>
+                        <input
+                            className="input"
+                            placeholder="e.g. Architecture & Engineering"
+                            value={category}
+                            onChange={e => setCategory(e.target.value)}
+                            required
+                        />
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Or type a new category to create it.</div>
+                    </div>
+                    <div>
+                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                            Estimated Read Time
+                        </label>
+                        <input
+                            className="input"
+                            placeholder="e.g. 5 min read"
+                            value={readTime}
+                            onChange={e => setReadTime(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                        Short Description *
+                    </label>
+                    <textarea
+                        className="input"
+                        rows={2}
+                        placeholder="Brief summary of the document..."
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        style={{ resize: 'vertical' }}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                        Detailed Content (Markdown Supported)
+                    </label>
+                    <textarea
+                        className="input"
+                        rows={10}
+                        placeholder="Full document content goes here..."
+                        value={content}
+                        onChange={e => setContent(e.target.value)}
+                        style={{ resize: 'vertical', fontFamily: 'monospace' }}
+                    />
+                </div>
+                
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {editingDoc ? 'Save Changes' : 'Publish Document'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,34 +1,54 @@
 -- ================================================================
--- IgnitionAI HQ — Production PostgreSQL & Realtime Schema
+-- IgnitionAI HQ — Full Supabase Schema v2
+-- Run this in Supabase SQL Editor
 -- ================================================================
 
--- 1. Users & Team Members Table
+-- ── 1. Users (active, approved) ──────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_users (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE NOT NULL,
+  email TEXT,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'engineering',
+  role TEXT NOT NULL DEFAULT 'intern' CHECK (role IN ('c_level', 'executive', 'intern')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending', 'rejected')),
   designation TEXT NOT NULL DEFAULT 'Team Member',
-  department TEXT NOT NULL DEFAULT 'Engineering',
+  department TEXT NOT NULL DEFAULT 'General',
   joining_date DATE NOT NULL DEFAULT CURRENT_DATE,
   skills TEXT[] DEFAULT '{}',
+  active_projects TEXT[] DEFAULT '{}',
+  active_tasks INT DEFAULT 0,
+  completed_tasks INT DEFAULT 0,
+  overdue_tasks INT DEFAULT 0,
+  performance_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Projects Table
+-- ── 2. Pending Users (awaiting admin approval) ───────────────
+CREATE TABLE IF NOT EXISTS public.hq_pending_users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  designation TEXT NOT NULL DEFAULT 'Team Member',
+  department TEXT NOT NULL DEFAULT 'General',
+  skills TEXT[] DEFAULT '{}',
+  requested_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 3. Projects ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_projects (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
-  owner_id TEXT REFERENCES public.hq_users(id),
+  owner_id TEXT REFERENCES public.hq_users(id) ON DELETE SET NULL,
   member_ids TEXT[] DEFAULT '{}',
-  start_date DATE NOT NULL,
-  target_date DATE NOT NULL,
+  start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  target_date DATE NOT NULL DEFAULT CURRENT_DATE,
   priority TEXT NOT NULL DEFAULT 'medium',
   status TEXT NOT NULL DEFAULT 'planned',
-  progress INT NOT NULL DEFAULT 0,
+  progress INT NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
   category TEXT NOT NULL DEFAULT 'product',
   objectives JSONB DEFAULT '[]',
   milestones JSONB DEFAULT '[]',
@@ -38,13 +58,14 @@ CREATE TABLE IF NOT EXISTS public.hq_projects (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Tasks Table
+-- ── 4. Tasks ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_tasks (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
-  project_id TEXT REFERENCES public.hq_projects(id) ON DELETE CASCADE,
-  assignee_id TEXT REFERENCES public.hq_users(id),
+  project_id TEXT REFERENCES public.hq_projects(id) ON DELETE SET NULL,
+  assignee_id TEXT REFERENCES public.hq_users(id) ON DELETE SET NULL,
+  reviewer_id TEXT REFERENCES public.hq_users(id) ON DELETE SET NULL,
   status TEXT NOT NULL DEFAULT 'planned',
   priority TEXT NOT NULL DEFAULT 'medium',
   due_date DATE,
@@ -52,11 +73,13 @@ CREATE TABLE IF NOT EXISTS public.hq_tasks (
   actual_hours INT DEFAULT 0,
   tags TEXT[] DEFAULT '{}',
   subtasks JSONB DEFAULT '[]',
+  dependencies TEXT[] DEFAULT '{}',
+  deliverables TEXT[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Meetings Table
+-- ── 5. Meetings ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_meetings (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -65,13 +88,14 @@ CREATE TABLE IF NOT EXISTS public.hq_meetings (
   duration INT DEFAULT 30,
   participants TEXT[] DEFAULT '{}',
   agenda JSONB DEFAULT '[]',
-  notes TEXT,
+  notes TEXT DEFAULT '',
   action_items JSONB DEFAULT '[]',
+  project_id TEXT,
   type TEXT NOT NULL DEFAULT 'internal',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 5. CRM Leads Table
+-- ── 6. CRM Leads (legacy pipeline) ───────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_leads (
   id TEXT PRIMARY KEY,
   company_name TEXT NOT NULL,
@@ -84,35 +108,150 @@ CREATE TABLE IF NOT EXISTS public.hq_leads (
   stage TEXT NOT NULL DEFAULT 'lead',
   potential_value NUMERIC DEFAULT 0,
   currency TEXT DEFAULT 'INR',
-  notes TEXT,
-  assigned_to TEXT REFERENCES public.hq_users(id),
+  notes TEXT DEFAULT '',
+  assigned_to TEXT,
+  next_follow_up DATE,
   activities JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Investor CRM Table
+-- ── 7. CRM Contacts (new CSV-importable system) ───────────────
+CREATE TABLE IF NOT EXISTS public.hq_crm_contacts (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  designation TEXT,
+  company TEXT,
+  notes TEXT DEFAULT '',
+  stage TEXT NOT NULL DEFAULT 'lead',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 8. Investors ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hq_investors (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   firm TEXT,
   stage TEXT NOT NULL DEFAULT 'research',
-  round TEXT DEFAULT 'Seed',
+  round TEXT DEFAULT 'Pre-Seed',
+  last_contact DATE,
+  next_action TEXT DEFAULT '',
+  next_action_date DATE,
   ticket_size TEXT,
   investment_thesis TEXT,
-  next_action TEXT,
-  next_action_date DATE,
-  notes TEXT,
+  notes TEXT DEFAULT '',
+  contact_person TEXT,
   deck_version_sent TEXT,
   interactions JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable Supabase Realtime for instant multi-user synchronization
+-- ── 9. R&D Projects ───────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_rd_projects (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  research_question TEXT,
+  lead_id TEXT,
+  supervisor_id TEXT,
+  stage TEXT NOT NULL DEFAULT 'hypothesis',
+  dataset TEXT,
+  hypothesis TEXT,
+  methodology TEXT,
+  experiments JSONB DEFAULT '[]',
+  progress INT DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
+  project_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 10. Goals / OKRs ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_goals (
+  id TEXT PRIMARY KEY,
+  quarter TEXT NOT NULL,
+  objective TEXT NOT NULL,
+  progress INT DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
+  key_results JSONB DEFAULT '[]',
+  created_by TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 11. Knowledge Base / Wiki ─────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_wiki_docs (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL DEFAULT 'General',
+  content TEXT DEFAULT '',
+  read_time TEXT DEFAULT '5 min read',
+  created_by TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 12. Progress Categories ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_progress_categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  sub_components JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── 13. Daily Progress Logs ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_progress_logs (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES public.hq_users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  entries JSONB DEFAULT '[]',
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (user_id, date)
+);
+
+-- ── Seed founder account ─────────────────────────────────────
+-- Password: Ignition@2026 (bcrypt hashed — replace hash below with actual hash from bcryptjs)
+-- Run: const bcrypt = require('bcryptjs'); bcrypt.hashSync('Ignition@2026', 10)
+INSERT INTO public.hq_users (
+  id, name, username, email, password_hash, role, status,
+  designation, department, joining_date, skills
+) VALUES (
+  'user-1',
+  'Shashank',
+  'shashank',
+  'shashank@ignitionai.in',
+  '$REPLACE_WITH_BCRYPT_HASH$',
+  'c_level',
+  'active',
+  'Founder & CEO',
+  'Executive',
+  '2024-01-01',
+  ARRAY['Strategy', 'AI/ML', 'Business Development', 'Fundraising']
+) ON CONFLICT (id) DO NOTHING;
+
+-- ── Enable Realtime ──────────────────────────────────────────
 ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_users;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_projects;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_tasks;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_meetings;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_leads;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_investors;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_crm_contacts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_goals;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_wiki_docs;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.hq_progress_logs;
+
+-- ── Disable RLS (custom session auth via our API routes) ─────
+ALTER TABLE public.hq_users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_pending_users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_meetings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_crm_contacts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_leads DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_investors DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_rd_projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_goals DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_wiki_docs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_progress_categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_progress_logs DISABLE ROW LEVEL SECURITY;

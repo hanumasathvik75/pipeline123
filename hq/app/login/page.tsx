@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
-import { Zap, Mail, Lock, AlertCircle } from 'lucide-react';
-
+import { User, Lock, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
   const login = useHQStore(s => s.login);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,11 +20,11 @@ export default function LoginPage() {
     setError('');
     
     try {
-      const ok = await login(email, password);
+      const ok = await login(username, password);
       if (ok) {
         router.replace('/dashboard');
       } else {
-        setError('Invalid credentials. Check email and password.');
+        setError('Invalid username or password, or account is pending approval.');
       }
     } catch {
       setError('Authentication failed. Please try again.');
@@ -70,16 +70,16 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-                Email Address
+                Username
               </label>
               <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <User size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   className="input"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="you@ignitionai.in"
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="e.g. shashank"
                   style={{ paddingLeft: '2.25rem' }}
                   required
                 />
@@ -125,8 +125,14 @@ export default function LoginPage() {
               ) : 'Sign In to HQ'}
             </button>
           </form>
+          
+          <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.8rem' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Don't have an account? </span>
+            <Link href="/register" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+              Request Access
+            </Link>
+          </div>
         </div>
-
 
       </div>
 

@@ -1,20 +1,34 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, formatDate, daysUntil, getInitials } from '@/lib/utils';
-import type { Task } from '@/lib/types';
+import type { Project, Task, Priority, ProjectStatus } from '@/lib/types';
 import {
   ArrowLeft, Users, Calendar, Target, AlertTriangle, CheckSquare,
-  ChevronRight, Clock, Tag, Flag, Check,
+  ChevronRight, Clock, Tag, Flag, Check, Edit2, Trash2, X, Plus
 } from 'lucide-react';
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { projects, tasks, team } = useHQStore();
+  const { projects, tasks, team, updateProject, deleteProject } = useHQStore();
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const project = projects.find(p => p.id === params.id);
+  const [projectForm, setProjectForm] = useState({
+    name: project?.name || '',
+    description: project?.description || '',
+    category: project?.category || 'product',
+    priority: project?.priority || 'high',
+    status: project?.status || 'in_progress',
+    targetDate: project?.targetDate || '',
+    ownerId: project?.ownerId || '',
+    objectives: project?.objectives?.join('\n') || '',
+  });
+
   if (!project) return (
     <div className="page"><p style={{ color: 'var(--text-muted)' }}>Project not found.</p></div>
   );
@@ -32,6 +46,37 @@ export default function ProjectDetailPage() {
   const CATEGORY_COLORS: Record<string, string> = {
     product: '#6366f1', rd: '#a78bfa', bizdev: '#10b981',
     operations: '#f59e0b', fundraising: '#f97316', internal: '#94a3b8',
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      deleteProject(project.id);
+      router.push('/projects');
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projectForm.name.trim()) return;
+
+    const objList = projectForm.objectives
+      ? projectForm.objectives.split('\n').map(o => o.trim()).filter(Boolean)
+      : ['Deliver baseline implementation'];
+
+    const newOwnerId = projectForm.ownerId || (team[0]?.id ?? 'user-1');
+
+    updateProject(project.id, {
+      name: projectForm.name.trim(),
+      description: projectForm.description.trim(),
+      category: projectForm.category,
+      priority: projectForm.priority,
+      status: projectForm.status,
+      ownerId: newOwnerId,
+      targetDate: projectForm.targetDate,
+      objectives: objList,
+    });
+    
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -58,7 +103,17 @@ export default function ProjectDetailPage() {
             }}>
               {project.category}
             </span>
+            
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(true)}>
+                <Edit2 size={16} />
+              </button>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#ef4444' }}>
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
+          
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{project.name}</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.375rem', fontSize: '0.875rem', maxWidth: 600 }}>{project.description}</p>
         </div>
@@ -235,6 +290,156 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
+
+       {/* Edit Project Modal */}
+       {isEditModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 520, padding: '1.75rem', background: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Edit Project</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Update project details and settings.</p>
+              </div>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Project Name *
+                </label>
+                <input
+                  className="input"
+                  value={projectForm.name}
+                  onChange={e => setProjectForm({ ...projectForm, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Description
+                </label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  value={projectForm.description}
+                  onChange={e => setProjectForm({ ...projectForm, description: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Category Pillar
+                  </label>
+                  <select
+                    className="input"
+                    value={projectForm.category}
+                    onChange={e => setProjectForm({ ...projectForm, category: e.target.value as Project['category'] })}
+                  >
+                    <option value="product">Product & Engineering</option>
+                    <option value="rd">R&D / Physical-AI</option>
+                    <option value="bizdev">Business Development / OEM</option>
+                    <option value="operations">Operations & Testing</option>
+                    <option value="fundraising">Fundraising & Cap Table</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Lead Owner
+                  </label>
+                  <select
+                    className="input"
+                    value={projectForm.ownerId}
+                    onChange={e => setProjectForm({ ...projectForm, ownerId: e.target.value })}
+                  >
+                    {team.map(m => (
+                      <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Priority
+                  </label>
+                  <select
+                    className="input"
+                    value={projectForm.priority}
+                    onChange={e => setProjectForm({ ...projectForm, priority: e.target.value as Priority })}
+                  >
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Status
+                  </label>
+                  <select
+                    className="input"
+                    value={projectForm.status}
+                    onChange={e => setProjectForm({ ...projectForm, status: e.target.value as ProjectStatus })}
+                  >
+                    <option value="in_progress">In Progress</option>
+                    <option value="planned">Planned</option>
+                    <option value="review">Review</option>
+                    <option value="testing">Testing</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Target Completion
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={projectForm.targetDate}
+                    onChange={e => setProjectForm({ ...projectForm, targetDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Objectives (one per line)
+                </label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  value={projectForm.objectives}
+                  onChange={e => setProjectForm({ ...projectForm, objectives: e.target.value })}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
