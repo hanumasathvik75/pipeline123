@@ -72,6 +72,7 @@ export default function TeamPage() {
           name: name.trim(),
           username: email.trim().toLowerCase(), // Using email as username for login
           password: password.trim(),
+          confirmPassword: password.trim(),
           email: email.trim().toLowerCase(),
           designation: designation.trim(),
           role,
