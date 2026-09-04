@@ -13,6 +13,7 @@ interface HQStore {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
 
   // Data
   projects: Project[];
@@ -145,6 +146,23 @@ export const useHQStore = create<HQStore>()(
       },
 
       logout: () => set({ currentUser: null, isAuthenticated: false }),
+
+      changePassword: async (currentPassword, newPassword) => {
+        const username = get().currentUser?.username;
+        if (!username) return { success: false, error: 'Not logged in' };
+        
+        try {
+          const res = await fetch('/api/auth/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, currentPassword, newPassword }),
+          });
+          const data = await res.json();
+          return { success: res.ok && data.success, error: data.error };
+        } catch (e: any) {
+          return { success: false, error: e.message || 'Network error' };
+        }
+      },
 
       syncWithServer: async () => {
         try {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHQStore } from '@/lib/store';
 import { getInitials } from '@/lib/utils';
 import type { UserRole } from '@/lib/types';
@@ -20,12 +20,19 @@ const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export default function TeamPage() {
-  const { team, tasks, projects } = useHQStore();
+  const { team, tasks, projects, currentUser, pendingUsers, fetchPendingUsers, approveMember, rejectMember } = useHQStore();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [activeTab, setActiveTab] = useState<'directory' | 'pending'>('directory');
+
+  useEffect(() => {
+    if (activeTab === 'pending' && currentUser?.role === 'c_level') {
+      fetchPendingUsers();
+    }
+  }, [activeTab, currentUser, fetchPendingUsers]);
 
   // Form state
   const [name, setName] = useState('');
@@ -158,9 +165,54 @@ export default function TeamPage() {
         </div>
       </div>
 
-      {/* Search & Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: '0 0 280px' }}>
+      {currentUser?.role === 'c_level' && (
+        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', paddingBottom: '0' }}>
+          <button
+            onClick={() => setActiveTab('directory')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '0.75rem 1rem',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              color: activeTab === 'directory' ? 'var(--accent)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'directory' ? '2px solid var(--accent)' : '2px solid transparent',
+              cursor: 'pointer',
+            }}
+          >
+            Team Directory
+          </button>
+          <button
+            onClick={() => setActiveTab('pending')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '0.75rem 1rem',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              color: activeTab === 'pending' ? 'var(--accent)' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'pending' ? '2px solid var(--accent)' : '2px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            Pending Approvals
+            {pendingUsers.length > 0 && (
+              <span style={{ background: '#ef4444', color: '#fff', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '1rem' }}>
+                {pendingUsers.length}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'directory' ? (
+        <>
+          {/* Search & Filters */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+            <div style={{ position: 'relative', flex: '0 0 280px' }}>
           <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             className="input"
@@ -315,6 +367,59 @@ export default function TeamPage() {
           );
         })}
       </div>
+      </>
+      ) : (
+        <div className="grid-auto">
+          {pendingUsers.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
+              <UserCheck size={32} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+              <p>No pending registration requests.</p>
+            </div>
+          ) : (
+            pendingUsers.map(user => (
+              <div key={user.id} className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    {getInitials(user.name)}
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>{user.name}</h3>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{user.username}</div>
+                  </div>
+                </div>
+                
+                <div style={{ background: 'var(--bg-base)', padding: '0.75rem', borderRadius: 8, fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Role:</span>
+                    <span style={{ fontWeight: 600 }}>{user.role}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Designation:</span>
+                    <span>{user.designation}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Department:</span>
+                    <span>{user.department}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                  <button 
+                    onClick={() => approveMember(user.id, user.role)}
+                    className="btn btn-primary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem' }}>
+                    Approve
+                  </button>
+                  <button 
+                    onClick={() => rejectMember(user.id)}
+                    className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Add Team Member Modal */}
       {showAddModal && (
