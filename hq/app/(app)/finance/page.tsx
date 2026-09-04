@@ -40,8 +40,23 @@ export default function FinancePage() {
 
   if (!financeData) {
     return (
-      <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
         <Loader2 size={24} className="spin" style={{ color: 'var(--text-muted)' }} />
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading Finance Data...</p>
+        <button 
+          className="btn btn-secondary" 
+          onClick={async () => {
+            try {
+              const res = await fetch('/api/finance');
+              const text = await res.text();
+              alert(`Status: ${res.status}\nBody: ${text}`);
+            } catch (e: any) {
+              alert('Fetch failed: ' + e.message);
+            }
+          }}
+        >
+          Debug Connection
+        </button>
       </div>
     );
   }

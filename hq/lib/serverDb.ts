@@ -775,7 +775,27 @@ export const serverDb = {
       .select('*')
       .eq('id', 'hq-finance-1')
       .single();
-    if (error || !data) return null;
+    
+    if (error || !data) {
+      // Auto-seed if it doesn't exist
+      const defaultData = {
+        id: 'hq-finance-1',
+        runway_months: 14,
+        monthly_burn: 420000,
+        cash_balance: 5880000,
+        committed_arr: 2600000,
+        expenses: [
+          { category: "Engineering & ML Payroll", amount: 280000, percentage: 67 },
+          { category: "Cloud Infrastructure & GPU Compute", amount: 65000, percentage: 15 },
+          { category: "Hardware Testbeds & OBD-II Simulators", amount: 35000, percentage: 8 },
+          { category: "Legal, Compliance & Patents", amount: 25000, percentage: 6 },
+          { category: "SaaS Tooling & Admin", amount: 15000, percentage: 4 }
+        ]
+      };
+      await supabaseAdmin.from('hq_finance').insert(defaultData);
+      return rowToFinanceData({ ...defaultData, updated_at: new Date().toISOString() });
+    }
+    
     return rowToFinanceData(data);
   },
 
@@ -806,7 +826,20 @@ export const serverDb = {
       .select('*')
       .eq('id', 'hq-fundraising-1')
       .single();
-    if (error || !data) return null;
+      
+    if (error || !data) {
+      // Auto-seed if it doesn't exist
+      const defaultMeta = {
+        id: 'hq-fundraising-1',
+        target_amount: 15000000,
+        currency: 'USD',
+        round_name: 'Series A',
+        pitch_deck_version: 'v2.4 Final'
+      };
+      await supabaseAdmin.from('hq_fundraising_meta').insert(defaultMeta);
+      return rowToFundraisingMeta({ ...defaultMeta, updated_at: new Date().toISOString() });
+    }
+    
     return rowToFundraisingMeta(data);
   },
 
