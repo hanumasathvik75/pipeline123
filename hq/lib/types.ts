@@ -264,3 +264,19 @@ export interface DailyLog {
   entries: LogEntry[];
   submittedAt: string;
 }
+
+export interface FinanceExpense {
+  category: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface FinanceData {
+  id: string;
+  runwayMonths: number;
+  monthlyBurn: number;
+  cashBalance: number;
+  committedArr: number;
+  expenses: FinanceExpense[];
+  updatedAt: string;
+}

@@ -756,4 +756,35 @@ export const serverDb = {
       lastUpdated: Date.now(),
     };
   },
+
+  // ── Finance ──────────────────────────────────────────────────
+  async getFinanceData(): Promise<any | null> {
+    const { data, error } = await supabaseAdmin
+      .from('hq_finance')
+      .select('*')
+      .eq('id', 'hq-finance-1')
+      .single();
+    if (error || !data) return null;
+    return rowToFinanceData(data);
+  },
+
+  async updateFinanceData(updates: any): Promise<boolean> {
+    const dbUpdates: any = { updated_at: new Date().toISOString() };
+    if (updates.runwayMonths !== undefined) dbUpdates.runway_months = updates.runwayMonths;
+    if (updates.monthlyBurn !== undefined) dbUpdates.monthly_burn = updates.monthlyBurn;
+    if (updates.cashBalance !== undefined) dbUpdates.cash_balance = updates.cashBalance;
+    if (updates.committedArr !== undefined) dbUpdates.committed_arr = updates.committedArr;
+    if (updates.expenses !== undefined) dbUpdates.expenses = updates.expenses;
+
+    const { error } = await supabaseAdmin
+      .from('hq_finance')
+      .update(dbUpdates)
+      .eq('id', 'hq-finance-1');
+    
+    if (error) {
+      console.error('Update finance error:', error);
+      return false;
+    }
+    return true;
+  }
 };
