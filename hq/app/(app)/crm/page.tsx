@@ -21,7 +21,7 @@ const STAGES: { stage: LeadStage; label: string; color: string }[] = [
 ];
 
 export default function CRMPage() {
-  const { leads, team, updateLeadStage } = useHQStore();
+  const { leads, team, updateLeadStage, addLead } = useHQStore();
   const [search, setSearch] = useState('');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
@@ -307,7 +307,28 @@ export default function CRMPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 450, padding: '1.5rem', background: 'var(--bg-surface)' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Add New Lead</h3>
             
-            <form onSubmit={(e) => { e.preventDefault(); setIsAddLeadModalOpen(false); setNewLead({ companyName: '', contactName: '', opportunity: '', potentialValue: '', stage: 'lead' }); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              addLead({
+                companyName: newLead.companyName,
+                contactName: newLead.contactName,
+                opportunity: newLead.opportunity,
+                potentialValue: Number(newLead.potentialValue),
+                stage: newLead.stage,
+                type: 'Enterprise',
+                location: 'Global',
+                currency: 'INR',
+                contactEmail: '',
+                contactPhone: '',
+                assignedTo: team[0]?.id || 'u-1',
+                notes: '',
+                lastContact: new Date().toISOString().split('T')[0],
+                nextFollowUp: '',
+                activities: []
+              });
+              setIsAddLeadModalOpen(false); 
+              setNewLead({ companyName: '', contactName: '', opportunity: '', potentialValue: '', stage: 'lead' }); 
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Company Name</label>
                 <input className="input" placeholder="e.g. Ford Motors" required value={newLead.companyName} onChange={e => setNewLead({...newLead, companyName: e.target.value})} />

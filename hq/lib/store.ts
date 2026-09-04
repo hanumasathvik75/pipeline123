@@ -51,6 +51,9 @@ interface HQStore {
   convertActionItemToTask: (meetingId: string, actionItemId: string) => void;
   updateLeadStage: (leadId: string, stage: Lead['stage']) => void;
   updateInvestorStage: (investorId: string, stage: Investor['stage']) => void;
+  addLead: (lead: Omit<Lead, 'id'>) => void;
+  addInvestor: (investor: Omit<Investor, 'id'>) => void;
+  addExperiment: (projectId: string, exp: Omit<Experiment, 'id' | 'number'>) => void;
 }
 
 export const useHQStore = create<HQStore>()(
@@ -256,6 +259,30 @@ export const useHQStore = create<HQStore>()(
         const updated = get().investors.map(i => i.id === investorId ? { ...i, stage } : i);
         set({ investors: updated });
         get().broadcastUpdates({ investors: updated });
+      },
+
+      addLead: (leadData) => {
+        const newLead: Lead = { ...leadData, id: `lead-${Date.now()}` };
+        const updated = [newLead, ...get().leads];
+        set({ leads: updated });
+        get().broadcastUpdates({ leads: updated });
+      },
+
+      addInvestor: (investorData) => {
+        const newInvestor: Investor = { ...investorData, id: `inv-${Date.now()}` };
+        const updated = [newInvestor, ...get().investors];
+        set({ investors: updated });
+        get().broadcastUpdates({ investors: updated });
+      },
+
+      addExperiment: (projectId, expData) => {
+        const updated = get().rdProjects.map(p => {
+          if (p.id !== projectId) return p;
+          const newExp = { ...expData, id: `exp-${Date.now()}`, number: p.experiments.length + 1 };
+          return { ...p, experiments: [newExp, ...p.experiments] };
+        });
+        set({ rdProjects: updated });
+        get().broadcastUpdates({ rdProjects: updated });
       },
     }),
     {

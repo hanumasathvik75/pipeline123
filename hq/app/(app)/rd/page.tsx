@@ -19,7 +19,7 @@ const STAGES: { stage: RDStage; label: string }[] = [
 ];
 
 export default function RDWorkspacePage() {
-  const { rdProjects, team } = useHQStore();
+  const { rdProjects, team, addExperiment } = useHQStore();
   const [selectedProjectId, setSelectedProjectId] = useState<string>(rdProjects[0]?.id || '');
   const [selectedExp, setSelectedExp] = useState<Experiment | null>(null);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
@@ -339,7 +339,21 @@ export default function RDWorkspacePage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 450, padding: '1.5rem', background: 'var(--bg-surface)' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Log New Experiment</h3>
             
-            <form onSubmit={(e) => { e.preventDefault(); setIsLogModalOpen(false); setNewExp({ model: '', dataset: '', result: '' }); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              if (selectedProjectId) {
+                addExperiment(selectedProjectId, {
+                  model: newExp.model,
+                  dataset: newExp.dataset,
+                  result: newExp.result,
+                  features: ['Custom'],
+                  parameters: { epochs: 100, batch_size: 32 },
+                  isBest: false
+                });
+              }
+              setIsLogModalOpen(false); 
+              setNewExp({ model: '', dataset: '', result: '' }); 
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Model Architecture</label>
                 <input className="input" placeholder="e.g. LSTM-Transformer v4" required value={newExp.model} onChange={e => setNewExp({...newExp, model: e.target.value})} />

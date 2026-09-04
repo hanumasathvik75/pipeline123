@@ -69,27 +69,12 @@ export default function Sidebar() {
         justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 8, flexShrink: 0,
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          overflow: 'hidden',
-          padding: 4,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          height: '100%', width: collapsed ? '100%' : '140px',
         }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="IgnitionAI Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="IgnitionAI Logo" style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '36px' }} />
         </div>
-        {!collapsed && (
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '0.92rem', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-              IgnitionAI
-            </div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              HQ Operating System
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Nav */}

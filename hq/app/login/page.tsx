@@ -57,25 +57,17 @@ export default function LoginPage() {
 
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 420 }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{
-            width: 100, height: 100, borderRadius: 20,
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            width: 220,
+            margin: '0 auto 1rem',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 1.25rem',
-            overflow: 'hidden',
-            padding: 12,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
           }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="IgnitionAI Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="IgnitionAI Logo" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.04em' }}>
-            IgnitionAI <span className="gradient-text">HQ</span>
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.375rem', fontSize: '0.875rem' }}>
-            Founder Operating System
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+            HQ Operating System
           </p>
         </div>
 

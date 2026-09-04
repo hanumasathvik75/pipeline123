@@ -20,7 +20,7 @@ const STAGES: { stage: InvestorStage; label: string; color: string }[] = [
 ];
 
 export default function FundraisingPage() {
-  const { investors, updateInvestorStage } = useHQStore();
+  const { investors, updateInvestorStage, addInvestor } = useHQStore();
   const [search, setSearch] = useState('');
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [isAddInvestorModalOpen, setIsAddInvestorModalOpen] = useState(false);
@@ -283,7 +283,22 @@ export default function FundraisingPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 450, padding: '1.5rem', background: 'var(--bg-surface)' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Add New Investor</h3>
             
-            <form onSubmit={(e) => { e.preventDefault(); setIsAddInvestorModalOpen(false); setNewInvestor({ name: '', firm: '', ticketSize: '', stage: 'research' }); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              addInvestor({
+                name: newInvestor.name,
+                firm: newInvestor.firm,
+                ticketSize: newInvestor.ticketSize,
+                stage: newInvestor.stage,
+                round: 'Seed',
+                investmentThesis: '',
+                nextAction: 'Initial review',
+                nextActionDate: new Date().toISOString().split('T')[0],
+                notes: ''
+              });
+              setIsAddInvestorModalOpen(false); 
+              setNewInvestor({ name: '', firm: '', ticketSize: '', stage: 'research' }); 
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Partner / Investor Name</label>
                 <input className="input" placeholder="e.g. Marc Andreessen" required value={newInvestor.name} onChange={e => setNewInvestor({...newInvestor, name: e.target.value})} />
