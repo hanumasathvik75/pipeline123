@@ -280,3 +280,12 @@ export interface FinanceData {
   expenses: FinanceExpense[];
   updatedAt: string;
 }
+
+export interface FundraisingMeta {
+  id: string;
+  targetAmount: number;
+  currency: string;
+  roundName: string;
+  pitchDeckVersion: string;
+  updatedAt: string;
+}

@@ -222,6 +222,17 @@ function rowToFinanceData(row: Record<string, unknown>): any {
   };
 }
 
+function rowToFundraisingMeta(row: Record<string, unknown>): any {
+  return {
+    id: row.id as string,
+    targetAmount: Number(row.target_amount),
+    currency: row.currency as string,
+    roundName: row.round_name as string,
+    pitchDeckVersion: row.pitch_deck_version as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
 // ── Main serverDb object ──────────────────────────────────────
 
 export const serverDb = {
@@ -783,6 +794,36 @@ export const serverDb = {
     
     if (error) {
       console.error('Update finance error:', error);
+      return false;
+    }
+    return true;
+  },
+
+  // ── Fundraising Meta ─────────────────────────────────────────
+  async getFundraisingMeta(): Promise<any | null> {
+    const { data, error } = await supabaseAdmin
+      .from('hq_fundraising_meta')
+      .select('*')
+      .eq('id', 'hq-fundraising-1')
+      .single();
+    if (error || !data) return null;
+    return rowToFundraisingMeta(data);
+  },
+
+  async updateFundraisingMeta(updates: any): Promise<boolean> {
+    const dbUpdates: any = { updated_at: new Date().toISOString() };
+    if (updates.targetAmount !== undefined) dbUpdates.target_amount = updates.targetAmount;
+    if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
+    if (updates.roundName !== undefined) dbUpdates.round_name = updates.roundName;
+    if (updates.pitchDeckVersion !== undefined) dbUpdates.pitch_deck_version = updates.pitchDeckVersion;
+
+    const { error } = await supabaseAdmin
+      .from('hq_fundraising_meta')
+      .update(dbUpdates)
+      .eq('id', 'hq-fundraising-1');
+    
+    if (error) {
+      console.error('Update fundraising meta error:', error);
       return false;
     }
     return true;

@@ -5,8 +5,9 @@ import { useHQStore } from '@/lib/store';
 import type { Investor, InvestorStage } from '@/lib/types';
 import {
   TrendingUp, DollarSign, Users, Briefcase, Plus, Search, Calendar,
-  ArrowRight, CheckCircle2, FileText, ChevronRight
+  ArrowRight, CheckCircle2, FileText, ChevronRight, Edit, Loader2
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 const STAGES: { stage: InvestorStage; label: string; color: string }[] = [
   { stage: 'research', label: 'Research', color: '#64748b' },
@@ -20,11 +21,15 @@ const STAGES: { stage: InvestorStage; label: string; color: string }[] = [
 ];
 
 export default function FundraisingPage() {
-  const { investors, updateInvestorStage, addInvestor } = useHQStore();
+  const { investors, updateInvestorStage, addInvestor, fundraisingMeta, currentUser, updateFundraisingMeta } = useHQStore();
   const [search, setSearch] = useState('');
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [isAddInvestorModalOpen, setIsAddInvestorModalOpen] = useState(false);
+  const [isEditMetaModalOpen, setIsEditMetaModalOpen] = useState(false);
   const [newInvestor, setNewInvestor] = useState({ name: '', firm: '', ticketSize: '', stage: 'research' as InvestorStage });
+
+  const [metaForm, setMetaForm] = useState({ targetAmount: 750000, currency: 'USD', roundName: 'Seed', pitchDeckVersion: 'v2.4' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeInvestors = investors.filter(i => i.stage !== 'closed' && i.stage !== 'pass');
   const committedInvestors = investors.filter(i => i.stage === 'closed');
@@ -35,20 +40,56 @@ export default function FundraisingPage() {
     (i.investmentThesis && i.investmentThesis.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const handleOpenEditMeta = () => {
+    if (fundraisingMeta) {
+      setMetaForm({
+        targetAmount: fundraisingMeta.targetAmount,
+        currency: fundraisingMeta.currency,
+        roundName: fundraisingMeta.roundName,
+        pitchDeckVersion: fundraisingMeta.pitchDeckVersion,
+      });
+    }
+    setIsEditMetaModalOpen(true);
+  };
+
+  const handleSaveMeta = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await updateFundraisingMeta(metaForm);
+    setIsSubmitting(false);
+    setIsEditMetaModalOpen(false);
+  };
+
+  if (!fundraisingMeta) {
+    return (
+      <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+        <Loader2 size={24} className="spin" style={{ color: 'var(--text-muted)' }} />
+      </div>
+    );
+  }
+
   return (
     <div className="page animate-fade-in">
       {/* Header */}
       <div className="page-header">
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 className="page-title">Fundraising & Investor CRM</h1>
           <p className="page-subtitle">
             Manage institutional deep-tech venture capital, angel networks, data rooms, and cap table pipeline.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsAddInvestorModalOpen(true)}>
-          <Plus size={15} />
-          Add Investor
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {currentUser?.role === 'c_level' && (
+            <button className="btn" onClick={handleOpenEditMeta}>
+              <Edit size={15} />
+              Edit Goals
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={() => setIsAddInvestorModalOpen(true)}>
+            <Plus size={15} />
+            Add Investor
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats */}
@@ -58,8 +99,8 @@ export default function FundraisingPage() {
             <TrendingUp size={20} />
           </div>
           <div>
-            <div className="stat-value">$750K</div>
-            <div className="stat-label">Round Target (Seed)</div>
+            <div className="stat-value">{formatCurrency(fundraisingMeta.targetAmount, fundraisingMeta.currency)}</div>
+            <div className="stat-label">Round Target ({fundraisingMeta.roundName})</div>
           </div>
         </div>
 
@@ -88,7 +129,7 @@ export default function FundraisingPage() {
             <Briefcase size={20} />
           </div>
           <div>
-            <div className="stat-value">v2.4</div>
+            <div className="stat-value">{fundraisingMeta.pitchDeckVersion}</div>
             <div className="stat-label">Current Pitch Deck</div>
           </div>
         </div>
@@ -323,6 +364,47 @@ export default function FundraisingPage() {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
                 <button type="button" className="btn btn-ghost" onClick={() => setIsAddInvestorModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">Add to Pipeline</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Meta Modal */}
+      {isEditMetaModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => !isSubmitting && setIsEditMetaModalOpen(false)} />
+          <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 450, zIndex: 1, padding: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Edit Fundraising Goals</h2>
+            
+            <form onSubmit={handleSaveMeta} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label className="label">Target Amount</label>
+                <input className="input" type="number" value={metaForm.targetAmount} onChange={e => setMetaForm({...metaForm, targetAmount: Number(e.target.value)})} required />
+              </div>
+              <div>
+                <label className="label">Currency</label>
+                <select className="input" value={metaForm.currency} onChange={e => setMetaForm({...metaForm, currency: e.target.value})} required>
+                  <option value="USD">USD ($)</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Round Name</label>
+                <input className="input" value={metaForm.roundName} onChange={e => setMetaForm({...metaForm, roundName: e.target.value})} placeholder="e.g. Pre-Seed, Seed, Series A" required />
+              </div>
+              <div>
+                <label className="label">Pitch Deck Version</label>
+                <input className="input" value={metaForm.pitchDeckVersion} onChange={e => setMetaForm({...metaForm, pitchDeckVersion: e.target.value})} placeholder="e.g. v2.4" required />
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setIsEditMetaModalOpen(false)} disabled={isSubmitting}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving...' : 'Save Goals'}
+                </button>
               </div>
             </form>
           </div>

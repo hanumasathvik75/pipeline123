@@ -236,6 +236,23 @@ INSERT INTO public.hq_finance (
   ]'::jsonb
 ) ON CONFLICT (id) DO NOTHING;
 
+-- ── 15. Fundraising Meta ──────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.hq_fundraising_meta (
+  id TEXT PRIMARY KEY,
+  target_amount NUMERIC DEFAULT 0,
+  currency TEXT DEFAULT 'USD',
+  round_name TEXT DEFAULT 'Seed',
+  pitch_deck_version TEXT DEFAULT 'v1.0',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed initial fundraising meta
+INSERT INTO public.hq_fundraising_meta (
+  id, target_amount, currency, round_name, pitch_deck_version
+) VALUES (
+  'hq-fundraising-1', 750000, 'USD', 'Seed', 'v2.4'
+) ON CONFLICT (id) DO NOTHING;
+
 -- ── Seed founder account ─────────────────────────────────────
 -- Password: Ignition@2026 (bcrypt hashed)
 INSERT INTO public.hq_users (
@@ -280,3 +297,4 @@ ALTER TABLE public.hq_wiki_docs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_progress_categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_progress_logs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_finance DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hq_fundraising_meta DISABLE ROW LEVEL SECURITY;

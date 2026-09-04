@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { 
   Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, 
-  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData
+  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData, FundraisingMeta
 } from './types';
 
 interface HQStore {
@@ -30,6 +30,7 @@ interface HQStore {
   progressLogs: DailyLog[];
   pendingUsers: Omit<TeamMember, 'passwordHash'>[];
   financeData: FinanceData | null;
+  fundraisingMeta: FundraisingMeta | null;
 
   // Real-time synchronization
   lastSyncTime: number;
@@ -105,6 +106,9 @@ interface HQStore {
 
   // Finance
   updateFinanceData: (updates: Partial<FinanceData>) => Promise<{ success: boolean; error?: string }>;
+
+  // Fundraising
+  updateFundraisingMeta: (updates: Partial<FundraisingMeta>) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useHQStore = create<HQStore>()(
@@ -128,6 +132,7 @@ export const useHQStore = create<HQStore>()(
       progressLogs: [],
       pendingUsers: [],
       financeData: null,
+      fundraisingMeta: null,
 
       login: async (username: string, password: string) => {
         try {
@@ -171,9 +176,10 @@ export const useHQStore = create<HQStore>()(
 
       syncWithServer: async () => {
         try {
-          const [res, financeRes] = await Promise.all([
+          const [res, financeRes, fundraisingRes] = await Promise.all([
             fetch('/api/sync'),
-            fetch('/api/finance')
+            fetch('/api/finance'),
+            fetch('/api/fundraising/meta')
           ]);
           
           if (res.ok) {
@@ -204,6 +210,13 @@ export const useHQStore = create<HQStore>()(
             const financeData = await financeRes.json();
             if (financeData.financeData) {
               set({ financeData: financeData.financeData });
+            }
+          }
+
+          if (fundraisingRes.ok) {
+            const fundraisingData = await fundraisingRes.json();
+            if (fundraisingData.fundraisingMeta) {
+              set({ fundraisingMeta: fundraisingData.fundraisingMeta });
             }
           }
         } catch (err) {
@@ -638,6 +651,25 @@ export const useHQStore = create<HQStore>()(
           if (res.ok) {
             set(s => ({
               financeData: s.financeData ? { ...s.financeData, ...updates, updatedAt: new Date().toISOString() } : null
+            }));
+            return { success: true };
+          }
+          const data = await res.json();
+          return { success: false, error: data.error };
+        } catch (e: any) {
+          return { success: false, error: e.message };
+        }
+      },
+      updateFundraisingMeta: async (updates) => {
+        try {
+          const res = await fetch('/api/fundraising/meta', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+          });
+          if (res.ok) {
+            set(s => ({
+              fundraisingMeta: s.fundraisingMeta ? { ...s.fundraisingMeta, ...updates, updatedAt: new Date().toISOString() } : null
             }));
             return { success: true };
           }
