@@ -216,7 +216,7 @@ export default function MeetingsPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid-3">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                     Date *
@@ -260,7 +260,7 @@ export default function MeetingsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                     Meeting Type
@@ -298,8 +298,8 @@ export default function MeetingsPage() {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                   Select Attendees
                 </label>
-                <div style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.375rem',
+                <div className="grid-2" style={{
+                  gap: '0.375rem',
                   maxHeight: '120px', overflowY: 'auto', padding: '0.5rem',
                   background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)'
                 }}>
@@ -566,7 +566,7 @@ export default function MeetingsPage() {
                 <div
                   key={item.id}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
                     padding: '0.75rem', borderRadius: 'var(--radius)',
                     background: item.completed ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-elevated)',
                     border: `1px solid ${item.completed ? 'rgba(16, 185, 129, 0.2)' : 'var(--border)'}`,
