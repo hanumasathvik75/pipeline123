@@ -1,0 +1,10 @@
+# IgnitionAI Risk Register
+
+| Risk ID | Risk Description | Severity | Likelihood | Mitigation & Engineering Controls |
+|---|---|---|---|---|
+| RSK-01 | **Exact Component Ambiguity**: OBD-II signals (DTC, trims, MAP) have multiple competing root causes (e.g. vacuum leak vs injector clog vs MAF bias). | High | High | Enforce Level 2 (Candidate) attribution with explicit competing alternatives and require Level 3 discriminating workshop tests before claiming confirmation. |
+| RSK-02 | **False Positive Vehicle Penalty**: Flagging a healthy vehicle as defective reduces dealership trust and causes unneeded part swaps. | High | Medium | Require duration & persistence gating (EWMA/CUSUM), state-matched baselines, and cross-channel corroboration. Never alarm on isolated single-frame spikes. |
+| RSK-03 | **Electrical / CAN Bus Disturbance**: Dongle transmission interfering with vehicle ECUs or causing bus-off. | Critical | Low | Strict firmware read allowlist, 1 outstanding transaction at a time, automatic bus-off shutdown, automotive-grade transceiver, optoisolation/transient protection. |
+| RSK-04 | **Mobile Capture Interruption**: OS kills capture app during 10-minute drive due to memory pressure, incoming calls, or background sleep. | High | High | Run capture as an Android Foreground Service with continuous notification, write append-only local chunks directly to disk before UI dispatch. |
+| RSK-05 | **Premature Health Score Misuse**: Dealership staff treating an unvalidated 0-100 score as a guarantee of complete mechanical health. | High | High | Keep numeric score issuance locked until calibrated; watermark all synthetic/development scores with `SIMULATED / NOT VALIDATED`. |
+| RSK-06 | **Multi-City Cloud Failover Inconsistency**: Split-brain or data loss across three geographically separated regions (Mumbai/Chennai/Bangalore). | Medium | Medium | Single authoritative primary writer with read replicas; strictly fenced failover with RPO/RTO validation. Local compose for simulator phase. |

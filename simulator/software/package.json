@@ -1,0 +1,19 @@
+{
+  "name": "@ignitionai/software-simulator",
+  "version": "0.1.0",
+  "description": "Seeded software CAN/OBD scenario generator and replay engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "simulate": "node dist/replay_runner.js"
+  },
+  "dependencies": {
+    "@ignitionai/contracts": "*",
+    "@ignitionai/capture-protocol": "*",
+    "@ignitionai/core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

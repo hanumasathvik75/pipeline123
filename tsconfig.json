@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@ignitionai/contracts": ["packages/contracts/src/index.ts"],
+      "@ignitionai/capture-protocol": ["packages/capture-protocol/src/index.ts"],
+      "@ignitionai/core": ["packages/core/src/index.ts"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true
+  }
+}

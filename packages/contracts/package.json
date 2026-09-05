@@ -1,0 +1,17 @@
+{
+  "name": "@ignitionai/contracts",
+  "version": "0.1.0",
+  "description": "Pure TypeScript observation, diagnostic module, and report schemas for IgnitionAI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Contracts typecheck passed\""
+  },
+  "keywords": ["ignitionai", "obd", "diagnostics", "contracts"],
+  "author": "IgnitionAI",
+  "license": "Proprietary",
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

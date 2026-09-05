@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@ignitionai/contracts": ["../../packages/contracts/src/index"],
+      "@ignitionai/capture-protocol": ["../../packages/capture-protocol/src/index"],
+      "@ignitionai/core": ["../../packages/core/src/index"]
+    }
+  },
+  "include": ["src/**/*"]
+}
