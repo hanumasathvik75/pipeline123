@@ -679,6 +679,7 @@ export const useHQStore = create<HQStore>()(
         tasks: state.tasks,
         meetings: state.meetings,
         team: state.team,
+        wikiDocs: state.wikiDocs,
         lastSyncTime: state.lastSyncTime,
       }),
     }

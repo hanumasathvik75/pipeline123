@@ -171,6 +171,7 @@ function rowToWikiDoc(row: Record<string, unknown>): WikiDoc {
     category: row.category as string,
     content: (row.content as string) || '',
     readTime: row.read_time as string | undefined,
+    googleDriveUrl: row.google_drive_url as string | undefined,
     createdBy: (row.created_by as string) || '',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -684,6 +685,7 @@ export const serverDb = {
       category: doc.category,
       content: doc.content,
       read_time: doc.readTime,
+      google_drive_url: doc.googleDriveUrl,
       created_by: doc.createdBy,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'id' }).select().single();

@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS public.hq_wiki_docs (
   category TEXT NOT NULL DEFAULT 'General',
   content TEXT DEFAULT '',
   read_time TEXT DEFAULT '5 min read',
+  google_drive_url TEXT,
   created_by TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
