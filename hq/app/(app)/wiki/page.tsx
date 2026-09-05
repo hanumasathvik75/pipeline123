@@ -1,7 +1,7 @@
 'use client';
 
-import { BookOpen, FileText, Search, Plus, Edit2, Trash2, X, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { BookOpen, FileText, Search, Plus, Edit2, Trash2, X, Eye, UploadCloud, ExternalLink, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { useHQStore } from '@/lib/store';
 import type { WikiDoc } from '@/lib/types';
 
@@ -20,6 +20,9 @@ export default function WikiPage() {
   const [category, setCategory] = useState('');
   const [content, setContent] = useState('');
   const [readTime, setReadTime] = useState('');
+  const [googleDriveUrl, setGoogleDriveUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isAdmin = currentUser?.role === 'c_level';
 
@@ -29,6 +32,7 @@ export default function WikiPage() {
     setCategory('Engineering');
     setContent('');
     setReadTime('5 min read');
+    setGoogleDriveUrl('');
     setEditingDoc(null);
     setIsModalOpen(true);
   };
@@ -40,6 +44,7 @@ export default function WikiPage() {
     setCategory(doc.category);
     setContent(doc.content);
     setReadTime(doc.readTime || '');
+    setGoogleDriveUrl(doc.googleDriveUrl || '');
     setEditingDoc(doc);
     setIsModalOpen(true);
   };
@@ -66,7 +71,8 @@ export default function WikiPage() {
               description: description.trim(),
               category: category.trim(),
               content: content.trim(),
-              readTime: readTime.trim()
+              readTime: readTime.trim(),
+              googleDriveUrl: googleDriveUrl.trim()
           });
       } else {
           addWikiDoc({
@@ -75,6 +81,7 @@ export default function WikiPage() {
               category: category.trim(),
               content: content.trim(),
               readTime: readTime.trim() || '5 min read',
+              googleDriveUrl: googleDriveUrl.trim(),
               createdBy: currentUser?.id || 'sys'
           });
       }
@@ -168,7 +175,10 @@ export default function WikiPage() {
                         </div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '3rem' }}>
-                          <FileText size={18} style={{ color: '#818cf8' }} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FileText size={18} style={{ color: doc.googleDriveUrl ? '#34d399' : '#818cf8' }} />
+                            {doc.googleDriveUrl && <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#34d399', background: 'rgba(52,211,153,0.1)', padding: '0.15rem 0.4rem', borderRadius: 4 }}>Drive</span>}
+                          </div>
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{doc.readTime}</span>
                         </div>
 
@@ -207,11 +217,33 @@ export default function WikiPage() {
                   <X size={20} />
                 </button>
               </div>
-              <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+              <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, minHeight: viewingDoc.googleDriveUrl ? '60vh' : 'auto' }}>
                  <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '1.5rem' }}>{viewingDoc.description}</p>
-                 <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                     {viewingDoc.content || 'No detailed content provided.'}
-                 </div>
+                 
+                 {viewingDoc.googleDriveUrl ? (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <a href={viewingDoc.googleDriveUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-secondary">
+                                <ExternalLink size={14} /> Open in Google Drive
+                            </a>
+                        </div>
+                        <div style={{ flex: 1, minHeight: '500px', width: '100%', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f8fafc' }}>
+                            <iframe 
+                                src={viewingDoc.googleDriveUrl.includes('drive.google.com') && !viewingDoc.googleDriveUrl.includes('/preview') 
+                                  ? viewingDoc.googleDriveUrl.replace(/\/view.*$/, '/preview') 
+                                  : viewingDoc.googleDriveUrl} 
+                                width="100%" 
+                                height="100%" 
+                                style={{ border: 'none' }}
+                                title="Google Drive Viewer"
+                            />
+                        </div>
+                    </div>
+                 ) : (
+                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                        {viewingDoc.content || 'No detailed content provided.'}
+                    </div>
+                 )}
               </div>
             </div>
           </div>
@@ -294,17 +326,58 @@ export default function WikiPage() {
 
                 <div>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                        Detailed Content (Markdown Supported)
+                        Google Drive Integration
                     </label>
-                    <textarea
-                        className="input"
-                        rows={10}
-                        placeholder="Full document content goes here..."
-                        value={content}
-                        onChange={e => setContent(e.target.value)}
-                        style={{ resize: 'vertical', fontFamily: 'monospace' }}
-                    />
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <input
+                            className="input"
+                            placeholder="Paste Google Drive URL or upload file..."
+                            value={googleDriveUrl}
+                            onChange={e => setGoogleDriveUrl(e.target.value)}
+                            style={{ flex: 1 }}
+                        />
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                    setIsUploading(true);
+                                    // Simulate network upload to drive
+                                    setTimeout(() => {
+                                        setGoogleDriveUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf');
+                                        setIsUploading(false);
+                                    }, 2000);
+                                }
+                            }}
+                        />
+                        <button 
+                            type="button" 
+                            className="btn btn-secondary"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                        >
+                            {isUploading ? <Loader2 size={15} className="animate-spin" /> : <UploadCloud size={15} />}
+                            {isUploading ? 'Uploading...' : 'Upload File'}
+                        </button>
+                    </div>
                 </div>
+
+                {!googleDriveUrl && (
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                            Detailed Content (Markdown Supported)
+                        </label>
+                        <textarea
+                            className="input"
+                            rows={10}
+                            placeholder="Full document content goes here (if not using Google Drive)..."
+                            value={content}
+                            onChange={e => setContent(e.target.value)}
+                            style={{ resize: 'vertical', fontFamily: 'monospace' }}
+                        />
+                    </div>
+                )}
                 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>

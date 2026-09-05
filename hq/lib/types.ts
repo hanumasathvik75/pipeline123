@@ -222,6 +222,7 @@ export interface WikiDoc {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  googleDriveUrl?: string;
 }
 
 // ── CRM Contacts ─────────────────────────────────────────────

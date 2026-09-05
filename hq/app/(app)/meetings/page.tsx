@@ -6,7 +6,7 @@ import { formatDate, getInitials, avatarColor } from '@/lib/utils';
 import type { Meeting } from '@/lib/types';
 import {
   Calendar, Clock, Users, CheckCircle2, ArrowRight, Plus, ChevronDown,
-  ChevronRight, ListTodo, FileText, CheckSquare, Sparkles, ExternalLink, Check, X
+  ChevronRight, ListTodo, FileText, CheckSquare, Sparkles, ExternalLink, Check, X, Trash2
 } from 'lucide-react';
 
 const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> = {
@@ -17,7 +17,7 @@ const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export default function MeetingsPage() {
-  const { meetings, team, projects, convertActionItemToTask, addMeeting, currentUser } = useHQStore();
+  const { meetings, team, projects, convertActionItemToTask, addMeeting, deleteMeeting, currentUser } = useHQStore();
   const [filterType, setFilterType] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(meetings[0]?.id || null);
   const [convertedToast, setConvertedToast] = useState<string | null>(null);
@@ -101,7 +101,7 @@ export default function MeetingsPage() {
       </div>
 
       {/* Main Grid: Left is meetings list, Right is expanded detail view */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(400px, 1.4fr)', gap: '1.25rem', alignItems: 'start' }}>
+      <div className="meetings-grid">
         {/* Meeting List Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Upcoming section */}
@@ -452,27 +452,42 @@ export default function MeetingsPage() {
     return (
       <div className="card animate-fade-in" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Title Header */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <span
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                padding: '0.2rem 0.6rem',
-                borderRadius: 4,
-                color: typeMeta.color,
-                background: typeMeta.bg,
-              }}
-            >
-              {typeMeta.label}
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {formatDate(meeting.date)} · {meeting.time} ({meeting.duration} mins)
-            </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: 4,
+                  color: typeMeta.color,
+                  background: typeMeta.bg,
+                }}
+              >
+                {typeMeta.label}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {formatDate(meeting.date)} · {meeting.time} ({meeting.duration} mins)
+              </span>
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+              {meeting.title}
+            </h2>
           </div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-            {meeting.title}
-          </h2>
+          <button 
+            className="btn btn-icon btn-ghost btn-sm" 
+            style={{ color: '#ef4444' }}
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete this meeting?')) {
+                deleteMeeting(meeting.id);
+                setExpandedId(null);
+              }
+            }}
+            title="Delete Meeting"
+          >
+            <Trash2 size={16} />
+          </button>
         </div>
 
         {/* Participants */}

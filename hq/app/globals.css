@@ -429,6 +429,12 @@ h1, h2, h3, h4, h5, h6 {
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
 
+.meetings-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(400px, 1.4fr);
+  gap: 1.25rem;
+  align-items: start;
+}
 /* ─── Divider ────────────────────────────────────────────── */
 .divider {
   height: 1px;
@@ -577,6 +583,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .meetings-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
