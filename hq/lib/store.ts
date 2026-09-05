@@ -230,20 +230,7 @@ export const useHQStore = create<HQStore>()(
           await fetch('/api/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              tasks: state.tasks,
-              projects: state.projects,
-              meetings: state.meetings,
-              leads: state.leads,
-              investors: state.investors,
-              rdProjects: state.rdProjects,
-              goals: state.goals,
-              wikiDocs: state.wikiDocs,
-              crmContacts: state.crmContacts,
-              progressCategories: state.progressCategories,
-              progressLogs: state.progressLogs,
-              ...partialUpdates,
-            }),
+            body: JSON.stringify(partialUpdates),
           });
         } catch (err) {
           console.warn('Broadcast failed:', err);
