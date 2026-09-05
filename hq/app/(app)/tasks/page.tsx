@@ -114,8 +114,8 @@ export default function TasksPage() {
         id: `task-${Date.now()}`,
         title: taskForm.title.trim(),
         description: taskForm.description.trim() || 'No description provided',
-        projectId: taskForm.projectId || (projects[0]?.id ?? 'proj-1'),
-        assigneeId: taskForm.assigneeId || (team[0]?.id ?? 'user-1'),
+        projectId: taskForm.projectId || (projects.length > 0 ? projects[0].id : ''),
+        assigneeId: taskForm.assigneeId || (team.length > 0 ? team[0].id : ''),
         status: 'planned',
         priority: taskForm.priority,
         dueDate: taskForm.dueDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
@@ -483,9 +483,8 @@ export default function TasksPage() {
                   <div>
                     <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Project</label>
                     <select className="input" value={taskForm.projectId} onChange={e => setTaskForm({ ...taskForm, projectId: e.target.value })}>
-                      {projects.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
+                      <option value="">No Project</option>
+                      {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                   <div>
