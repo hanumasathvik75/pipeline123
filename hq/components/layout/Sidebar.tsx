@@ -10,7 +10,7 @@ import {
   Zap, LayoutDashboard, FolderKanban, CheckSquare, Users,
   CalendarDays, Building2, FlaskConical, TrendingUp, BookOpen,
   Target, DollarSign, ChevronLeft, ChevronRight,
-  LogOut, Settings,
+  LogOut, Settings, X,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
