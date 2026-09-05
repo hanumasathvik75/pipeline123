@@ -139,6 +139,13 @@ export default function Sidebar() {
             }}
           />
         </Link>
+        <button 
+          className="btn btn-ghost btn-icon mobile-only" 
+          onClick={toggleSidebar}
+          style={{ padding: '0.25rem' }}
+        >
+          <X size={20} />
+        </button>
       </div>
 
       {/* Nav */}

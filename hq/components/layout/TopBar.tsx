@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import {
   Search, Bell, Plus, ChevronDown, X, CheckSquare, FolderKanban,
-  Calendar, Building2, TrendingUp, Sparkles
+  Calendar, Building2, TrendingUp, Sparkles, Menu
 } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
 import type { Priority, ProjectStatus, LeadStage, InvestorStage } from '@/lib/types';
@@ -173,15 +173,22 @@ export default function TopBar() {
     <>
       <header className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+          <button 
+            className="btn btn-ghost btn-icon mobile-only" 
+            onClick={() => useHQStore.getState().toggleSidebar()}
+            style={{ marginRight: '0.25rem' }}
+          >
+            <Menu size={18} />
+          </button>
           <h2 style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             {title}
           </h2>
-          <span style={{ color: 'var(--border-hover)', userSelect: 'none' }}>/</span>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>IgnitionAI HQ</span>
+          <span className="desktop-only" style={{ color: 'var(--border-hover)', userSelect: 'none' }}>/</span>
+          <span className="desktop-only" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>IgnitionAI HQ</span>
         </div>
 
         {/* Search */}
-        <div style={{ position: 'relative', width: 240 }}>
+        <div className="desktop-only" style={{ position: 'relative', width: 240 }}>
           <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             className="input"
@@ -205,7 +212,7 @@ export default function TopBar() {
             style={{ gap: '0.375rem', fontSize: '0.8rem', height: 34, padding: '0 0.875rem' }}
           >
             <Plus size={14} />
-            New
+            <span className="desktop-only">New</span>
           </button>
 
           <button
@@ -235,8 +242,8 @@ export default function TopBar() {
               >
                 {getInitials(currentUser.name)}
               </div>
-              <span style={{ fontWeight: 600 }}>{currentUser.name}</span>
-              <ChevronDown size={12} style={{ color: 'var(--text-muted)' }} />
+              <span className="desktop-only" style={{ fontWeight: 600 }}>{currentUser.name}</span>
+              <ChevronDown className="desktop-only" size={12} style={{ color: 'var(--text-muted)' }} />
             </button>
           )}
         </div>
@@ -330,7 +337,7 @@ export default function TopBar() {
                       autoFocus
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.75rem' }}>
+                  <div className="grid-2">
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
                         Project
@@ -400,7 +407,7 @@ export default function TopBar() {
                       autoFocus
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="grid-2">
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
                         Date *
