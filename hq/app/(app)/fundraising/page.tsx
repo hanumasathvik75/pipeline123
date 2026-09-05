@@ -5,7 +5,7 @@ import { useHQStore } from '@/lib/store';
 import type { Investor, InvestorStage } from '@/lib/types';
 import {
   TrendingUp, DollarSign, Users, Briefcase, Plus, Search, Calendar,
-  ArrowRight, CheckCircle2, FileText, ChevronRight, Edit, Loader2
+  ArrowRight, CheckCircle2, FileText, ChevronRight, Edit, Loader2, Shield
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -59,6 +59,16 @@ export default function FundraisingPage() {
     setIsSubmitting(false);
     setIsEditMetaModalOpen(false);
   };
+
+  if (currentUser?.role === 'intern') {
+    return (
+      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
+        <Shield size={48} style={{ color: 'var(--text-muted)' }} />
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Access Denied</h2>
+        <p style={{ color: 'var(--text-muted)' }}>You do not have clearance to view fundraising data.</p>
+      </div>
+    );
+  }
 
   if (!fundraisingMeta) {
     return (

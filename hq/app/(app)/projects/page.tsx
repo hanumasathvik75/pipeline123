@@ -139,10 +139,12 @@ export default function ProjectsPage() {
           <h1 className="page-title">Projects</h1>
           <p className="page-subtitle">{projects.length} projects · {projects.filter(p => p.status === 'in_progress').length} active</p>
         </div>
-        <button className="btn btn-primary" onClick={openAddModal}>
-          <Plus size={15} />
-          New Project
-        </button>
+        {currentUser?.role !== 'intern' && (
+          <button className="btn btn-primary" onClick={openAddModal}>
+            <Plus size={15} />
+            New Project
+          </button>
+        )}
       </div>
 
       {/* Filters */}

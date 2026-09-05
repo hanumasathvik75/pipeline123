@@ -38,6 +38,16 @@ export default function FinancePage() {
     setIsEditing(false);
   };
 
+  if (currentUser?.role === 'intern') {
+    return (
+      <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
+        <ShieldCheck size={48} style={{ color: 'var(--text-muted)' }} />
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Access Denied</h2>
+        <p style={{ color: 'var(--text-muted)' }}>You do not have clearance to view financial data.</p>
+      </div>
+    );
+  }
+
   if (!financeData) {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>

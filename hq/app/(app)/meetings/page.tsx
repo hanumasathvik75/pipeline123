@@ -74,10 +74,12 @@ export default function MeetingsPage() {
             Executive control for decisions, agendas, and auto-converting meeting action items into project tasks.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
-          <Plus size={15} />
-          Schedule Meeting
-        </button>
+        {currentUser?.role !== 'intern' && (
+          <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
+            <Plus size={15} />
+            Schedule Meeting
+          </button>
+        )}
       </div>
 
       {/* Filter Tabs */}

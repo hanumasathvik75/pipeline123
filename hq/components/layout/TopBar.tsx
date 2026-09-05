@@ -282,7 +282,12 @@ export default function TopBar() {
                 { id: 'meeting', label: 'Meeting', icon: Calendar },
                 { id: 'lead', label: 'Lead', icon: Building2 },
                 { id: 'investor', label: 'Investor', icon: TrendingUp },
-              ].map(tab => {
+              ].filter(tab => {
+                if (currentUser?.role === 'intern') {
+                  return ['task', 'lead'].includes(tab.id);
+                }
+                return true;
+              }).map(tab => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
                 return (

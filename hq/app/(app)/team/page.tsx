@@ -119,10 +119,12 @@ export default function TeamPage() {
             Core leadership, engineering team, AI/ML researchers, and telematics interns driving IgnitionAI.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          <Plus size={15} />
-          Add Team Member
-        </button>
+        {currentUser?.role !== 'intern' && (
+          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            <Plus size={15} />
+            Add Team Member
+          </button>
+        )}
       </div>
 
       {/* KPI Stats */}

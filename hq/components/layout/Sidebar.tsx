@@ -58,6 +58,17 @@ export default function Sidebar() {
   const { sidebarCollapsed, toggleSidebar, currentUser, logout, changePassword } = useHQStore();
   const collapsed = sidebarCollapsed;
 
+  const filteredNavSections = NAV_SECTIONS.map(section => ({
+    ...section,
+    items: section.items.filter(item => {
+      if (currentUser?.role === 'intern') {
+        const restricted = ['/finance', '/fundraising'];
+        if (restricted.includes(item.href)) return false;
+      }
+      return true;
+    })
+  })).filter(section => section.items.length > 0);
+
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -132,7 +143,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav style={{ flex: 1, overflow: 'hidden auto', padding: collapsed ? '0.75rem 0.5rem' : '0.75rem 0.625rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        {NAV_SECTIONS.map(section => (
+        {filteredNavSections.map((section, idx) => (
           <div key={section.label} style={{ marginBottom: '0.5rem' }}>
             {!collapsed && (
               <div style={{
