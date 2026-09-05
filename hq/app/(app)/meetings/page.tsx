@@ -17,7 +17,7 @@ const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export default function MeetingsPage() {
-  const { meetings, team, projects, convertActionItemToTask, addMeeting } = useHQStore();
+  const { meetings, team, projects, convertActionItemToTask, addMeeting, currentUser } = useHQStore();
   const [filterType, setFilterType] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(meetings[0]?.id || null);
   const [convertedToast, setConvertedToast] = useState<string | null>(null);
