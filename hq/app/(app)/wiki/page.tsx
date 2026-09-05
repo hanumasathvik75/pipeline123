@@ -217,24 +217,22 @@ export default function WikiPage() {
                   <X size={20} />
                 </button>
               </div>
-              <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, minHeight: viewingDoc.googleDriveUrl ? '60vh' : 'auto' }}>
+              <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
                  <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '1.5rem' }}>{viewingDoc.description}</p>
                  
                  {viewingDoc.googleDriveUrl ? (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                             <a href={viewingDoc.googleDriveUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-secondary">
                                 <ExternalLink size={14} /> Open in Google Drive
                             </a>
                         </div>
-                        <div style={{ flex: 1, minHeight: '500px', width: '100%', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f8fafc' }}>
+                        <div style={{ width: '100%', height: '65vh', minHeight: '500px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f8fafc' }}>
                             <iframe 
                                 src={viewingDoc.googleDriveUrl.includes('drive.google.com') && !viewingDoc.googleDriveUrl.includes('/preview') 
                                   ? viewingDoc.googleDriveUrl.replace(/\/view.*$/, '/preview') 
                                   : viewingDoc.googleDriveUrl} 
-                                width="100%" 
-                                height="100%" 
-                                style={{ border: 'none' }}
+                                style={{ border: 'none', display: 'block', width: '100%', height: '100%' }}
                                 title="Google Drive Viewer"
                             />
                         </div>
