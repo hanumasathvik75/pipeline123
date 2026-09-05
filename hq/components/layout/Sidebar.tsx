@@ -10,7 +10,7 @@ import {
   Zap, LayoutDashboard, FolderKanban, CheckSquare, Users,
   CalendarDays, Building2, FlaskConical, TrendingUp, BookOpen,
   Target, DollarSign, ChevronLeft, ChevronRight,
-  LogOut, Settings, X,
+  LogOut, Settings, X, ClipboardCheck,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -18,6 +18,7 @@ const NAV_SECTIONS = [
     label: 'Core',
     items: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { href: '/inspections', icon: ClipboardCheck, label: 'Vehicle Inspections' },
       { href: '/projects', icon: FolderKanban, label: 'Projects' },
       { href: '/tasks', icon: CheckSquare, label: 'Tasks' },
       { href: '/progress', icon: Zap, label: 'Progress Logger' },
