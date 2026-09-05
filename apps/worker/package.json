@@ -1,0 +1,17 @@
+{
+  "name": "@ignitionai/worker",
+  "version": "0.1.0",
+  "description": "IgnitionAI Background Analysis & Report Generation Worker",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@ignitionai/contracts": "*",
+    "@ignitionai/core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

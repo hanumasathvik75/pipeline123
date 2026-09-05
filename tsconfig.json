@@ -7,7 +7,10 @@
     "paths": {
       "@ignitionai/contracts": ["packages/contracts/src/index.ts"],
       "@ignitionai/capture-protocol": ["packages/capture-protocol/src/index.ts"],
-      "@ignitionai/core": ["packages/core/src/index.ts"]
+      "@ignitionai/core": ["packages/core/src/index.ts"],
+      "@ignitionai/sync": ["packages/sync/src/index.ts"],
+      "@ignitionai/api": ["apps/api/src/index.ts"],
+      "@ignitionai/worker": ["apps/worker/src/index.ts"]
     },
     "esModuleInterop": true,
     "skipLibCheck": true,
