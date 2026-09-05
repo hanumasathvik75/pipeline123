@@ -10,11 +10,7 @@ import {
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import Link from 'next/link';
 
-const progressData = [
-  { w: 'W1', v: 8 }, { w: 'W2', v: 15 }, { w: 'W3', v: 22 },
-  { w: 'W4', v: 28 }, { w: 'W5', v: 35 }, { w: 'W6', v: 42 },
-  { w: 'W7', v: 48 }, { w: 'W8', v: 55 },
-];
+
 
 function StatWidget({ icon: Icon, label, value, sub, accent, link }: {
   icon: React.ElementType; label: string; value: string | number;
@@ -58,6 +54,34 @@ export default function DashboardPage() {
   const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
   const blockedTasks = tasks.filter(t => t.status === 'blocked');
   const dueTasks = tasks.filter(t => t.dueDate <= weekEnd && t.status !== 'done');
+
+  // Generate task velocity data (last 8 weeks) based on actual completed tasks
+  const progressData = Array.from({ length: 8 }).map((_, i) => {
+    const weekIndex = 7 - i;
+    const startOffset = new Date(now.getTime() - (weekIndex * 7 + 7) * 24 * 60 * 60 * 1000);
+    const endOffset = new Date(now.getTime() - (weekIndex * 7) * 24 * 60 * 60 * 1000);
+    
+    // In a real app, you'd use a dedicated 'completedAt' field. We use 'updatedAt' for 'done' tasks here.
+    const count = tasks.filter(t => 
+      t.status === 'done' && 
+      new Date(t.updatedAt) >= startOffset && 
+      new Date(t.updatedAt) < endOffset
+    ).length;
+    
+    // If no tasks ever, let's just make sure the graph isn't entirely broken by falling back to 0.
+    return { w: `W${i + 1}`, v: count };
+  });
+
+  // Generate R&D Progress from actual R&D projects
+  const rdProgressData = projects
+    .filter(p => p.category === 'rd')
+    .slice(0, 3)
+    .map(p => ({
+      label: p.name,
+      progress: p.progress,
+      stage: p.status === 'done' ? 'Completed' : (p.status === 'in_progress' ? 'In Progress' : 'Planned'),
+      color: p.progress >= 75 ? '#10b981' : (p.progress >= 40 ? '#818cf8' : '#f59e0b')
+    }));
   const upcomingMeetings = meetings.filter(m => m.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
   const totalLeads = leads.length;
   const pilotLeads = leads.filter(l => l.stage === 'pilot' || l.stage === 'meeting').length;
@@ -226,24 +250,26 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {[
-                { label: 'Battery RUL Model', progress: 65, stage: 'Model Development', color: '#818cf8' },
-                { label: 'OBD Diagnostics', progress: 42, stage: 'In Progress', color: '#60a5fa' },
-                { label: 'Fault Prediction', progress: 25, stage: 'Dataset Collection', color: '#34d399' },
-              ].map(item => (
-                <div key={item.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{item.label}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{item.stage}</span>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: item.color }}>{item.progress}%</span>
+              {rdProgressData.length > 0 ? (
+                rdProgressData.map(item => (
+                  <div key={item.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{item.label}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{item.stage}</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: item.color }}>{item.progress}%</span>
+                      </div>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${item.progress}%`, background: `linear-gradient(90deg, ${item.color}, ${item.color}aa)` }} />
                     </div>
                   </div>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${item.progress}%`, background: `linear-gradient(90deg, ${item.color}, ${item.color}aa)` }} />
-                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No active R&D projects found.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
