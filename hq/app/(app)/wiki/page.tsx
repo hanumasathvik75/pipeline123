@@ -4,6 +4,8 @@ import { BookOpen, FileText, Search, Plus, Edit2, Trash2, X, Eye, UploadCloud, E
 import { useState, useRef } from 'react';
 import { useHQStore } from '@/lib/store';
 import type { WikiDoc } from '@/lib/types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function WikiPage() {
   const { wikiDocs, currentUser, addWikiDoc, updateWikiDoc, deleteWikiDoc } = useHQStore();
@@ -238,8 +240,12 @@ export default function WikiPage() {
                         </div>
                     </div>
                  ) : (
-                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                        {viewingDoc.content || 'No detailed content provided.'}
+                    <div className="markdown-body" style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                        {viewingDoc.content ? (
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                               {viewingDoc.content}
+                           </ReactMarkdown>
+                        ) : 'No detailed content provided.'}
                     </div>
                  )}
               </div>
