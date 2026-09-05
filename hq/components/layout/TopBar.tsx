@@ -175,7 +175,7 @@ export default function TopBar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
           <button 
             className="btn btn-ghost btn-icon mobile-only" 
-            onClick={() => useHQStore.getState().toggleSidebar()}
+            onClick={() => useHQStore.getState().toggleMobileMenu()}
             style={{ marginRight: '0.25rem' }}
           >
             <Menu size={18} />

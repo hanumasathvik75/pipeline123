@@ -509,7 +509,19 @@ h1, h2, h3, h4, h5, h6 {
 .status-dot.muted { background: var(--text-muted); }
 
 /* ─── Table ──────────────────────────────────────────────── */
-.data-table { width: 100%; border-collapse: collapse; }
+.data-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+}
+
+@media (max-width: 768px) {
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 .data-table th {
   padding: 0.625rem 1rem;
   text-align: left;
@@ -600,13 +612,13 @@ h1, h2, h3, h4, h5, h6 {
     top: 0; left: 0; bottom: 0;
     z-index: 100;
     width: var(--sidebar-width) !important;
-    transform: translateX(0);
+    transform: translateX(-100%);
     transition: transform 0.3s ease;
     box-shadow: 4px 0 24px rgba(0,0,0,0.1);
   }
   
-  .app-shell.collapsed .sidebar {
-    transform: translateX(-100%);
+  .app-shell.mobile-open .sidebar {
+    transform: translateX(0);
   }
 
   .topbar { padding: 0 0.75rem; justify-content: space-between; }

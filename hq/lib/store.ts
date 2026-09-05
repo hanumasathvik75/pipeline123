@@ -49,6 +49,9 @@ interface HQStore {
   toggleSidebar: () => void;
   activeModule: string;
   setActiveModule: (m: string) => void;
+  mobileMenuOpen: boolean;
+  toggleMobileMenu: () => void;
+  closeMobileMenu: () => void;
 
   // CRUD Actions
   // Tasks
@@ -332,6 +335,9 @@ export const useHQStore = create<HQStore>()(
       toggleSidebar: () => set(s => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       activeModule: 'dashboard',
       setActiveModule: (m) => set({ activeModule: m }),
+      mobileMenuOpen: false,
+      toggleMobileMenu: () => set(s => ({ mobileMenuOpen: !s.mobileMenuOpen })),
+      closeMobileMenu: () => set({ mobileMenuOpen: false }),
 
       // --- Tasks ---
       addTask: (task) => {

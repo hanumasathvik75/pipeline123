@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, sidebarCollapsed, syncWithServer } = useHQStore();
+  const pathname = usePathname();
+  const { isAuthenticated, sidebarCollapsed, mobileMenuOpen, closeMobileMenu, syncWithServer } = useHQStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,16 +22,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Initial sync from central server
     if (mounted && isAuthenticated) {
       syncWithServer();
     }
   }, [mounted, isAuthenticated, router, syncWithServer]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    closeMobileMenu();
+  }, [pathname, closeMobileMenu]);
+
   if (!mounted || !isAuthenticated) return null;
 
   return (
-    <div className={`app-shell${sidebarCollapsed ? ' collapsed' : ''}`}>
+    <div className={`app-shell${sidebarCollapsed ? ' collapsed' : ''}${mobileMenuOpen ? ' mobile-open' : ''}`}>
       <Sidebar />
       <TopBar />
       <main className="main-content">
