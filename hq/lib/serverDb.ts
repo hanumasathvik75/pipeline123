@@ -900,7 +900,7 @@ export const serverDb = {
       
     if (!memberData || memberData.length === 0) return [];
     
-    const channelIds = memberData.map(m => m.channel_id);
+    const channelIds = memberData.map((m: any) => m.channel_id);
     
     // 2. Get the channels
     const { data: channels } = await supabaseAdmin
@@ -916,12 +916,12 @@ export const serverDb = {
       .select('channel_id, user_id')
       .in('channel_id', channelIds);
 
-    return channels.map(row => {
+    return channels.map((row: any) => {
       const channel = rowToChatChannel(row);
       if (allMembers) {
         channel.memberIds = allMembers
-          .filter(m => m.channel_id === channel.id)
-          .map(m => m.user_id);
+          .filter((m: any) => m.channel_id === channel.id)
+          .map((m: any) => m.user_id);
       }
       return channel;
     });

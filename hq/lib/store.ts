@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 import type { 
   Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, 
   UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData, FundraisingMeta,
-  ChatChannel, ChatMessage
+  ChatChannel, ChatMessage, ChatReference
 } from './types';
 
 interface HQStore {
