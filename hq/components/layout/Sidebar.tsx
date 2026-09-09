@@ -10,7 +10,7 @@ import {
   Zap, LayoutDashboard, FolderKanban, CheckSquare, Users,
   CalendarDays, Building2, FlaskConical, TrendingUp, BookOpen,
   Target, DollarSign, ChevronLeft, ChevronRight,
-  LogOut, Settings, X,
+  LogOut, Settings, X, MessageSquare,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -41,6 +41,7 @@ const NAV_SECTIONS = [
     label: 'People',
     items: [
       { href: '/team', icon: Users, label: 'Team' },
+      { href: '/chat', icon: MessageSquare, label: 'Chat' },
     ],
   },
   {

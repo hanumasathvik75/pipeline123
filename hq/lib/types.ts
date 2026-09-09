@@ -290,3 +290,38 @@ export interface FundraisingMeta {
   pitchDeckVersion: string;
   updatedAt: string;
 }
+
+// ── Chat ──────────────────────────────────────────────────────
+export interface ChatChannel {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'direct' | 'group';
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  memberIds: string[]; // For quick access on client side
+}
+
+export interface ChatReference {
+  type: 'task' | 'project' | 'wiki';
+  id: string;
+  title: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  channelId: string;
+  senderId: string;
+  content: string;
+  references: ChatReference[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatMember {
+  channelId: string;
+  userId: string;
+  role: 'admin' | 'member';
+  joinedAt: string;
+}

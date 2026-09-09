@@ -7,7 +7,8 @@ import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from './supabaseAdmin';
 import type {
   TeamMember, Project, Task, Meeting, Lead, Investor, RDProject,
-  Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, UserRole, UserStatus
+  Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, UserRole, UserStatus,
+  ChatChannel, ChatMessage, ChatMember, ChatReference
 } from './types';
 
 export interface UserAccount extends TeamMember {
@@ -230,6 +231,31 @@ function rowToFundraisingMeta(row: Record<string, unknown>): any {
     currency: row.currency as string,
     roundName: row.round_name as string,
     pitchDeckVersion: row.pitch_deck_version as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+function rowToChatChannel(row: Record<string, unknown>): ChatChannel {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    description: row.description as string | undefined,
+    type: row.type as 'direct' | 'group',
+    createdBy: row.created_by as string,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+    memberIds: [], // We will join this separately or return it from a joined query
+  };
+}
+
+function rowToChatMessage(row: Record<string, unknown>): ChatMessage {
+  return {
+    id: row.id as string,
+    channelId: row.channel_id as string,
+    senderId: row.sender_id as string,
+    content: row.content as string,
+    references: (row.references as ChatReference[]) || [],
+    createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
 }
@@ -862,5 +888,95 @@ export const serverDb = {
       return false;
     }
     return true;
+  },
+
+  // ── Chat ─────────────────────────────────────────────────────
+  async getChatChannelsForUser(userId: string): Promise<ChatChannel[]> {
+    // 1. Get channel IDs the user is a member of
+    const { data: memberData } = await supabaseAdmin
+      .from('hq_chat_members')
+      .select('channel_id')
+      .eq('user_id', userId);
+      
+    if (!memberData || memberData.length === 0) return [];
+    
+    const channelIds = memberData.map(m => m.channel_id);
+    
+    // 2. Get the channels
+    const { data: channels } = await supabaseAdmin
+      .from('hq_chat_channels')
+      .select('*')
+      .in('id', channelIds);
+      
+    if (!channels) return [];
+
+    // 3. Populate memberIds for these channels
+    const { data: allMembers } = await supabaseAdmin
+      .from('hq_chat_members')
+      .select('channel_id, user_id')
+      .in('channel_id', channelIds);
+
+    return channels.map(row => {
+      const channel = rowToChatChannel(row);
+      if (allMembers) {
+        channel.memberIds = allMembers
+          .filter(m => m.channel_id === channel.id)
+          .map(m => m.user_id);
+      }
+      return channel;
+    });
+  },
+
+  async createChatChannel(channel: Omit<ChatChannel, 'createdAt' | 'updatedAt'>, memberIds: string[]): Promise<ChatChannel> {
+    const { data, error } = await supabaseAdmin.from('hq_chat_channels').insert({
+      id: channel.id,
+      name: channel.name,
+      description: channel.description || null,
+      type: channel.type,
+      created_by: channel.createdBy,
+    }).select().single();
+
+    if (error) throw new Error(error.message);
+    
+    // Insert members
+    const members = memberIds.map(userId => ({
+      channel_id: channel.id,
+      user_id: userId,
+      role: userId === channel.createdBy ? 'admin' : 'member'
+    }));
+    
+    await supabaseAdmin.from('hq_chat_members').insert(members);
+
+    const newChannel = rowToChatChannel(data);
+    newChannel.memberIds = memberIds;
+    return newChannel;
+  },
+
+  async getChatMessages(channelId: string, limit = 50): Promise<ChatMessage[]> {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const { data } = await supabaseAdmin
+      .from('hq_chat_messages')
+      .select('*')
+      .eq('channel_id', channelId)
+      .gte('created_at', sevenDaysAgo.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(limit);
+      
+    return (data || []).map(rowToChatMessage).reverse(); // Return chronological
+  },
+
+  async insertChatMessage(message: Omit<ChatMessage, 'createdAt' | 'updatedAt'>): Promise<ChatMessage> {
+    const { data, error } = await supabaseAdmin.from('hq_chat_messages').insert({
+      id: message.id,
+      channel_id: message.channelId,
+      sender_id: message.senderId,
+      content: message.content,
+      references: message.references,
+    }).select().single();
+
+    if (error) throw new Error(error.message);
+    return rowToChatMessage(data);
   }
 };

@@ -4,7 +4,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { 
   Project, Task, Meeting, Lead, Investor, RDProject, TeamMember, 
-  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData, FundraisingMeta
+  UserRole, Experiment, Goal, WikiDoc, CrmContact, ProgressCategory, DailyLog, FinanceData, FundraisingMeta,
+  ChatChannel, ChatMessage
 } from './types';
 
 interface HQStore {
@@ -32,6 +33,22 @@ interface HQStore {
   financeData: FinanceData | null;
   fundraisingMeta: FundraisingMeta | null;
 
+  // Chat
+  chatChannels: ChatChannel[];
+  chatMessages: Record<string, ChatMessage[]>; // channelId -> messages
+  activeChatChannelId: string | null;
+  
+  setChatChannels: (channels: ChatChannel[]) => void;
+  setChatMessages: (channelId: string, messages: ChatMessage[]) => void;
+  setActiveChatChannelId: (id: string | null) => void;
+  addChatMessage: (message: ChatMessage) => void;
+  addChatChannel: (channel: ChatChannel) => void;
+
+  fetchChatChannels: () => Promise<void>;
+  fetchChatMessages: (channelId: string) => Promise<void>;
+  sendChatMessage: (content: string, references: ChatReference[], channelId: string) => Promise<{success: boolean, error?: string}>;
+  createNewChatChannel: (name: string, description: string, type: 'direct' | 'group', memberIds: string[]) => Promise<{success: boolean, channel?: ChatChannel, error?: string}>;
+  
   // Real-time synchronization
   lastSyncTime: number;
   syncWithServer: () => Promise<void>;
@@ -137,6 +154,125 @@ export const useHQStore = create<HQStore>()(
       financeData: null,
       fundraisingMeta: null,
 
+      chatChannels: [],
+      chatMessages: {},
+      activeChatChannelId: null,
+
+      setChatChannels: (channels) => set({ chatChannels: channels }),
+      setChatMessages: (channelId, messages) => set(s => ({
+          chatMessages: { ...s.chatMessages, [channelId]: messages }
+      })),
+      setActiveChatChannelId: (id) => set({ activeChatChannelId: id }),
+      addChatMessage: (message) => set(s => {
+          const current = s.chatMessages[message.channelId] || [];
+          // Avoid duplicates if real-time double triggers
+          if (current.some(m => m.id === message.id)) return s;
+          return {
+              chatMessages: {
+                  ...s.chatMessages,
+                  [message.channelId]: [...current, message]
+              }
+          };
+      }),
+      addChatChannel: (channel) => set(s => {
+          if (s.chatChannels.some(c => c.id === channel.id)) return s;
+          return { chatChannels: [...s.chatChannels, channel] };
+      }),
+
+      fetchChatChannels: async () => {
+          const user = get().currentUser;
+          if (!user) return;
+          try {
+              const res = await fetch(`/api/chat/channels?userId=${user.id}`);
+              if (res.ok) {
+                  const data = await res.json();
+                  set({ chatChannels: data.channels || [] });
+              }
+          } catch (e) {
+              console.error('Failed to fetch chat channels', e);
+          }
+      },
+
+      fetchChatMessages: async (channelId: string) => {
+          try {
+              const res = await fetch(`/api/chat/messages?channelId=${channelId}`);
+              if (res.ok) {
+                  const data = await res.json();
+                  set(s => ({
+                      chatMessages: { ...s.chatMessages, [channelId]: data.messages || [] }
+                  }));
+              }
+          } catch (e) {
+              console.error('Failed to fetch chat messages', e);
+          }
+      },
+
+      sendChatMessage: async (content, references, channelId) => {
+          const user = get().currentUser;
+          if (!user) return { success: false, error: 'Not logged in' };
+          
+          const tempId = `msg-${Date.now()}`;
+          const message: ChatMessage = {
+              id: tempId,
+              channelId,
+              senderId: user.id,
+              content,
+              references,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+          };
+          
+          // Optimistic update
+          get().addChatMessage(message);
+          
+          try {
+              const res = await fetch('/api/chat/messages', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(message)
+              });
+              if (!res.ok) {
+                  const data = await res.json();
+                  // Revert optimistic update ideally
+                  return { success: false, error: data.error };
+              }
+              return { success: true };
+          } catch (e: any) {
+              return { success: false, error: e.message };
+          }
+      },
+
+      createNewChatChannel: async (name, description, type, memberIds) => {
+          const user = get().currentUser;
+          if (!user) return { success: false, error: 'Not logged in' };
+          
+          const channelId = `chan-${Date.now()}`;
+          const channel: Omit<ChatChannel, 'createdAt' | 'updatedAt'> = {
+              id: channelId,
+              name,
+              description,
+              type,
+              createdBy: user.id,
+              memberIds: [...memberIds, user.id] // ensure creator is member
+          };
+          
+          try {
+              const res = await fetch('/api/chat/channels', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ channel, memberIds: channel.memberIds })
+              });
+              const data = await res.json();
+              if (res.ok && data.channel) {
+                  get().addChatChannel(data.channel);
+                  return { success: true, channel: data.channel };
+              }
+              return { success: false, error: data.error };
+          } catch (e: any) {
+              return { success: false, error: e.message };
+          }
+      },
+
       login: async (username: string, password: string) => {
         try {
           const res = await fetch('/api/auth/login', {
@@ -207,6 +343,9 @@ export const useHQStore = create<HQStore>()(
             if (get().currentUser?.role === 'c_level') {
                 get().fetchPendingUsers();
             }
+            
+            // Fetch chat
+            get().fetchChatChannels();
           }
           
           if (financeRes.ok) {
@@ -687,6 +826,7 @@ export const useHQStore = create<HQStore>()(
         team: state.team,
         wikiDocs: state.wikiDocs,
         lastSyncTime: state.lastSyncTime,
+        chatChannels: state.chatChannels,
       }),
     }
   )
