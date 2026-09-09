@@ -247,13 +247,14 @@ export const useHQStore = create<HQStore>()(
           if (!user) return { success: false, error: 'Not logged in' };
           
           const channelId = `chan-${Date.now()}`;
+          const uniqueMemberIds = Array.from(new Set([...memberIds, user.id]));
           const channel: Omit<ChatChannel, 'createdAt' | 'updatedAt'> = {
               id: channelId,
               name,
               description,
               type,
               createdBy: user.id,
-              memberIds: [...memberIds, user.id] // ensure creator is member
+              memberIds: uniqueMemberIds
           };
           
           try {
