@@ -1,26 +1,27 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import MessageList from '@/components/chat/MessageList';
 import MessageInput from '@/components/chat/MessageInput';
-import { Hash } from 'lucide-react';
+import { Hash, ArrowLeft, Trash2, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ChannelPage({ params }: { params: Promise<{ channelId: string }> }) {
   const resolvedParams = use(params);
   const { channelId } = resolvedParams;
-  const { chatChannels, fetchChatMessages, fetchChatChannels, currentUser, team } = useHQStore();
+  const router = useRouter();
+  const { chatChannels, fetchChatMessages, fetchChatChannels, currentUser, team, deleteChatChannel } = useHQStore();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    // Ensure channels are fetched if not yet loaded
     if (chatChannels.length === 0 && currentUser?.id) {
       fetchChatChannels();
     }
     
-    // Initial fetch of messages
     fetchChatMessages(channelId);
 
-    // Poll for new messages every 3 seconds
     const interval = setInterval(() => {
       fetchChatMessages(channelId);
     }, 3000);
@@ -37,7 +38,7 @@ export default function ChannelPage({ params }: { params: Promise<{ channelId: s
   if (channel) {
     if (channel.type === 'group') {
       title = `#${channel.name}`;
-      subtitle = channel.description || `${channel.memberIds?.length || 0} members`;
+      subtitle = channel.description || 'Public channel';
     } else {
       const otherMemberId = channel.memberIds.find(id => id !== currentUser?.id) || channel.createdBy;
       const otherMember = team.find(t => t.id === otherMemberId);
@@ -45,28 +46,88 @@ export default function ChannelPage({ params }: { params: Promise<{ channelId: s
       subtitle = otherMember?.designation || otherMember?.role || 'Direct Message';
     }
   } else {
-    title = channelId.startsWith('chan-') ? 'Loading Channel...' : 'Chat Channel';
+    title = 'Chat Room';
   }
+
+  const canDeleteChannel = channel && (currentUser?.role === 'c_level' || channel.createdBy === currentUser?.id);
+
+  const handleDeleteChannel = async () => {
+    const confirmName = channel?.name || 'this channel';
+    if (!window.confirm(`Are you sure you want to delete "${confirmName}"? All messages will be permanently deleted.`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    const res = await deleteChatChannel(channelId);
+    setIsDeleting(false);
+
+    if (res.success) {
+      router.push('/chat');
+    } else {
+      alert(res.error || 'Failed to delete channel');
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Top Header */}
       <div style={{ 
-        padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', 
+        padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', 
         background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexShrink: 0
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          {isDirect ? (
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)' }} />
-          ) : (
-            <Hash size={20} style={{ color: 'var(--primary)' }} />
-          )}
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>{title}</div>
-            {subtitle && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+          {/* Mobile Back button */}
+          <Link 
+            href="/chat" 
+            className="mobile-only"
+            style={{ 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              width: 32, height: 32, borderRadius: '6px', background: 'var(--bg-hover)', 
+              color: 'var(--text-primary)', textDecoration: 'none', flexShrink: 0
+            }}
+          >
+            <ArrowLeft size={18} />
+          </Link>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+            {isDirect ? (
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
+            ) : (
+              <Hash size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
             )}
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {title}
+              </div>
+              {subtitle && (
+                <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {subtitle}
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {canDeleteChannel && (
+            <button
+              onClick={handleDeleteChannel}
+              disabled={isDeleting}
+              title="Delete Channel"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)',
+                border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px',
+                padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Trash2 size={13} />
+              <span className="desktop-only">{isDeleting ? 'Deleting...' : 'Delete'}</span>
+            </button>
+          )}
         </div>
       </div>
       

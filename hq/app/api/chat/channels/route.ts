@@ -36,3 +36,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error?.message || 'Failed to create channel' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const channelId = searchParams.get('channelId');
+    const userId = searchParams.get('userId');
+    const userRole = searchParams.get('userRole') || 'member';
+
+    if (!channelId || !userId) {
+      return NextResponse.json({ error: 'channelId and userId are required' }, { status: 400 });
+    }
+
+    await serverDb.deleteChatChannel(channelId, userId, userRole);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Failed to delete channel:', error);
+    return NextResponse.json({ error: error?.message || 'Failed to delete channel' }, { status: 500 });
+  }
+}

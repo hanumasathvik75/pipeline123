@@ -713,3 +713,92 @@ h1, h2, h3, h4, h5, h6 {
   border-top: 1px solid var(--border);
   margin: 2em 0;
 }
+
+/* ─── Modern Responsive Chat Styles ──────────────────────── */
+.chat-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-default);
+}
+
+.chat-sidebar-col {
+  width: 280px;
+  flex-shrink: 0;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-main-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-default);
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - 56px);
+  }
+  .chat-sidebar-col.hide-mobile {
+    display: none !important;
+  }
+  .chat-main-col.hide-mobile {
+    display: none !important;
+  }
+  .chat-sidebar-col {
+    width: 100% !important;
+    border-right: none !important;
+  }
+}
+
+.chat-msg-row {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.chat-msg-row:hover {
+  background: var(--bg-hover);
+}
+
+.chat-msg-actions {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  display: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 2px 4px;
+  z-index: 10;
+}
+
+.chat-msg-row:hover .chat-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 768px) {
+  .chat-msg-actions {
+    display: flex;
+    position: static;
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-top: 4px;
+  }
+}
+

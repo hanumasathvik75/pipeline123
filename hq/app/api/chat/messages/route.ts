@@ -36,3 +36,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error?.message || 'Failed to insert message' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const messageId = searchParams.get('messageId');
+    const userId = searchParams.get('userId');
+    const userRole = searchParams.get('userRole') || 'member';
+
+    if (!messageId || !userId) {
+      return NextResponse.json({ error: 'messageId and userId are required' }, { status: 400 });
+    }
+
+    await serverDb.deleteChatMessage(messageId, userId, userRole);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Failed to delete message:', error);
+    return NextResponse.json({ error: error?.message || 'Failed to delete message' }, { status: 500 });
+  }
+}

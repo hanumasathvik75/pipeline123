@@ -48,6 +48,8 @@ interface HQStore {
   fetchChatMessages: (channelId: string) => Promise<void>;
   sendChatMessage: (content: string, references: ChatReference[], channelId: string) => Promise<{success: boolean, error?: string}>;
   createNewChatChannel: (name: string, description: string, type: 'direct' | 'group', memberIds: string[]) => Promise<{success: boolean, channel?: ChatChannel, error?: string}>;
+  deleteChatChannel: (channelId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteChatMessage: (messageId: string, channelId: string) => Promise<{ success: boolean; error?: string }>;
   
   // Real-time synchronization
   lastSyncTime: number;
@@ -276,6 +278,49 @@ export const useHQStore = create<HQStore>()(
           } catch (e: any) {
               return { success: false, error: e.message || 'Network error' };
           }
+      },
+
+      deleteChatChannel: async (channelId) => {
+        const user = get().currentUser;
+        if (!user) return { success: false, error: 'Not logged in' };
+        try {
+          const res = await fetch(`/api/chat/channels?channelId=${channelId}&userId=${user.id}&userRole=${user.role}`, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            set(s => ({
+              chatChannels: s.chatChannels.filter(c => c.id !== channelId),
+            }));
+            return { success: true };
+          }
+          return { success: false, error: data.error || 'Failed to delete channel' };
+        } catch (e: any) {
+          return { success: false, error: e.message || 'Network error' };
+        }
+      },
+
+      deleteChatMessage: async (messageId, channelId) => {
+        const user = get().currentUser;
+        if (!user) return { success: false, error: 'Not logged in' };
+        try {
+          const res = await fetch(`/api/chat/messages?messageId=${messageId}&userId=${user.id}&userRole=${user.role}`, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            set(s => ({
+              chatMessages: {
+                ...s.chatMessages,
+                [channelId]: (s.chatMessages[channelId] || []).filter(m => m.id !== messageId),
+              },
+            }));
+            return { success: true };
+          }
+          return { success: false, error: data.error || 'Failed to delete message' };
+        } catch (e: any) {
+          return { success: false, error: e.message || 'Network error' };
+        }
       },
 
       login: async (username: string, password: string) => {

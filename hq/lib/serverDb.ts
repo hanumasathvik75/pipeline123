@@ -1019,5 +1019,41 @@ export const serverDb = {
       throw new Error(error.message);
     }
     return rowToChatMessage(data);
+  },
+
+  async deleteChatChannel(channelId: string, userId: string, userRole: string): Promise<boolean> {
+    const { data: chan, error: findError } = await supabaseAdmin
+      .from('hq_chat_channels')
+      .select('created_by')
+      .eq('id', channelId)
+      .single();
+
+    if (findError || !chan) throw new Error('Channel not found');
+    if (chan.created_by !== userId && userRole !== 'c_level') {
+      throw new Error('Unauthorized to delete this channel');
+    }
+
+    await supabaseAdmin.from('hq_chat_messages').delete().eq('channel_id', channelId);
+    await supabaseAdmin.from('hq_chat_members').delete().eq('channel_id', channelId);
+    const { error: delError } = await supabaseAdmin.from('hq_chat_channels').delete().eq('id', channelId);
+    if (delError) throw new Error(delError.message);
+    return true;
+  },
+
+  async deleteChatMessage(messageId: string, userId: string, userRole: string): Promise<boolean> {
+    const { data: msg, error: findError } = await supabaseAdmin
+      .from('hq_chat_messages')
+      .select('sender_id')
+      .eq('id', messageId)
+      .single();
+
+    if (findError || !msg) throw new Error('Message not found');
+    if (msg.sender_id !== userId && userRole !== 'c_level') {
+      throw new Error('Unauthorized to delete this message');
+    }
+
+    const { error: delError } = await supabaseAdmin.from('hq_chat_messages').delete().eq('id', messageId);
+    if (delError) throw new Error(delError.message);
+    return true;
   }
 };

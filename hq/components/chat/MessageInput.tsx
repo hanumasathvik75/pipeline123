@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useHQStore } from '@/lib/store';
-import { Send, Hash, AtSign, Search } from 'lucide-react';
+import { Send, Paperclip, CheckSquare, FolderKanban, BookOpen, X } from 'lucide-react';
 import { ChatReference } from '@/lib/types';
 
 export default function MessageInput({ channelId }: { channelId: string }) {
@@ -42,7 +42,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
     const val = e.target.value;
     setContent(val);
     
-    // Simple slash command detection
+    // Slash command detection
     if (val.endsWith('/') || val.endsWith('@')) {
       setShowRefMenu(true);
       setRefSearchTerm('');
@@ -51,76 +51,126 @@ export default function MessageInput({ channelId }: { channelId: string }) {
       setRefSearchTerm(parts[parts.length - 1].toLowerCase());
     }
     
-    if (val === '' || (!val.includes('/') && !val.includes('@'))) {
+    if (val === '' || (!val.includes('/') && !val.includes('@') && showRefMenu && !refSearchTerm)) {
       setShowRefMenu(false);
     }
   };
 
   const addReference = (ref: ChatReference) => {
-    setReferences([...references, ref]);
-    setContent(content.replace(/[\/@][\w\s]*$/, '') + ' '); // remove the search text
+    if (!references.some(r => r.id === ref.id)) {
+      setReferences([...references, ref]);
+    }
+    setContent(content.replace(/[\/@][\w\s]*$/, '').trim() + ' ');
     setShowRefMenu(false);
     inputRef.current?.focus();
   };
 
-  // Filter items for the reference menu
-  const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(refSearchTerm)).slice(0, 3);
-  const filteredProjects = projects.filter(p => p.name.toLowerCase().includes(refSearchTerm)).slice(0, 3);
-  const filteredWiki = wikiDocs.filter(w => w.title.toLowerCase().includes(refSearchTerm)).slice(0, 3);
+  const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(refSearchTerm)).slice(0, 4);
+  const filteredProjects = projects.filter(p => p.name.toLowerCase().includes(refSearchTerm)).slice(0, 4);
+  const filteredWiki = wikiDocs.filter(w => w.title.toLowerCase().includes(refSearchTerm)).slice(0, 4);
 
   return (
-    <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'var(--bg-card)' }}>
+    <div style={{ 
+      padding: '0.75rem 1rem', borderTop: '1px solid var(--border)', 
+      background: 'var(--bg-surface)', flexShrink: 0 
+    }}>
+      {/* Attached Reference Chips */}
       {references.length > 0 && (
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
           {references.map((ref, idx) => (
-            <div key={idx} style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.25rem', 
-              padding: '0.25rem 0.5rem', background: 'var(--surface-hover)', 
-              borderRadius: '16px', fontSize: '0.7rem', fontWeight: 600 
-            }}>
-              {ref.title}
-              <button onClick={() => setReferences(references.filter((_, i) => i !== idx))} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, marginLeft: '0.25rem' }}>✕</button>
+            <div 
+              key={idx} 
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '0.35rem', 
+                padding: '0.2rem 0.6rem', background: 'var(--surface-hover)', 
+                border: '1px solid var(--border)', borderRadius: '16px', 
+                fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' 
+              }}
+            >
+              <span>{ref.title}</span>
+              <button 
+                onClick={() => setReferences(references.filter((_, i) => i !== idx))} 
+                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: 'var(--text-muted)' }}
+              >
+                <X size={12} />
+              </button>
             </div>
           ))}
         </div>
       )}
       
       <div style={{ position: 'relative' }}>
+        {/* References Menu Popover */}
         {showRefMenu && (
           <div style={{ 
-            position: 'absolute', bottom: '100%', left: 0, width: '300px', maxHeight: '300px', 
-            overflowY: 'auto', background: 'var(--bg-surface)', border: '1px solid var(--border)', 
-            borderRadius: '8px', boxShadow: 'var(--shadow-md)', zIndex: 10, marginBottom: '0.5rem' 
+            position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, 
+            width: '100%', maxWidth: '340px', maxHeight: '280px', 
+            overflowY: 'auto', background: 'var(--bg-card)', border: '1px solid var(--border)', 
+            borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 100 
           }}>
-            <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
-              Attach Reference
+            <div style={{ 
+              padding: '0.5rem 0.75rem', fontSize: '0.75rem', fontWeight: 700, 
+              color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <span>Attach Context</span>
+              <button onClick={() => setShowRefMenu(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={14} />
+              </button>
             </div>
+
             {filteredTasks.length > 0 && (
               <div style={{ padding: '0.25rem 0' }}>
-                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Tasks</div>
+                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                  Tasks
+                </div>
                 {filteredTasks.map(t => (
-                  <div key={t.id} onClick={() => addReference({ type: 'task', id: t.id, title: t.title })} style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }} className="hover-bg">
-                    {t.title}
+                  <div 
+                    key={t.id} 
+                    onClick={() => addReference({ type: 'task', id: t.id, title: t.title })} 
+                    style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
+                    className="hover-bg"
+                  >
+                    <CheckSquare size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
                   </div>
                 ))}
               </div>
             )}
-             {filteredProjects.length > 0 && (
+
+            {filteredProjects.length > 0 && (
               <div style={{ padding: '0.25rem 0' }}>
-                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Projects</div>
+                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                  Projects
+                </div>
                 {filteredProjects.map(p => (
-                  <div key={p.id} onClick={() => addReference({ type: 'project', id: p.id, title: p.name })} style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }} className="hover-bg">
-                    {p.name}
+                  <div 
+                    key={p.id} 
+                    onClick={() => addReference({ type: 'project', id: p.id, title: p.name })} 
+                    style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
+                    className="hover-bg"
+                  >
+                    <FolderKanban size={14} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                   </div>
                 ))}
               </div>
             )}
-             {filteredWiki.length > 0 && (
+
+            {filteredWiki.length > 0 && (
               <div style={{ padding: '0.25rem 0' }}>
-                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Wiki</div>
+                <div style={{ padding: '0.25rem 0.75rem', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                  Knowledge Base
+                </div>
                 {filteredWiki.map(w => (
-                  <div key={w.id} onClick={() => addReference({ type: 'wiki', id: w.id, title: w.title })} style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }} className="hover-bg">
-                    {w.title}
+                  <div 
+                    key={w.id} 
+                    onClick={() => addReference({ type: 'wiki', id: w.id, title: w.title })} 
+                    style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
+                    className="hover-bg"
+                  >
+                    <BookOpen size={14} style={{ color: '#10b981', flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</span>
                   </div>
                 ))}
               </div>
@@ -128,27 +178,52 @@ export default function MessageInput({ channelId }: { channelId: string }) {
           </div>
         )}
         
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem', background: 'var(--bg-surface)' }}>
+        {/* Main Input Box */}
+        <div style={{ 
+          display: 'flex', alignItems: 'flex-end', gap: '0.5rem', 
+          border: '1px solid var(--border)', borderRadius: '12px', 
+          padding: '0.4rem 0.6rem', background: 'var(--bg-default)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowRefMenu(!showRefMenu)}
+            title="Attach task, project, or doc"
+            style={{ 
+              background: 'none', border: 'none', cursor: 'pointer', 
+              color: showRefMenu ? 'var(--primary)' : 'var(--text-muted)', 
+              padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', flexShrink: 0 
+            }}
+            className="hover-bg"
+          >
+            <Paperclip size={18} />
+          </button>
+
           <textarea
             ref={inputRef}
             value={content}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message or '/' to attach tasks..."
+            placeholder="Type a message... (or '/' to attach)"
             style={{ 
               flex: 1, border: 'none', background: 'none', resize: 'none', 
-              maxHeight: '150px', minHeight: '40px', outline: 'none', fontSize: '0.9rem',
-              color: 'var(--text-primary)', fontFamily: 'inherit'
+              maxHeight: '120px', minHeight: '36px', outline: 'none', fontSize: '0.9rem',
+              color: 'var(--text-primary)', fontFamily: 'inherit', padding: '6px 2px'
             }}
             rows={1}
           />
+
           <button 
             onClick={handleSend}
             disabled={!content.trim() && references.length === 0}
-            className="btn btn-primary btn-icon"
-            style={{ flexShrink: 0 }}
+            className="btn btn-primary"
+            style={{ 
+              padding: '6px 12px', borderRadius: '8px', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, minWidth: '40px', minHeight: '36px' 
+            }}
           >
-            <Send size={16} />
+            <Send size={15} />
           </button>
         </div>
       </div>

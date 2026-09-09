@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useHQStore } from '@/lib/store';
-import { MessageSquare, Plus, Hash, Users, User, ArrowRight, Sparkles } from 'lucide-react';
+import { MessageSquare, Plus, Hash, Users, ArrowRight, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function ChatPage() {
@@ -23,7 +23,6 @@ export default function ChatPage() {
   }, [currentUser?.id, fetchChatChannels]);
 
   const handleStartDM = async (memberId: string) => {
-    // Check if DM exists
     const existingDM = dms.find(c => c.memberIds.includes(memberId));
     if (existingDM) {
       router.push(`/chat/${existingDM.id}`);
@@ -69,37 +68,37 @@ export default function ChatPage() {
   };
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ maxWidth: '720px', width: '100%' }}>
         {/* Welcome Banner */}
         <div style={{ 
           background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(249, 115, 22, 0.04) 100%)',
           border: '1px solid rgba(234, 88, 12, 0.2)',
           borderRadius: '16px',
-          padding: '2rem',
-          marginBottom: '2rem',
+          padding: '1.5rem 1rem',
+          marginBottom: '1.5rem',
           textAlign: 'center'
         }}>
           <div style={{ 
-            width: 48, height: 48, borderRadius: '12px', background: 'var(--primary)', 
+            width: 44, height: 44, borderRadius: '12px', background: 'var(--primary)', 
             color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            margin: '0 auto 1rem auto' 
+            margin: '0 auto 0.75rem auto' 
           }}>
-            <MessageSquare size={24} />
+            <MessageSquare size={22} />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-            Ignition HQ Team Chat
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.375rem', letterSpacing: '-0.02em' }}>
+            Ignition HQ Chat
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto 1.5rem auto' }}>
-            Collaborate in real-time, message colleagues directly, and reference Tasks, Projects, and Wiki documentation using <code style={{ background: 'var(--surface-hover)', padding: '2px 6px', borderRadius: '4px' }}>/</code> commands.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', maxWidth: '480px', margin: '0 auto 1.25rem auto', lineHeight: 1.4 }}>
+            Message colleagues directly, talk in company channels, and reference Tasks, Projects, and Wiki docs using <code style={{ background: 'var(--surface-hover)', padding: '2px 5px', borderRadius: '4px' }}>/</code>.
           </p>
 
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             {currentUser?.role === 'c_level' && (
               <button 
                 onClick={() => setShowCreateModal(true)} 
                 className="btn btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '8px 16px' }}
               >
                 <Plus size={16} /> Create Channel
               </button>
@@ -109,7 +108,7 @@ export default function ChatPage() {
                 onClick={handleCreateQuickGeneral}
                 disabled={isSubmitting}
                 className="btn btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '8px 16px' }}
               >
                 <Sparkles size={16} /> Quick Setup #general
               </button>
@@ -118,42 +117,42 @@ export default function ChatPage() {
         </div>
 
         {/* Existing Channels */}
-        <div style={{ marginBottom: '2.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Hash size={18} className="text-primary" /> Group Channels
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Hash size={17} className="text-primary" /> Group Channels ({groups.length})
             </h2>
             {currentUser?.role === 'c_level' && (
               <button 
                 onClick={() => setShowCreateModal(true)}
                 className="btn btn-sm btn-ghost"
-                style={{ fontSize: '0.8rem' }}
+                style={{ fontSize: '0.75rem' }}
               >
-                + New Channel
+                + New
               </button>
             )}
           </div>
 
           {groups.length === 0 ? (
-            <div className="card" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              No group channels created yet. {currentUser?.role === 'c_level' ? 'Click "Create Channel" to start one!' : 'A founder or C-level executive can create public channels.'}
+            <div className="card" style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              No group channels created yet. {currentUser?.role === 'c_level' ? 'Click "Create Channel" to start one!' : 'A founder or C-level executive can create channels.'}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.625rem' }}>
               {groups.map(c => (
                 <div 
                   key={c.id} 
                   onClick={() => router.push(`/chat/${c.id}`)}
                   className="card hover-bg"
                   style={{ 
-                    padding: '1rem', cursor: 'pointer', display: 'flex', 
+                    padding: '0.875rem 1rem', cursor: 'pointer', display: 'flex', 
                     alignItems: 'center', justifyContent: 'space-between',
                     border: '1px solid var(--border)' 
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                    <Hash size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <Hash size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {c.name}
                     </span>
                   </div>
@@ -165,44 +164,44 @@ export default function ChatPage() {
         </div>
 
         {/* Team Direct Messaging */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={18} className="text-primary" /> Direct Message Colleagues
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Users size={17} className="text-primary" /> Direct Message Colleagues
             </h2>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{team.length} members</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{team.length} members</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.625rem' }}>
             {team.filter(t => t.id !== currentUser?.id).map(member => (
               <div 
                 key={member.id} 
                 onClick={() => handleStartDM(member.id)}
                 className="card hover-bg"
                 style={{ 
-                  padding: '0.875rem 1rem', cursor: 'pointer', display: 'flex', 
+                  padding: '0.75rem 0.875rem', cursor: 'pointer', display: 'flex', 
                   alignItems: 'center', justifyContent: 'space-between',
                   border: '1px solid var(--border)' 
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', overflow: 'hidden' }}>
                   <div style={{ 
-                    width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', 
+                    width: 30, height: 30, borderRadius: '50%', background: 'var(--primary)', 
                     color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
                     fontSize: '0.75rem', fontWeight: 700, flexShrink: 0 
                   }}>
                     {member.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div style={{ overflow: 'hidden' }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.825rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {member.name}
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {member.designation || member.role}
                     </div>
                   </div>
                 </div>
-                <button className="btn btn-sm btn-ghost" style={{ fontSize: '0.7rem', padding: '2px 6px' }}>Chat</button>
+                <button className="btn btn-sm btn-ghost" style={{ fontSize: '0.7rem', padding: '2px 6px', flexShrink: 0 }}>Chat</button>
               </div>
             ))}
           </div>
@@ -213,12 +212,12 @@ export default function ChatPage() {
       {showCreateModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowCreateModal(false)} />
-          <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 420, padding: '1.75rem', zIndex: 1 }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Hash size={20} className="text-primary" /> Create Group Channel
+          <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 400, padding: '1.5rem', zIndex: 1 }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Hash size={18} className="text-primary" /> Create Group Channel
             </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-              Group channels can be joined and viewed by all members in the organization.
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              Group channels can be joined and viewed by all members in HQ.
             </p>
 
             <form onSubmit={handleCreateGroup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -246,7 +245,7 @@ export default function ChatPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting || !newChannelName.trim()}>
-                  {isSubmitting ? 'Creating...' : 'Create Channel'}
+                  {isSubmitting ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </form>

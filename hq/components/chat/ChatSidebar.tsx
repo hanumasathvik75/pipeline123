@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useHQStore } from '@/lib/store';
-import { Hash, Plus, MessageSquare, RefreshCw, Search, Users, User, AlertCircle } from 'lucide-react';
+import { Hash, Plus, MessageSquare, RefreshCw, Search, Users, Trash2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function ChatSidebar() {
-  const { chatChannels, currentUser, team, createNewChatChannel, fetchChatChannels } = useHQStore();
+  const { chatChannels, currentUser, team, createNewChatChannel, fetchChatChannels, deleteChatChannel } = useHQStore();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -108,6 +108,22 @@ export default function ChatSidebar() {
     }
   };
 
+  const handleDeleteChannel = async (e: React.MouseEvent, channelId: string, channelName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!window.confirm(`Delete channel "${channelName}"?`)) return;
+
+    const res = await deleteChatChannel(channelId);
+    if (res.success) {
+      if (pathname === `/chat/${channelId}`) {
+        router.push('/chat');
+      }
+    } else {
+      alert(res.error || 'Failed to delete channel');
+    }
+  };
+
   const filteredTeam = team.filter(t => 
     t.id !== currentUser?.id && 
     (t.name.toLowerCase().includes(dmSearch.toLowerCase()) || 
@@ -116,9 +132,9 @@ export default function ChatSidebar() {
 
   return (
     <div style={{ 
-      width: '260px', borderRight: '1px solid var(--border)', 
+      width: '100%', 
       background: 'var(--bg-surface)', display: 'flex', flexDirection: 'column',
-      height: '100%', flexShrink: 0
+      height: '100%'
     }}>
       {/* Header */}
       <div style={{ 
@@ -132,7 +148,7 @@ export default function ChatSidebar() {
         <button 
           onClick={handleRefresh} 
           title="Refresh channels"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '4px' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '6px' }}
         >
           <RefreshCw size={15} style={{ transform: isRefreshing ? 'rotate(180deg)' : 'none', transition: 'transform 0.5s ease' }} />
         </button>
@@ -167,7 +183,7 @@ export default function ChatSidebar() {
                 style={{ 
                   background: 'var(--surface-hover)', border: '1px solid var(--border)', 
                   cursor: 'pointer', color: 'var(--text-primary)', borderRadius: '4px',
-                  display: 'flex', alignItems: 'center', gap: '2px', padding: '2px 6px', fontSize: '0.7rem', fontWeight: 600
+                  display: 'flex', alignItems: 'center', gap: '2px', padding: '3px 8px', fontSize: '0.7rem', fontWeight: 600
                 }}
               >
                 <Plus size={12} /> Add
@@ -183,7 +199,7 @@ export default function ChatSidebar() {
                   <button 
                     onClick={() => setShowCreateModal(true)}
                     className="btn btn-sm btn-ghost"
-                    style={{ fontSize: '0.75rem', padding: '2px 8px' }}
+                    style={{ fontSize: '0.75rem', padding: '4px 8px' }}
                   >
                     + Create #general
                   </button>
@@ -193,23 +209,48 @@ export default function ChatSidebar() {
           ) : (
             groups.map(c => {
               const isActive = pathname === `/chat/${c.id}`;
+              const canDelete = currentUser?.role === 'c_level' || c.createdBy === currentUser?.id;
+
               return (
-                <Link 
+                <div 
                   key={c.id} 
-                  href={`/chat/${c.id}`}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 1rem',
-                    textDecoration: 'none', 
-                    color: isActive ? 'var(--primary)' : 'var(--text-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.2rem 0.5rem 0.2rem 0',
                     background: isActive ? 'var(--surface-hover)' : 'transparent',
                     borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
-                    fontWeight: isActive ? 600 : 400,
-                    fontSize: '0.875rem'
                   }}
+                  className="hover-bg"
                 >
-                  <Hash size={16} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)' }} /> 
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
-                </Link>
+                  <Link 
+                    href={`/chat/${c.id}`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0.75rem',
+                      textDecoration: 'none', flex: 1, minWidth: 0,
+                      color: isActive ? 'var(--primary)' : 'var(--text-primary)',
+                      fontWeight: isActive ? 600 : 400,
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <Hash size={16} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)', flexShrink: 0 }} /> 
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                  </Link>
+
+                  {canDelete && (
+                    <button
+                      onClick={(e) => handleDeleteChannel(e, c.id, c.name)}
+                      title="Delete channel"
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'var(--text-muted)', padding: '6px', borderRadius: '4px',
+                        display: 'flex', alignItems: 'center', opacity: 0.7
+                      }}
+                      className="hover-bg"
+                    >
+                      <Trash2 size={13} style={{ color: 'var(--danger)' }} />
+                    </button>
+                  )}
+                </div>
               );
             })
           )}
@@ -229,7 +270,7 @@ export default function ChatSidebar() {
               style={{ 
                 background: 'var(--surface-hover)', border: '1px solid var(--border)', 
                 cursor: 'pointer', color: 'var(--text-primary)', borderRadius: '4px',
-                display: 'flex', alignItems: 'center', gap: '2px', padding: '2px 6px', fontSize: '0.7rem', fontWeight: 600
+                display: 'flex', alignItems: 'center', gap: '2px', padding: '3px 8px', fontSize: '0.7rem', fontWeight: 600
               }}
             >
               <Plus size={12} /> New DM
@@ -243,7 +284,7 @@ export default function ChatSidebar() {
                 <button 
                   onClick={() => setShowDMModal(true)}
                   className="btn btn-sm btn-ghost"
-                  style={{ fontSize: '0.75rem', padding: '2px 8px' }}
+                  style={{ fontSize: '0.75rem', padding: '4px 8px' }}
                 >
                   + Message someone
                 </button>
@@ -257,24 +298,45 @@ export default function ChatSidebar() {
               const displayName = otherMember?.name || (otherMemberId === currentUser?.id ? `${currentUser?.name} (You)` : 'Team Member');
 
               return (
-                <Link 
-                  key={c.id} 
-                  href={`/chat/${c.id}`}
+                <div
+                  key={c.id}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 1rem',
-                    textDecoration: 'none', 
-                    color: isActive ? 'var(--primary)' : 'var(--text-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.2rem 0.5rem 0.2rem 0',
                     background: isActive ? 'var(--surface-hover)' : 'transparent',
                     borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
-                    fontWeight: isActive ? 600 : 400,
-                    fontSize: '0.875rem'
                   }}
+                  className="hover-bg"
                 >
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {displayName}
-                  </span>
-                </Link>
+                  <Link 
+                    href={`/chat/${c.id}`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0.75rem',
+                      textDecoration: 'none', flex: 1, minWidth: 0,
+                      color: isActive ? 'var(--primary)' : 'var(--text-primary)',
+                      fontWeight: isActive ? 600 : 400,
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {displayName}
+                    </span>
+                  </Link>
+
+                  <button
+                    onClick={(e) => handleDeleteChannel(e, c.id, displayName)}
+                    title="Delete conversation"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--text-muted)', padding: '6px', borderRadius: '4px',
+                      display: 'flex', alignItems: 'center', opacity: 0.7
+                    }}
+                    className="hover-bg"
+                  >
+                    <Trash2 size={13} style={{ color: 'var(--danger)' }} />
+                  </button>
+                </div>
               );
             })
           )}
