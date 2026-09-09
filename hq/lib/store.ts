@@ -184,9 +184,11 @@ export const useHQStore = create<HQStore>()(
           if (!user) return;
           try {
               const res = await fetch(`/api/chat/channels?userId=${user.id}`);
-              if (res.ok) {
-                  const data = await res.json();
-                  set({ chatChannels: data.channels || [] });
+              const data = await res.json();
+              if (res.ok && Array.isArray(data.channels)) {
+                  set({ chatChannels: data.channels });
+              } else if (data.error) {
+                  console.error('Failed to fetch chat channels:', data.error);
               }
           } catch (e) {
               console.error('Failed to fetch chat channels', e);
@@ -196,10 +198,10 @@ export const useHQStore = create<HQStore>()(
       fetchChatMessages: async (channelId: string) => {
           try {
               const res = await fetch(`/api/chat/messages?channelId=${channelId}`);
-              if (res.ok) {
-                  const data = await res.json();
+              const data = await res.json();
+              if (res.ok && Array.isArray(data.messages)) {
                   set(s => ({
-                      chatMessages: { ...s.chatMessages, [channelId]: data.messages || [] }
+                      chatMessages: { ...s.chatMessages, [channelId]: data.messages }
                   }));
               }
           } catch (e) {
@@ -217,7 +219,7 @@ export const useHQStore = create<HQStore>()(
               channelId,
               senderId: user.id,
               content,
-              references,
+              references: references || [],
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
           };
@@ -231,14 +233,13 @@ export const useHQStore = create<HQStore>()(
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(message)
               });
+              const data = await res.json();
               if (!res.ok) {
-                  const data = await res.json();
-                  // Revert optimistic update ideally
-                  return { success: false, error: data.error };
+                  return { success: false, error: data.error || 'Failed to send message' };
               }
               return { success: true };
           } catch (e: any) {
-              return { success: false, error: e.message };
+              return { success: false, error: e.message || 'Network error' };
           }
       },
 
@@ -246,11 +247,14 @@ export const useHQStore = create<HQStore>()(
           const user = get().currentUser;
           if (!user) return { success: false, error: 'Not logged in' };
           
+          const formattedName = type === 'group' 
+            ? name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-')
+            : name.trim();
           const channelId = `chan-${Date.now()}`;
           const uniqueMemberIds = Array.from(new Set([...memberIds, user.id]));
           const channel: Omit<ChatChannel, 'createdAt' | 'updatedAt'> = {
               id: channelId,
-              name,
+              name: formattedName || 'channel',
               description,
               type,
               createdBy: user.id,
@@ -268,9 +272,9 @@ export const useHQStore = create<HQStore>()(
                   get().addChatChannel(data.channel);
                   return { success: true, channel: data.channel };
               }
-              return { success: false, error: data.error };
+              return { success: false, error: data.error || 'Failed to create channel' };
           } catch (e: any) {
-              return { success: false, error: e.message };
+              return { success: false, error: e.message || 'Network error' };
           }
       },
 

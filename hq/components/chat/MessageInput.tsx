@@ -17,10 +17,18 @@ export default function MessageInput({ channelId }: { channelId: string }) {
   const handleSend = async () => {
     if (!content.trim() && references.length === 0) return;
     
-    await sendChatMessage(content, references, channelId);
+    const text = content;
+    const refs = references;
     setContent('');
     setReferences([]);
     setShowRefMenu(false);
+
+    const res = await sendChatMessage(text, refs, channelId);
+    if (res && !res.success) {
+      alert(`Message failed to send: ${res.error || 'Please check connection'}`);
+      setContent(text);
+      setReferences(refs);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

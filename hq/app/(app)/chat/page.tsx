@@ -1,7 +1,258 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useHQStore } from '@/lib/store';
+import { MessageSquare, Plus, Hash, Users, User, ArrowRight, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
 export default function ChatPage() {
+  const { chatChannels, currentUser, team, createNewChatChannel, fetchChatChannels } = useHQStore();
+  const router = useRouter();
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newChannelName, setNewChannelName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const groups = chatChannels.filter(c => c.type === 'group');
+  const dms = chatChannels.filter(c => c.type === 'direct');
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchChatChannels();
+    }
+  }, [currentUser?.id, fetchChatChannels]);
+
+  const handleStartDM = async (memberId: string) => {
+    // Check if DM exists
+    const existingDM = dms.find(c => c.memberIds.includes(memberId));
+    if (existingDM) {
+      router.push(`/chat/${existingDM.id}`);
+      return;
+    }
+
+    const member = team.find(t => t.id === memberId);
+    const dmTitle = member ? `dm-${member.name.toLowerCase().replace(/\s+/g, '-')}` : 'direct-message';
+    const res = await createNewChatChannel(dmTitle, '', 'direct', [memberId]);
+    if (res.success && res.channel) {
+      router.push(`/chat/${res.channel.id}`);
+    } else {
+      alert(res.error || 'Failed to start direct message');
+    }
+  };
+
+  const handleCreateQuickGeneral = async () => {
+    setIsSubmitting(true);
+    const allMemberIds = team.map(t => t.id);
+    const res = await createNewChatChannel('general', 'Company-wide discussion and announcements', 'group', allMemberIds);
+    setIsSubmitting(false);
+    if (res.success && res.channel) {
+      router.push(`/chat/${res.channel.id}`);
+    } else {
+      alert(res.error || 'Failed to create #general');
+    }
+  };
+
+  const handleCreateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChannelName.trim()) return;
+    setIsSubmitting(true);
+    const allMemberIds = team.map(t => t.id);
+    const res = await createNewChatChannel(newChannelName, '', 'group', allMemberIds);
+    setIsSubmitting(false);
+    if (res.success && res.channel) {
+      setShowCreateModal(false);
+      setNewChannelName('');
+      router.push(`/chat/${res.channel.id}`);
+    } else {
+      alert(res.error || 'Failed to create channel');
+    }
+  };
+
   return (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-      Select a channel or direct message from the sidebar to start chatting.
+    <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ maxWidth: '720px', width: '100%' }}>
+        {/* Welcome Banner */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(249, 115, 22, 0.04) 100%)',
+          border: '1px solid rgba(234, 88, 12, 0.2)',
+          borderRadius: '16px',
+          padding: '2rem',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}>
+          <div style={{ 
+            width: 48, height: 48, borderRadius: '12px', background: 'var(--primary)', 
+            color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            margin: '0 auto 1rem auto' 
+          }}>
+            <MessageSquare size={24} />
+          </div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+            Ignition HQ Team Chat
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto 1.5rem auto' }}>
+            Collaborate in real-time, message colleagues directly, and reference Tasks, Projects, and Wiki documentation using <code style={{ background: 'var(--surface-hover)', padding: '2px 6px', borderRadius: '4px' }}>/</code> commands.
+          </p>
+
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {currentUser?.role === 'c_level' && (
+              <button 
+                onClick={() => setShowCreateModal(true)} 
+                className="btn btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <Plus size={16} /> Create Channel
+              </button>
+            )}
+            {groups.length === 0 && currentUser?.role === 'c_level' && (
+              <button 
+                onClick={handleCreateQuickGeneral}
+                disabled={isSubmitting}
+                className="btn btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <Sparkles size={16} /> Quick Setup #general
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Existing Channels */}
+        <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Hash size={18} className="text-primary" /> Group Channels
+            </h2>
+            {currentUser?.role === 'c_level' && (
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="btn btn-sm btn-ghost"
+                style={{ fontSize: '0.8rem' }}
+              >
+                + New Channel
+              </button>
+            )}
+          </div>
+
+          {groups.length === 0 ? (
+            <div className="card" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              No group channels created yet. {currentUser?.role === 'c_level' ? 'Click "Create Channel" to start one!' : 'A founder or C-level executive can create public channels.'}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+              {groups.map(c => (
+                <div 
+                  key={c.id} 
+                  onClick={() => router.push(`/chat/${c.id}`)}
+                  className="card hover-bg"
+                  style={{ 
+                    padding: '1rem', cursor: 'pointer', display: 'flex', 
+                    alignItems: 'center', justifyContent: 'space-between',
+                    border: '1px solid var(--border)' 
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                    <Hash size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {c.name}
+                    </span>
+                  </div>
+                  <ArrowRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Team Direct Messaging */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Users size={18} className="text-primary" /> Direct Message Colleagues
+            </h2>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{team.length} members</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+            {team.filter(t => t.id !== currentUser?.id).map(member => (
+              <div 
+                key={member.id} 
+                onClick={() => handleStartDM(member.id)}
+                className="card hover-bg"
+                style={{ 
+                  padding: '0.875rem 1rem', cursor: 'pointer', display: 'flex', 
+                  alignItems: 'center', justifyContent: 'space-between',
+                  border: '1px solid var(--border)' 
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', 
+                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontSize: '0.75rem', fontWeight: 700, flexShrink: 0 
+                  }}>
+                    {member.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {member.name}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {member.designation || member.role}
+                    </div>
+                  </div>
+                </div>
+                <button className="btn btn-sm btn-ghost" style={{ fontSize: '0.7rem', padding: '2px 6px' }}>Chat</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CREATE MODAL */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowCreateModal(false)} />
+          <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 420, padding: '1.75rem', zIndex: 1 }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Hash size={20} className="text-primary" /> Create Group Channel
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+              Group channels can be joined and viewed by all members in the organization.
+            </p>
+
+            <form onSubmit={handleCreateGroup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
+                  Channel Name
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>#</span>
+                  <input
+                    className="input"
+                    type="text"
+                    value={newChannelName}
+                    onChange={e => setNewChannelName(e.target.value)}
+                    placeholder="general, dev, marketing"
+                    style={{ paddingLeft: '24px' }}
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-ghost" style={{ flex: 1 }} disabled={isSubmitting}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting || !newChannelName.trim()}>
+                  {isSubmitting ? 'Creating...' : 'Create Channel'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

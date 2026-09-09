@@ -892,39 +892,65 @@ export const serverDb = {
 
   // ── Chat ─────────────────────────────────────────────────────
   async getChatChannelsForUser(userId: string): Promise<ChatChannel[]> {
-    // 1. Get channel IDs the user is a member of
-    const { data: memberData } = await supabaseAdmin
-      .from('hq_chat_members')
-      .select('channel_id')
-      .eq('user_id', userId);
-      
-    if (!memberData || memberData.length === 0) return [];
-    
-    const channelIds = memberData.map((m: any) => m.channel_id);
-    
-    // 2. Get the channels
-    const { data: channels } = await supabaseAdmin
-      .from('hq_chat_channels')
-      .select('*')
-      .in('id', channelIds);
-      
-    if (!channels) return [];
+    try {
+      // 1. Get channel IDs where user is explicitly listed as a member
+      const { data: memberData, error: memberErr } = await supabaseAdmin
+        .from('hq_chat_members')
+        .select('channel_id')
+        .eq('user_id', userId);
 
-    // 3. Populate memberIds for these channels
-    const { data: allMembers } = await supabaseAdmin
-      .from('hq_chat_members')
-      .select('channel_id, user_id')
-      .in('channel_id', channelIds);
-
-    return channels.map((row: any) => {
-      const channel = rowToChatChannel(row);
-      if (allMembers) {
-        channel.memberIds = allMembers
-          .filter((m: any) => m.channel_id === channel.id)
-          .map((m: any) => m.user_id);
+      if (memberErr) {
+        console.error('getChatChannelsForUser member error:', memberErr);
       }
-      return channel;
-    });
+
+      const userMemberChannelIds = (memberData || []).map((m: any) => m.channel_id);
+
+      // 2. Fetch all channels
+      const { data: allChannels, error: chanErr } = await supabaseAdmin
+        .from('hq_chat_channels')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (chanErr) {
+        console.error('getChatChannelsForUser channel error:', chanErr);
+        throw new Error(chanErr.message);
+      }
+
+      if (!allChannels || allChannels.length === 0) return [];
+
+      // 3. Filter visible channels:
+      // - Group channels are visible to all employees
+      // - Direct messages are visible if the user is a member or the creator
+      const visibleChannels = allChannels.filter((c: any) => {
+        if (c.type === 'group') return true;
+        return userMemberChannelIds.includes(c.id) || c.created_by === userId;
+      });
+
+      const channelIds = visibleChannels.map((c: any) => c.id);
+      if (channelIds.length === 0) return [];
+
+      // 4. Fetch all members for visible channels
+      const { data: allMembers } = await supabaseAdmin
+        .from('hq_chat_members')
+        .select('channel_id, user_id')
+        .in('channel_id', channelIds);
+
+      return visibleChannels.map((row: any) => {
+        const channel = rowToChatChannel(row);
+        if (allMembers) {
+          channel.memberIds = allMembers
+            .filter((m: any) => m.channel_id === channel.id)
+            .map((m: any) => m.user_id);
+        }
+        if (!channel.memberIds || channel.memberIds.length === 0) {
+          channel.memberIds = [channel.createdBy];
+        }
+        return channel;
+      });
+    } catch (e: any) {
+      console.error('getChatChannelsForUser exception:', e);
+      throw e;
+    }
   },
 
   async createChatChannel(channel: Omit<ChatChannel, 'createdAt' | 'updatedAt'>, memberIds: string[]): Promise<ChatChannel> {
@@ -936,19 +962,26 @@ export const serverDb = {
       created_by: channel.createdBy,
     }).select().single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('createChatChannel insert error:', error);
+      throw new Error(error.message);
+    }
     
     // Insert members
-    const members = memberIds.map(userId => ({
+    const uniqueMembers = Array.from(new Set([...memberIds, channel.createdBy]));
+    const members = uniqueMembers.map(userId => ({
       channel_id: channel.id,
       user_id: userId,
       role: userId === channel.createdBy ? 'admin' : 'member'
     }));
     
-    await supabaseAdmin.from('hq_chat_members').insert(members);
+    const { error: memberError } = await supabaseAdmin.from('hq_chat_members').insert(members);
+    if (memberError) {
+      console.warn('createChatChannel members insert warning:', memberError);
+    }
 
     const newChannel = rowToChatChannel(data);
-    newChannel.memberIds = memberIds;
+    newChannel.memberIds = uniqueMembers;
     return newChannel;
   },
 
@@ -956,13 +989,18 @@ export const serverDb = {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('hq_chat_messages')
       .select('*')
       .eq('channel_id', channelId)
       .gte('created_at', sevenDaysAgo.toISOString())
       .order('created_at', { ascending: false })
       .limit(limit);
+      
+    if (error) {
+      console.error('getChatMessages error:', error);
+      throw new Error(error.message);
+    }
       
     return (data || []).map(rowToChatMessage).reverse(); // Return chronological
   },
@@ -973,10 +1011,13 @@ export const serverDb = {
       channel_id: message.channelId,
       sender_id: message.senderId,
       content: message.content,
-      references: message.references,
+      references: message.references || [],
     }).select().single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('insertChatMessage error:', error);
+      throw new Error(error.message);
+    }
     return rowToChatMessage(data);
   }
 };

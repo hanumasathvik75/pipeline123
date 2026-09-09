@@ -14,9 +14,9 @@ export async function GET(request: Request) {
 
     const channels = await serverDb.getChatChannelsForUser(userId);
     return NextResponse.json({ channels });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get channels:', error);
-    return NextResponse.json({ error: 'Failed to read channels' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to read channels' }, { status: 500 });
   }
 }
 
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
 
     const newChannel = await serverDb.createChatChannel(channel, memberIds);
     return NextResponse.json({ channel: newChannel });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to create channel:', error);
-    return NextResponse.json({ error: 'Failed to create channel' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to create channel' }, { status: 500 });
   }
 }

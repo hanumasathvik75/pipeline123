@@ -15,9 +15,9 @@ export async function GET(request: Request) {
 
     const messages = await serverDb.getChatMessages(channelId, limit);
     return NextResponse.json({ messages });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get messages:', error);
-    return NextResponse.json({ error: 'Failed to read messages' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to read messages' }, { status: 500 });
   }
 }
 
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
 
     const newMessage = await serverDb.insertChatMessage(body);
     return NextResponse.json({ message: newMessage });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to insert message:', error);
-    return NextResponse.json({ error: 'Failed to insert message' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to insert message' }, { status: 500 });
   }
 }
