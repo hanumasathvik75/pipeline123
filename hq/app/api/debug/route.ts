@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const results: Record<string, any> = {
     env: {
@@ -17,7 +19,7 @@ export async function GET() {
   }
   results.supabaseClient = 'OK';
 
-  // Try to list tables
+  // Check hq_users
   try {
     const { data, error } = await supabaseAdmin
       .from('hq_users')
@@ -25,12 +27,28 @@ export async function GET() {
       .limit(5);
 
     if (error) {
-      results.tableQuery = { error: error.message, code: error.code };
+      results.usersTable = { error: error.message, code: error.code };
     } else {
-      results.tableQuery = { rowCount: data?.length ?? 0, rows: data };
+      results.usersTable = { rowCount: data?.length ?? 0 };
     }
   } catch (e: any) {
-    results.tableQuery = { exception: e.message };
+    results.usersTable = { exception: e.message };
+  }
+
+  // Check hq_chat_channels
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('hq_chat_channels')
+      .select('*')
+      .limit(5);
+
+    if (error) {
+      results.chatChannels = { error: error.message, code: error.code };
+    } else {
+      results.chatChannels = { ok: true, count: data?.length ?? 0, rows: data };
+    }
+  } catch (e: any) {
+    results.chatChannels = { exception: e.message };
   }
 
   return NextResponse.json(results);

@@ -1,5 +1,5 @@
--- Migration for Chat Tables (Safe and Idempotent)
--- Run this in your Supabase SQL Editor
+-- Migration for Chat Tables (Safe, Idempotent, with Full Role Grants)
+-- Run this in your Supabase SQL Editor to fix "permission denied" errors
 
 CREATE TABLE IF NOT EXISTS public.hq_chat_channels (
     id TEXT PRIMARY KEY,
@@ -29,12 +29,35 @@ CREATE TABLE IF NOT EXISTS public.hq_chat_messages (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Match the rest of HQ tables: custom session auth via API routes (bypasses RLS)
+-- Ensure postgres is table owner
+ALTER TABLE public.hq_chat_channels OWNER TO postgres;
+ALTER TABLE public.hq_chat_members OWNER TO postgres;
+ALTER TABLE public.hq_chat_messages OWNER TO postgres;
+
+-- 1. CRITICAL: Grant all permissions to all roles (anon, authenticated, service_role, postgres)
+-- This fixes the "permission denied for table hq_chat_channels" error
+GRANT ALL ON TABLE public.hq_chat_channels TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.hq_chat_members TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.hq_chat_messages TO postgres, anon, authenticated, service_role;
+
+-- 2. Disable Row Level Security (matches rest of HQ schema)
 ALTER TABLE public.hq_chat_channels DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_chat_members DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hq_chat_messages DISABLE ROW LEVEL SECURITY;
 
--- Safely add to realtime publication if not already present
+-- 3. In case RLS is ever re-enabled, set open policies as a fallback
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "allow_all_channels" ON public.hq_chat_channels;
+  DROP POLICY IF EXISTS "allow_all_members" ON public.hq_chat_members;
+  DROP POLICY IF EXISTS "allow_all_messages" ON public.hq_chat_messages;
+  
+  CREATE POLICY "allow_all_channels" ON public.hq_chat_channels FOR ALL USING (true) WITH CHECK (true);
+  CREATE POLICY "allow_all_members" ON public.hq_chat_members FOR ALL USING (true) WITH CHECK (true);
+  CREATE POLICY "allow_all_messages" ON public.hq_chat_messages FOR ALL USING (true) WITH CHECK (true);
+END $$;
+
+-- 4. Safely add to realtime publication
 DO $$
 BEGIN
   BEGIN
