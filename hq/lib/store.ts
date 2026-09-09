@@ -304,7 +304,7 @@ export const useHQStore = create<HQStore>()(
         const user = get().currentUser;
         if (!user) return { success: false, error: 'Not logged in' };
         try {
-          const res = await fetch(`/api/chat/messages?messageId=${messageId}&userId=${user.id}&userRole=${user.role}`, {
+          const res = await fetch(`/api/chat/messages?messageId=${messageId}&userId=${user.id}`, {
             method: 'DELETE',
           });
           const data = await res.json();

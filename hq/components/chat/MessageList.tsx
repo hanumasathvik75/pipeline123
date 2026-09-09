@@ -113,7 +113,7 @@ export default function MessageList({ channelId }: { channelId: string }) {
           prevMsg.senderId === msg.senderId && 
           (new Date(msg.createdAt).getTime() - new Date(prevMsg.createdAt).getTime() < 4 * 60000);
 
-        const canDelete = isCurrentUser || currentUser?.role === 'c_level';
+        const canDelete = isCurrentUser;
 
         return (
           <div 

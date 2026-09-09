@@ -42,13 +42,12 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const messageId = searchParams.get('messageId');
     const userId = searchParams.get('userId');
-    const userRole = searchParams.get('userRole') || 'member';
 
     if (!messageId || !userId) {
       return NextResponse.json({ error: 'messageId and userId are required' }, { status: 400 });
     }
 
-    await serverDb.deleteChatMessage(messageId, userId, userRole);
+    await serverDb.deleteChatMessage(messageId, userId);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Failed to delete message:', error);

@@ -1040,7 +1040,7 @@ export const serverDb = {
     return true;
   },
 
-  async deleteChatMessage(messageId: string, userId: string, userRole: string): Promise<boolean> {
+  async deleteChatMessage(messageId: string, userId: string): Promise<boolean> {
     const { data: msg, error: findError } = await supabaseAdmin
       .from('hq_chat_messages')
       .select('sender_id')
@@ -1048,8 +1048,8 @@ export const serverDb = {
       .single();
 
     if (findError || !msg) throw new Error('Message not found');
-    if (msg.sender_id !== userId && userRole !== 'c_level') {
-      throw new Error('Unauthorized to delete this message');
+    if (msg.sender_id !== userId) {
+      throw new Error('You can only delete your own messages');
     }
 
     const { error: delError } = await supabaseAdmin.from('hq_chat_messages').delete().eq('id', messageId);
