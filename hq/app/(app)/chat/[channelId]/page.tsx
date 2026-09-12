@@ -118,8 +118,8 @@ export default function ChannelPage({ params }: { params: Promise<{ channelId: s
               title="Delete Channel"
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.35rem',
-                background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)',
-                border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px',
+                background: 'rgba(0, 0, 0, 0.1)', color: 'var(--danger)',
+                border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: '6px',
                 padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer'
               }}

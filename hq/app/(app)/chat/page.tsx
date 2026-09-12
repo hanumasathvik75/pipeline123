@@ -72,8 +72,8 @@ export default function ChatPage() {
       <div style={{ maxWidth: '720px', width: '100%' }}>
         {/* Welcome Banner */}
         <div style={{ 
-          background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(249, 115, 22, 0.04) 100%)',
-          border: '1px solid rgba(234, 88, 12, 0.2)',
+          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.04) 100%)',
+          border: '1px solid rgba(0, 0, 0, 0.2)',
           borderRadius: '16px',
           padding: '1.5rem 1rem',
           marginBottom: '1.5rem',

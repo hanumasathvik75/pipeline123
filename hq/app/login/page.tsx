@@ -105,9 +105,9 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8 }}>
-                <AlertCircle size={14} color="#ef4444" />
-                <span style={{ fontSize: '0.8rem', color: '#f87171' }}>{error}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: 8 }}>
+                <AlertCircle size={14} color="#000000" />
+                <span style={{ fontSize: '0.8rem', color: '#000000' }}>{error}</span>
               </div>
             )}
 

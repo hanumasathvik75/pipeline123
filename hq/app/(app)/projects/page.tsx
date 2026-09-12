@@ -13,8 +13,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  product: '#6366f1', rd: '#a78bfa', bizdev: '#10b981',
-  operations: '#f59e0b', fundraising: '#f97316', internal: '#94a3b8',
+  product: '#000000', rd: '#000000', bizdev: '#000000',
+  operations: '#000000', fundraising: '#000000', internal: '#000000',
 };
 
 export default function ProjectsPage() {
@@ -160,8 +160,8 @@ export default function ProjectsPage() {
             className="btn btn-sm"
             style={{
               background: filter === f ? 'var(--accent-muted)' : 'var(--bg-elevated)',
-              color: filter === f ? '#818cf8' : 'var(--text-secondary)',
-              border: `1px solid ${filter === f ? 'rgba(99,102,241,0.3)' : 'var(--border)'}`,
+              color: filter === f ? '#000000' : 'var(--text-secondary)',
+              border: `1px solid ${filter === f ? 'rgba(0, 0, 0, 0.3)' : 'var(--border)'}`,
             }}
           >
             {f === 'all' ? 'All' : f === 'in_progress' ? 'In Progress' : f === 'rd' ? 'R&D' : f === 'bizdev' ? 'Biz Dev' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
                      <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
                         <Edit2 size={14} />
                      </button>
-                     <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#ef4444' }}>
+                     <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#000000' }}>
                         <Trash2 size={14} />
                      </button>
                   </div>
@@ -199,7 +199,7 @@ export default function ProjectsPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
                         <span style={{
                           width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                          background: CATEGORY_COLORS[p.category] || '#6366f1',
+                          background: CATEGORY_COLORS[p.category] || '#000000',
                         }} />
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                           {CATEGORY_LABELS[p.category]}
@@ -215,7 +215,7 @@ export default function ProjectsPage() {
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Progress</span>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: p.progress >= 70 ? '#10b981' : p.progress >= 40 ? '#818cf8' : '#f59e0b' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: p.progress >= 70 ? '#000000' : p.progress >= 40 ? '#000000' : '#000000' }}>
                         {p.progress}%
                       </span>
                     </div>
@@ -234,7 +234,7 @@ export default function ProjectsPage() {
                       {members.slice(0, 3).map((m, i) => m && (
                         <div key={m.id} className="avatar" style={{
                           width: 24, height: 24, fontSize: '0.55rem',
-                          background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+                          background: 'linear-gradient(135deg, #000000, #000000)',
                           marginLeft: i > 0 ? -6 : 0, border: '2px solid var(--bg-surface)',
                         }}>
                           {getInitials(m.name)}
@@ -243,7 +243,7 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '0.7rem', color: daysUntil(p.targetDate) <= 14 ? '#ef4444' : 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '0.7rem', color: daysUntil(p.targetDate) <= 14 ? '#000000' : 'var(--text-muted)' }}>
                     {daysUntil(p.targetDate) > 0 ? `Due in ${daysUntil(p.targetDate)} days` : `${Math.abs(daysUntil(p.targetDate))} days overdue`}
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function ProjectsPage() {
                     <td>
                       {owner && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <div className="avatar" style={{ width: 22, height: 22, fontSize: '0.55rem', background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+                          <div className="avatar" style={{ width: 22, height: 22, fontSize: '0.55rem', background: 'linear-gradient(135deg, #000000, #000000)' }}>
                             {getInitials(owner.name)}
                           </div>
                           <span style={{ fontSize: '0.8rem' }}>{owner.name}</span>
@@ -300,7 +300,7 @@ export default function ProjectsPage() {
                     </td>
                     <td><span className={`badge ${priorityColor(p.priority)}`}>{p.priority}</span></td>
                     <td><span className={`badge ${statusColor(p.status)}`}>{statusLabel(p.status)}</span></td>
-                    <td style={{ fontSize: '0.8rem', color: daysUntil(p.targetDate) <= 14 ? '#ef4444' : 'var(--text-secondary)' }}>
+                    <td style={{ fontSize: '0.8rem', color: daysUntil(p.targetDate) <= 14 ? '#000000' : 'var(--text-secondary)' }}>
                       {new Date(p.targetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </td>
                     <td style={{ textAlign: 'right' }}>
@@ -308,7 +308,7 @@ export default function ProjectsPage() {
                           <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
                             <Edit2 size={14} />
                           </button>
-                          <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#ef4444' }}>
+                          <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#000000' }}>
                             <Trash2 size={14} />
                           </button>
                         </div>

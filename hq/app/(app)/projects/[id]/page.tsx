@@ -44,8 +44,8 @@ export default function ProjectDetailPage() {
   };
 
   const CATEGORY_COLORS: Record<string, string> = {
-    product: '#6366f1', rd: '#a78bfa', bizdev: '#10b981',
-    operations: '#f59e0b', fundraising: '#f97316', internal: '#94a3b8',
+    product: '#000000', rd: '#000000', bizdev: '#000000',
+    operations: '#000000', fundraising: '#000000', internal: '#000000',
   };
 
   const handleDelete = () => {
@@ -97,8 +97,8 @@ export default function ProjectDetailPage() {
             </span>
             <span className={`badge ${statusColor(project.status)}`}>{statusLabel(project.status)}</span>
             <span style={{
-              fontSize: '0.75rem', color: CATEGORY_COLORS[project.category] || '#818cf8',
-              background: `${CATEGORY_COLORS[project.category] || '#6366f1'}15`,
+              fontSize: '0.75rem', color: CATEGORY_COLORS[project.category] || '#000000',
+              background: `${CATEGORY_COLORS[project.category] || '#000000'}15`,
               padding: '0.125rem 0.5rem', borderRadius: 99, fontWeight: 600,
             }}>
               {project.category}
@@ -108,7 +108,7 @@ export default function ProjectDetailPage() {
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(true)}>
                 <Edit2 size={16} />
               </button>
-              <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#ef4444' }}>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
                 <Trash2 size={16} />
               </button>
             </div>
@@ -119,7 +119,7 @@ export default function ProjectDetailPage() {
         </div>
         <div className="card" style={{ padding: '1rem 1.25rem', flexShrink: 0, minWidth: 200 }}>
           <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: project.progress >= 70 ? '#10b981' : '#818cf8', letterSpacing: '-0.04em' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: project.progress >= 70 ? '#000000' : '#000000', letterSpacing: '-0.04em' }}>
               {project.progress}%
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Complete</div>
@@ -127,7 +127,7 @@ export default function ProjectDetailPage() {
           <div className="progress-bar" style={{ height: 8 }}>
             <div className={`progress-fill${project.progress >= 70 ? ' success' : ''}`} style={{ width: `${project.progress}%` }} />
           </div>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: daysUntil(project.targetDate) <= 14 ? '#ef4444' : 'var(--text-muted)', textAlign: 'center' }}>
+          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: daysUntil(project.targetDate) <= 14 ? '#000000' : 'var(--text-muted)', textAlign: 'center' }}>
             {daysUntil(project.targetDate) > 0
               ? `${daysUntil(project.targetDate)} days remaining`
               : `${Math.abs(daysUntil(project.targetDate))} days overdue`}
@@ -142,7 +142,7 @@ export default function ProjectDetailPage() {
           {/* Tasks Kanban */}
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <CheckSquare size={16} color="#3b82f6" />
+              <CheckSquare size={16} color="#000000" />
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Tasks ({projectTasks.length})</span>
             </div>
             <div style={{ padding: '1rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
@@ -166,7 +166,7 @@ export default function ProjectDetailPage() {
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <span className={`badge ${priorityColor(t.priority)}`} style={{ fontSize: '0.6rem' }}>{t.priority}</span>
                             {assignee && (
-                              <div className="avatar" style={{ width: 18, height: 18, fontSize: '0.45rem', background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+                              <div className="avatar" style={{ width: 18, height: 18, fontSize: '0.45rem', background: 'linear-gradient(135deg, #000000, #000000)' }}>
                                 {getInitials(assignee.name)}
                               </div>
                             )}
@@ -183,7 +183,7 @@ export default function ProjectDetailPage() {
           {/* Milestones */}
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <Target size={16} color="#10b981" />
+              <Target size={16} color="#000000" />
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Milestones</span>
             </div>
             <div style={{ padding: '0.75rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -191,8 +191,8 @@ export default function ProjectDetailPage() {
                 <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{
                     width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                    border: `2px solid ${m.completed ? '#10b981' : 'var(--border)'}`,
-                    background: m.completed ? '#10b981' : 'transparent',
+                    border: `2px solid ${m.completed ? '#000000' : 'var(--border)'}`,
+                    background: m.completed ? '#000000' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {m.completed && <Check size={12} color="white" />}
@@ -202,7 +202,7 @@ export default function ProjectDetailPage() {
                       {m.title}
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: m.completed ? '#10b981' : daysUntil(m.dueDate) <= 7 ? '#ef4444' : 'var(--text-muted)', flexShrink: 0 }}>
+                  <div style={{ fontSize: '0.75rem', color: m.completed ? '#000000' : daysUntil(m.dueDate) <= 7 ? '#000000' : 'var(--text-muted)', flexShrink: 0 }}>
                     {formatDate(m.dueDate)}
                   </div>
                 </div>
@@ -214,14 +214,14 @@ export default function ProjectDetailPage() {
           {project.risks.length > 0 && (
             <div className="card" style={{ overflow: 'hidden' }}>
               <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <AlertTriangle size={16} color="#f59e0b" />
+                <AlertTriangle size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Risks</span>
               </div>
               <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 {project.risks.map(r => (
-                  <div key={r.id} style={{ padding: '0.875rem', background: r.severity === 'high' ? 'rgba(239,68,68,0.05)' : 'var(--bg-elevated)', borderRadius: 8, border: `1px solid ${r.severity === 'high' ? 'rgba(239,68,68,0.2)' : 'var(--border)'}` }}>
+                  <div key={r.id} style={{ padding: '0.875rem', background: r.severity === 'high' ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-elevated)', borderRadius: 8, border: `1px solid ${r.severity === 'high' ? 'rgba(0, 0, 0, 0.2)' : 'var(--border)'}` }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <AlertTriangle size={14} color={r.severity === 'high' ? '#ef4444' : r.severity === 'medium' ? '#f59e0b' : '#94a3b8'} style={{ flexShrink: 0, marginTop: 1 }} />
+                      <AlertTriangle size={14} color={r.severity === 'high' ? '#000000' : r.severity === 'medium' ? '#000000' : '#000000'} style={{ flexShrink: 0, marginTop: 1 }} />
                       <div>
                         <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>{r.description}</div>
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Mitigation: {r.mitigation}</div>
@@ -254,7 +254,7 @@ export default function ProjectDetailPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {members.map(m => m && (
                   <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                    <div className="avatar" style={{ width: 26, height: 26, fontSize: '0.6rem', background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+                    <div className="avatar" style={{ width: 26, height: 26, fontSize: '0.6rem', background: 'linear-gradient(135deg, #000000, #000000)' }}>
                       {getInitials(m.name)}
                     </div>
                     <div>
@@ -282,7 +282,7 @@ export default function ProjectDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {project.objectives.map((obj, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1', flexShrink: 0, marginTop: 7 }} />
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#000000', flexShrink: 0, marginTop: 7 }} />
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{obj}</span>
                 </div>
               ))}

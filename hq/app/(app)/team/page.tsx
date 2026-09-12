@@ -11,14 +11,14 @@ import {
 } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  c_level: { label: 'Cofounder', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
-  executive: { label: 'Executive Team', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
-  founder: { label: 'Cofounder', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
-  coo: { label: 'Operations & BD Lead', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  engineering: { label: 'Lead Engineer', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
-  ml_rd: { label: 'Lead AI Scientist', color: '#c084fc', bg: 'rgba(192,132,252,0.12)' },
-  bizdev: { label: 'Business Development', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-  intern: { label: 'Intern', color: '#f472b6', bg: 'rgba(244,114,182,0.12)' },
+  c_level: { label: 'Cofounder', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  executive: { label: 'Executive Team', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  founder: { label: 'Cofounder', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  coo: { label: 'Operations & BD Lead', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  engineering: { label: 'Lead Engineer', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  ml_rd: { label: 'Lead AI Scientist', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  bizdev: { label: 'Business Development', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  intern: { label: 'Intern', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
 };
 
 export default function TeamPage() {
@@ -130,7 +130,7 @@ export default function TeamPage() {
       {/* KPI Stats */}
       <div className="grid-stats">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#818cf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Users size={20} />
           </div>
           <div>
@@ -140,7 +140,7 @@ export default function TeamPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Briefcase size={20} />
           </div>
           <div>
@@ -150,7 +150,7 @@ export default function TeamPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <CheckCircle2 size={20} />
           </div>
           <div>
@@ -160,7 +160,7 @@ export default function TeamPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <AlertCircle size={20} />
           </div>
           <div>
@@ -205,7 +205,7 @@ export default function TeamPage() {
           >
             Pending Approvals
             {pendingUsers.length > 0 && (
-              <span style={{ background: '#ef4444', color: '#fff', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '1rem' }}>
+              <span style={{ background: '#000000', color: '#fff', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '1rem' }}>
                 {pendingUsers.length}
               </span>
             )}
@@ -270,7 +270,7 @@ export default function TeamPage() {
                       width: 48,
                       height: 48,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      background: 'linear-gradient(135deg, #000000, #000000)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -292,7 +292,7 @@ export default function TeamPage() {
                     </div>
 
                     {/* Explicit Designation */}
-                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#818cf8', marginTop: '0.15rem' }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#000000', marginTop: '0.15rem' }}>
                       {member.designation || roleMeta.label}
                     </div>
 
@@ -350,14 +350,14 @@ export default function TeamPage() {
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#000000' }}>
                       {inProgressCount}
                     </div>
                     <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Active</div>
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: member.overdueTasks > 0 ? '#ef4444' : '#10b981' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: member.overdueTasks > 0 ? '#000000' : '#000000' }}>
                       {member.overdueTasks}
                     </div>
                     <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Overdue</div>
@@ -412,7 +412,7 @@ export default function TeamPage() {
                   </button>
                   <button 
                     onClick={() => rejectMember(user.id)}
-                    className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                    className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', color: '#000000', border: '1px solid rgba(0, 0, 0, 0.3)' }}>
                     Reject
                   </button>
                 </div>
@@ -444,9 +444,9 @@ export default function TeamPage() {
               <div style={{
                 padding: '0.75rem 1rem', borderRadius: 'var(--radius)', marginBottom: '1rem',
                 fontSize: '0.8rem',
-                background: feedback.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                border: `1px solid ${feedback.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                color: feedback.type === 'success' ? '#10b981' : '#f87171',
+                background: feedback.type === 'success' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                border: `1px solid ${feedback.type === 'success' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.3)'}`,
+                color: feedback.type === 'success' ? '#000000' : '#000000',
               }}>
                 {feedback.message}
               </div>

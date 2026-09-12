@@ -10,10 +10,10 @@ import {
 } from 'lucide-react';
 
 const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> = {
-  internal: { label: 'Internal Sync', color: '#818cf8', bg: 'rgba(99, 102, 241, 0.12)' },
-  external: { label: 'Client / External', color: '#34d399', bg: 'rgba(52, 211, 153, 0.12)' },
-  investor: { label: 'Investor', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.12)' },
-  mentor: { label: 'Advisory / Mentor', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.12)' },
+  internal: { label: 'Internal Sync', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  external: { label: 'Client / External', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  investor: { label: 'Investor', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  mentor: { label: 'Advisory / Mentor', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
 };
 
 export default function MeetingsPage() {
@@ -91,8 +91,8 @@ export default function MeetingsPage() {
             className="btn btn-sm"
             style={{
               background: filterType === type ? 'var(--accent-muted)' : 'var(--bg-elevated)',
-              color: filterType === type ? '#818cf8' : 'var(--text-secondary)',
-              border: `1px solid ${filterType === type ? 'rgba(99,102,241,0.3)' : 'var(--border)'}`,
+              color: filterType === type ? '#000000' : 'var(--text-secondary)',
+              border: `1px solid ${filterType === type ? 'rgba(0, 0, 0, 0.3)' : 'var(--border)'}`,
             }}
           >
             {type === 'all' ? 'All Meetings' : TYPE_COLORS[type]?.label || type}
@@ -107,7 +107,7 @@ export default function MeetingsPage() {
           {/* Upcoming section */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <Clock size={14} style={{ color: '#38bdf8' }} />
+              <Clock size={14} style={{ color: '#000000' }} />
               <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
                 Upcoming ({upcomingMeetings.length})
               </h3>
@@ -369,7 +369,7 @@ export default function MeetingsPage() {
           padding: '1rem',
           cursor: 'pointer',
           border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border)',
-          background: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'var(--bg-card)',
+          background: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-card)',
           transition: 'all 0.15s ease',
         }}
       >
@@ -407,7 +407,7 @@ export default function MeetingsPage() {
                 title={p?.name}
                 style={{
                   width: 22, height: 22, borderRadius: '50%',
-                  background: '#6366f1', color: '#fff',
+                  background: '#000000', color: '#fff',
                   fontSize: '0.6rem', fontWeight: 700,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginLeft: idx === 0 ? 0 : -6,
@@ -426,7 +426,7 @@ export default function MeetingsPage() {
 
           {/* Action items badge */}
           {m.actionItems.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: pendingActions > 0 ? '#f59e0b' : '#10b981' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: pendingActions > 0 ? '#000000' : '#000000' }}>
               <ListTodo size={12} />
               <span>{pendingActions} action{pendingActions === 1 ? '' : 's'} pending</span>
             </div>
@@ -477,7 +477,7 @@ export default function MeetingsPage() {
           </div>
           <button 
             className="btn btn-icon btn-ghost btn-sm" 
-            style={{ color: '#ef4444' }}
+            style={{ color: '#000000' }}
             onClick={() => {
               if (window.confirm('Are you sure you want to delete this meeting?')) {
                 deleteMeeting(meeting.id);
@@ -506,7 +506,7 @@ export default function MeetingsPage() {
                   fontSize: '0.75rem'
                 }}
               >
-                <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#6366f1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700 }}>
+                <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#000000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700 }}>
                   {p ? getInitials(p.name) : '?'}
                 </div>
                 <span>{p?.name}</span>
@@ -568,15 +568,15 @@ export default function MeetingsPage() {
                   style={{
                     display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
                     padding: '0.75rem', borderRadius: 'var(--radius)',
-                    background: item.completed ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-elevated)',
-                    border: `1px solid ${item.completed ? 'rgba(16, 185, 129, 0.2)' : 'var(--border)'}`,
+                    background: item.completed ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-elevated)',
+                    border: `1px solid ${item.completed ? 'rgba(0, 0, 0, 0.2)' : 'var(--border)'}`,
                     gap: '0.75rem',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flex: 1, minWidth: 0 }}>
                     <CheckCircle2
                       size={16}
-                      style={{ color: item.completed ? '#10b981' : 'var(--text-muted)', flexShrink: 0 }}
+                      style={{ color: item.completed ? '#000000' : 'var(--text-muted)', flexShrink: 0 }}
                     />
                     <div style={{ minWidth: 0 }}>
                       <div style={{
@@ -597,7 +597,7 @@ export default function MeetingsPage() {
                   {/* Convert to Task CTA or Converted Badge */}
                   <div>
                     {item.convertedToTask ? (
-                      <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
                         <Check size={11} /> Converted to Task
                       </span>
                     ) : (

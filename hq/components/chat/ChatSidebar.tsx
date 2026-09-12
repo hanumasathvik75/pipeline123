@@ -156,8 +156,8 @@ export default function ChatSidebar() {
 
       {sidebarError && (
         <div style={{ 
-          margin: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', fontSize: '0.75rem', 
+          margin: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(0, 0, 0, 0.1)', 
+          border: '1px solid rgba(0, 0, 0, 0.3)', borderRadius: '6px', fontSize: '0.75rem', 
           color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.375rem' 
         }}>
           <AlertCircle size={14} style={{ flexShrink: 0 }} />

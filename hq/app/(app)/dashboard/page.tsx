@@ -80,7 +80,7 @@ export default function DashboardPage() {
       label: p.name,
       progress: p.progress,
       stage: p.status === 'done' ? 'Completed' : (p.status === 'in_progress' ? 'In Progress' : 'Planned'),
-      color: p.progress >= 75 ? '#10b981' : (p.progress >= 40 ? '#818cf8' : '#f59e0b')
+      color: p.progress >= 75 ? '#000000' : (p.progress >= 40 ? '#000000' : '#000000')
     }));
   const upcomingMeetings = meetings.filter(m => m.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
   const totalLeads = leads.length;
@@ -107,11 +107,11 @@ export default function DashboardPage() {
         </div>
         <div style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+          background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)',
           borderRadius: 8, padding: '0.5rem 0.875rem',
         }}>
-          <AlertTriangle size={14} color="#ef4444" />
-          <span style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 600 }}>
+          <AlertTriangle size={14} color="#000000" />
+          <span style={{ fontSize: '0.8rem', color: '#000000', fontWeight: 600 }}>
             {blockedTasks.length} blocked · {atRiskProjects.length} at risk
           </span>
         </div>
@@ -119,10 +119,10 @@ export default function DashboardPage() {
 
       {/* Top stats */}
       <div className="grid-4">
-        <StatWidget icon={FolderKanban} label="Active Projects" value={activeProjects.length} sub={`${atRiskProjects.length} at risk`} accent="#6366f1" link="/projects" />
-        <StatWidget icon={CheckSquare} label="Tasks In Progress" value={inProgressTasks.length} sub={`${blockedTasks.length} blocked`} accent="#3b82f6" link="/tasks" />
-        <StatWidget icon={Building2} label="CRM Leads" value={totalLeads} sub={`${pilotLeads} in pilot/meetings`} accent="#10b981" link="/crm" />
-        <StatWidget icon={TrendingUp} label="Active Investors" value={activeInvestors} sub="Pre-seed round" accent="#f59e0b" link="/fundraising" />
+        <StatWidget icon={FolderKanban} label="Active Projects" value={activeProjects.length} sub={`${atRiskProjects.length} at risk`} accent="#000000" link="/projects" />
+        <StatWidget icon={CheckSquare} label="Tasks In Progress" value={inProgressTasks.length} sub={`${blockedTasks.length} blocked`} accent="#000000" link="/tasks" />
+        <StatWidget icon={Building2} label="CRM Leads" value={totalLeads} sub={`${pilotLeads} in pilot/meetings`} accent="#000000" link="/crm" />
+        <StatWidget icon={TrendingUp} label="Active Investors" value={activeInvestors} sub="Pre-seed round" accent="#000000" link="/fundraising" />
       </div>
 
       {/* Main grid */}
@@ -135,10 +135,10 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <FolderKanban size={16} color="#6366f1" />
+                <FolderKanban size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Active Projects</span>
               </div>
-              <Link href="/projects" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#818cf8', textDecoration: 'none', fontWeight: 500 }}>
+              <Link href="/projects" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
                 View all <ArrowRight size={12} />
               </Link>
             </div>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                   >
                     <div style={{
                       width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                      background: p.priority === 'critical' ? '#ef4444' : p.priority === 'high' ? '#f97316' : '#6366f1',
+                      background: p.priority === 'critical' ? '#000000' : p.priority === 'high' ? '#000000' : '#000000',
                     }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.375rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: p.progress >= 70 ? '#10b981' : 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: p.progress >= 70 ? '#000000' : 'var(--text-secondary)' }}>
                         {p.progress}%
                       </span>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -190,10 +190,10 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <CheckSquare size={16} color="#3b82f6" />
+                <CheckSquare size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Priority Tasks</span>
               </div>
-              <Link href="/tasks" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#818cf8', textDecoration: 'none', fontWeight: 500 }}>
+              <Link href="/tasks" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
                 View all <ArrowRight size={12} />
               </Link>
             </div>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
                   }}>
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                      background: t.status === 'blocked' ? '#ef4444' : t.priority === 'critical' ? '#ef4444' : '#f97316',
+                      background: t.status === 'blocked' ? '#000000' : t.priority === 'critical' ? '#000000' : '#000000',
                     }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 500, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -219,15 +219,15 @@ export default function DashboardPage() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
                       {t.status === 'blocked' && (
-                        <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                        <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.1)', color: '#000000', border: '1px solid rgba(0, 0, 0, 0.2)' }}>
                           Blocked
                         </span>
                       )}
-                      <span style={{ fontSize: '0.7rem', color: daysUntil(t.dueDate) <= 3 ? '#ef4444' : 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '0.7rem', color: daysUntil(t.dueDate) <= 3 ? '#000000' : 'var(--text-muted)' }}>
                         {daysUntil(t.dueDate) <= 0 ? 'Overdue' : `${daysUntil(t.dueDate)}d`}
                       </span>
                       {member && (
-                        <div className="avatar" style={{ width: 22, height: 22, fontSize: '0.55rem', background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+                        <div className="avatar" style={{ width: 22, height: 22, fontSize: '0.55rem', background: 'linear-gradient(135deg, #000000, #000000)' }}>
                           {getInitials(member.name)}
                         </div>
                       )}
@@ -242,10 +242,10 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <FlaskConical size={16} color="#a78bfa" />
+                <FlaskConical size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>R&D Progress</span>
               </div>
-              <Link href="/rd" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#818cf8', textDecoration: 'none', fontWeight: 500 }}>
+              <Link href="/rd" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
                 View lab <ArrowRight size={12} />
               </Link>
             </div>
@@ -287,15 +287,15 @@ export default function DashboardPage() {
               <AreaChart data={progressData}>
                 <defs>
                   <linearGradient id="vg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#000000" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#000000" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <Tooltip
                   contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '0.75rem' }}
                   cursor={false}
                 />
-                <Area type="monotone" dataKey="v" stroke="#6366f1" strokeWidth={2} fill="url(#vg)" dot={false} />
+                <Area type="monotone" dataKey="v" stroke="#000000" strokeWidth={2} fill="url(#vg)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -304,10 +304,10 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <CalendarDays size={16} color="#f59e0b" />
+                <CalendarDays size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Upcoming</span>
               </div>
-              <Link href="/meetings" style={{ fontSize: '0.7rem', color: '#818cf8', textDecoration: 'none' }}>All</Link>
+              <Link href="/meetings" style={{ fontSize: '0.7rem', color: '#000000', textDecoration: 'none' }}>All</Link>
             </div>
             <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {upcomingMeetings.length === 0 && (
@@ -338,15 +338,15 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <TrendingUp size={16} color="#10b981" />
+                <TrendingUp size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Fundraising</span>
               </div>
-              <Link href="/fundraising" style={{ fontSize: '0.7rem', color: '#818cf8', textDecoration: 'none' }}>All</Link>
+              <Link href="/fundraising" style={{ fontSize: '0.7rem', color: '#000000', textDecoration: 'none' }}>All</Link>
             </div>
             <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {investors.slice(0, 4).map(inv => {
                 const stageColors: Record<string, string> = {
-                  first_meeting: '#6366f1', application: '#f59e0b', intro: '#3b82f6', partner_meeting: '#10b981',
+                  first_meeting: '#000000', application: '#000000', intro: '#000000', partner_meeting: '#000000',
                 };
                 const stageLabels: Record<string, string> = {
                   first_meeting: 'Meeting', application: 'Application', intro: 'Intro', partner_meeting: 'Partner Mtg',
@@ -364,9 +364,9 @@ export default function DashboardPage() {
                       {inv.name}
                     </span>
                     <span className="badge" style={{
-                      background: `${stageColors[inv.stage] || '#6366f1'}18`,
-                      color: stageColors[inv.stage] || '#818cf8',
-                      border: `1px solid ${stageColors[inv.stage] || '#6366f1'}30`,
+                      background: `${stageColors[inv.stage] || '#000000'}18`,
+                      color: stageColors[inv.stage] || '#000000',
+                      border: `1px solid ${stageColors[inv.stage] || '#000000'}30`,
                     }}>
                       {stageLabels[inv.stage] || inv.stage}
                     </span>
@@ -380,14 +380,14 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <Users size={16} color="#f97316" />
+                <Users size={16} color="#000000" />
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Team ({team.length})</span>
               </div>
             </div>
             <div style={{ padding: '0.875rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {team.slice(0, 4).map(m => (
                 <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div className="avatar" style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)', width: 28, height: 28, fontSize: '0.6rem' }}>
+                  <div className="avatar" style={{ background: 'linear-gradient(135deg, #000000, #000000)', width: 28, height: 28, fontSize: '0.6rem' }}>
                     {getInitials(m.name)}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -397,7 +397,7 @@ export default function DashboardPage() {
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{m.activeTasks} active tasks</div>
                   </div>
                   {m.overdueTasks > 0 && (
-                    <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.7rem', color: '#000000', fontWeight: 600 }}>
                       {m.overdueTasks} overdue
                     </span>
                   )}

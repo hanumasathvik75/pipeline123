@@ -83,7 +83,7 @@ export default function RegisterPage() {
         <div className="card animate-fade-in" style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: 420, width: '100%' }}>
           {status === 'pending' && (
             <>
-              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
                 <Loader2 size={32} color="var(--accent)" className="animate-spin" />
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Request Submitted</h2>
@@ -98,8 +98,8 @@ export default function RegisterPage() {
           
           {status === 'active' && (
             <>
-              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                <CheckCircle2 size={32} color="#10b981" />
+              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                <CheckCircle2 size={32} color="#000000" />
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Account Approved!</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
@@ -110,8 +110,8 @@ export default function RegisterPage() {
 
            {status === 'rejected' && (
             <>
-              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                <AlertCircle size={32} color="#ef4444" />
+              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                <AlertCircle size={32} color="#000000" />
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Request Denied</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
@@ -231,9 +231,9 @@ export default function RegisterPage() {
             </div>
 
             {error && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8 }}>
-                <AlertCircle size={14} color="#ef4444" style={{ flexShrink: 0 }} />
-                <span style={{ fontSize: '0.8rem', color: '#f87171' }}>{error}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: 8 }}>
+                <AlertCircle size={14} color="#000000" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '0.8rem', color: '#000000' }}>{error}</span>
               </div>
             )}
 

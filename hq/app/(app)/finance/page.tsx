@@ -91,7 +91,7 @@ export default function FinancePage() {
       {/* KPI Stats */}
       <div className="grid-stats">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <DollarSign size={20} />
           </div>
           <div>
@@ -101,7 +101,7 @@ export default function FinancePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <TrendingDown size={20} />
           </div>
           <div>
@@ -111,7 +111,7 @@ export default function FinancePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Clock size={20} />
           </div>
           <div>
@@ -121,7 +121,7 @@ export default function FinancePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(167, 139, 250, 0.12)', color: '#a78bfa' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <ShieldCheck size={20} />
           </div>
           <div>
@@ -151,7 +151,7 @@ export default function FinancePage() {
                   className="progress-fill"
                   style={{
                     width: `${exp.percentage}%`,
-                    background: i === 0 ? 'var(--accent)' : i === 1 ? '#38bdf8' : i === 2 ? '#f59e0b' : '#a855f7'
+                    background: i === 0 ? 'var(--accent)' : i === 1 ? '#000000' : i === 2 ? '#000000' : '#000000'
                   }}
                 />
               </div>
@@ -207,7 +207,7 @@ export default function FinancePage() {
                         <input className="input" type="number" placeholder="%" value={exp.percentage} onChange={e => { const newExp = [...expenses]; newExp[i].percentage = Number(e.target.value); setExpenses(newExp); }} required style={{ paddingRight: '1.5rem' }} />
                         <span style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>%</span>
                       </div>
-                      <button type="button" onClick={() => setExpenses(expenses.filter((_, idx) => idx !== i))} className="btn-icon" style={{ color: '#ef4444' }}>
+                      <button type="button" onClick={() => setExpenses(expenses.filter((_, idx) => idx !== i))} className="btn-icon" style={{ color: '#000000' }}>
                         <Trash2 size={16} />
                       </button>
                     </div>

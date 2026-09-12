@@ -7,35 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function priorityColor(priority: Priority): string {
-  switch (priority) {
-    case 'critical': return 'text-red-400 bg-red-400/10 border-red-400/20';
-    case 'high': return 'text-orange-400 bg-orange-400/10 border-orange-400/20';
-    case 'medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
-    case 'low': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-  }
+  if (priority === 'critical') return 'text-white bg-black border-black';
+  return 'text-[#073988] bg-[#073988]/10 border-[#073988]/20';
 }
 
 export function priorityDot(priority: Priority): string {
-  switch (priority) {
-    case 'critical': return 'bg-red-400';
-    case 'high': return 'bg-orange-400';
-    case 'medium': return 'bg-yellow-400';
-    case 'low': return 'bg-emerald-400';
-  }
+  return priority === 'critical' ? 'bg-black' : 'bg-[#073988]';
 }
 
 export function statusColor(status: ProjectStatus | TaskStatus): string {
-  switch (status) {
-    case 'done': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-    case 'in_progress': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-    case 'review': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
-    case 'testing': return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
-    case 'blocked': return 'text-red-400 bg-red-400/10 border-red-400/20';
-    case 'planned': return 'text-blue-300 bg-blue-300/10 border-blue-300/20';
-    case 'backlog': return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
-    case 'on_hold': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
-    default: return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
-  }
+  if (status === 'done') return 'text-white bg-[#073988] border-[#073988]';
+  if (status === 'blocked') return 'text-white bg-black border-black';
+  return 'text-[#073988] bg-[#073988]/10 border-[#073988]/20';
 }
 
 export function statusLabel(status: ProjectStatus | TaskStatus): string {
@@ -53,16 +36,8 @@ export function statusLabel(status: ProjectStatus | TaskStatus): string {
 }
 
 export function leadStageColor(stage: LeadStage): string {
-  switch (stage) {
-    case 'customer': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-    case 'negotiation': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
-    case 'proposal': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-    case 'pilot': return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
-    case 'meeting': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
-    case 'interested': return 'text-orange-400 bg-orange-400/10 border-orange-400/20';
-    case 'contacted': return 'text-blue-300 bg-blue-300/10 border-blue-300/20';
-    case 'lead': return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
-  }
+  if (stage === 'customer') return 'text-white bg-[#073988] border-[#073988]';
+  return 'text-[#073988] bg-[#073988]/10 border-[#073988]/20';
 }
 
 export function formatCurrency(value: number, currency: string = 'INR'): string {
@@ -91,17 +66,7 @@ export function getInitials(name: string): string {
 }
 
 export function avatarColor(name: string): string {
-  const colors = [
-    'from-violet-500 to-purple-600',
-    'from-blue-500 to-cyan-600',
-    'from-emerald-500 to-teal-600',
-    'from-orange-500 to-red-600',
-    'from-pink-500 to-rose-600',
-    'from-indigo-500 to-blue-600',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
-  return colors[hash % colors.length];
+  return 'bg-[#073988] text-white';
 }
 
 export function rdStageLabel(stage: string): string {

@@ -150,7 +150,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                     style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
                     className="hover-bg"
                   >
-                    <FolderKanban size={14} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                    <FolderKanban size={14} style={{ color: '#000000', flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                   </div>
                 ))}
@@ -169,7 +169,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                     style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
                     className="hover-bg"
                   >
-                    <BookOpen size={14} style={{ color: '#10b981', flexShrink: 0 }} />
+                    <BookOpen size={14} style={{ color: '#000000', flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</span>
                   </div>
                 ))}

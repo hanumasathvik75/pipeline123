@@ -225,7 +225,7 @@ export default function TopBar() {
               <span style={{
                 position: 'absolute', top: 6, right: 6,
                 width: 6, height: 6, borderRadius: '50%',
-                background: '#ef4444', border: '1.5px solid var(--bg-surface)',
+                background: '#000000', border: '1.5px solid var(--bg-surface)',
               }} />
             )}
           </button>
@@ -238,7 +238,7 @@ export default function TopBar() {
             >
               <div
                 className="avatar"
-                style={{ width: 24, height: 24, fontSize: '0.6rem', background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}
+                style={{ width: 24, height: 24, fontSize: '0.6rem', background: 'linear-gradient(135deg, #000000, #000000)' }}
               >
                 {getInitials(currentUser.name)}
               </div>

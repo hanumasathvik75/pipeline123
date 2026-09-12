@@ -12,21 +12,21 @@ function ReferenceCard({ reference }: { reference: ChatReference }) {
   let icon = <CheckSquare size={14} className="text-primary" />;
   let href = `/tasks`;
   let badgeText = 'Task';
-  let badgeColor = 'rgba(234, 88, 12, 0.1)';
+  let badgeColor = 'rgba(0, 0, 0, 0.1)';
   let textColor = 'var(--primary)';
 
   if (reference.type === 'project') {
-    icon = <FolderKanban size={14} style={{ color: '#3b82f6' }} />;
+    icon = <FolderKanban size={14} style={{ color: '#000000' }} />;
     href = `/projects`;
     badgeText = 'Project';
-    badgeColor = 'rgba(59, 130, 246, 0.1)';
-    textColor = '#3b82f6';
+    badgeColor = 'rgba(0, 0, 0, 0.1)';
+    textColor = '#000000';
   } else if (reference.type === 'wiki') {
-    icon = <BookOpen size={14} style={{ color: '#10b981' }} />;
+    icon = <BookOpen size={14} style={{ color: '#000000' }} />;
     href = `/wiki`;
     badgeText = 'Wiki';
-    badgeColor = 'rgba(16, 185, 129, 0.1)';
-    textColor = '#10b981';
+    badgeColor = 'rgba(0, 0, 0, 0.1)';
+    textColor = '#000000';
   }
 
   return (
@@ -152,7 +152,7 @@ export default function MessageList({ channelId }: { channelId: string }) {
                   {sender?.role === 'c_level' && (
                     <span style={{ 
                       fontSize: '0.625rem', padding: '1px 5px', borderRadius: '4px', 
-                      background: 'rgba(234, 88, 12, 0.1)', color: 'var(--primary)', fontWeight: 700 
+                      background: 'rgba(0, 0, 0, 0.1)', color: 'var(--primary)', fontWeight: 700 
                     }}>
                       ADMIN
                     </span>

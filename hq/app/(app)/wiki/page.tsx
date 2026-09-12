@@ -250,7 +250,7 @@ export default function WikiPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   {isEngineering && <Cpu size={18} style={{ color: 'var(--primary)' }} />}
-                  {isResearch && <Microscope size={18} style={{ color: '#3b82f6' }} />}
+                  {isResearch && <Microscope size={18} style={{ color: '#000000' }} />}
                   <span>{cat}</span>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                     ({items.length} {items.length === 1 ? 'doc' : 'docs'})
@@ -328,9 +328,9 @@ export default function WikiPage() {
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '3rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <FileText size={18} style={{ color: doc.googleDriveUrl ? '#34d399' : (isResearch ? '#3b82f6' : 'var(--primary)') }} />
+                          <FileText size={18} style={{ color: doc.googleDriveUrl ? '#000000' : (isResearch ? '#000000' : 'var(--primary)') }} />
                           {doc.googleDriveUrl && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#34d399', background: 'rgba(52,211,153,0.1)', padding: '0.15rem 0.4rem', borderRadius: 4 }}>
+                            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#000000', background: 'rgba(0, 0, 0, 0.1)', padding: '0.15rem 0.4rem', borderRadius: 4 }}>
                               Drive
                             </span>
                           )}
@@ -364,7 +364,7 @@ export default function WikiPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 800, padding: '2rem', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
               <div>
-                <span className="badge" style={{ marginBottom: '0.5rem', background: viewingDoc.category === 'Research' ? 'rgba(59,130,246,0.15)' : 'rgba(234,88,12,0.15)', color: viewingDoc.category === 'Research' ? '#3b82f6' : 'var(--primary)' }}>
+                <span className="badge" style={{ marginBottom: '0.5rem', background: viewingDoc.category === 'Research' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(0, 0, 0, 0.15)', color: viewingDoc.category === 'Research' ? '#000000' : 'var(--primary)' }}>
                   {viewingDoc.category}
                 </span>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{viewingDoc.title}</h3>
@@ -386,7 +386,7 @@ export default function WikiPage() {
                       <ExternalLink size={14} /> Open in Google Drive
                     </a>
                   </div>
-                  <div style={{ width: '100%', height: '65vh', minHeight: '500px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f8fafc' }}>
+                  <div style={{ width: '100%', height: '65vh', minHeight: '500px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#000000' }}>
                     <iframe 
                       src={viewingDoc.googleDriveUrl.includes('drive.google.com') && !viewingDoc.googleDriveUrl.includes('/preview') 
                         ? viewingDoc.googleDriveUrl.replace(/\/view.*$/, '/preview') 
@@ -457,7 +457,7 @@ export default function WikiPage() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                       padding: '0.75rem', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 700,
                       border: !isCustomCategory && category === 'Engineering' ? '2px solid var(--primary)' : '1px solid var(--border)',
-                      background: !isCustomCategory && category === 'Engineering' ? 'rgba(234, 88, 12, 0.12)' : 'var(--bg-default)',
+                      background: !isCustomCategory && category === 'Engineering' ? 'rgba(0, 0, 0, 0.12)' : 'var(--bg-default)',
                       color: !isCustomCategory && category === 'Engineering' ? 'var(--primary)' : 'var(--text-primary)',
                       cursor: 'pointer', transition: 'all 0.15s ease'
                     }}
@@ -471,9 +471,9 @@ export default function WikiPage() {
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                       padding: '0.75rem', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 700,
-                      border: !isCustomCategory && category === 'Research' ? '2px solid #3b82f6' : '1px solid var(--border)',
-                      background: !isCustomCategory && category === 'Research' ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-default)',
-                      color: !isCustomCategory && category === 'Research' ? '#3b82f6' : 'var(--text-primary)',
+                      border: !isCustomCategory && category === 'Research' ? '2px solid #000000' : '1px solid var(--border)',
+                      background: !isCustomCategory && category === 'Research' ? 'rgba(0, 0, 0, 0.12)' : 'var(--bg-default)',
+                      color: !isCustomCategory && category === 'Research' ? '#000000' : 'var(--text-primary)',
                       cursor: 'pointer', transition: 'all 0.15s ease'
                     }}
                   >

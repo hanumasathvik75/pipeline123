@@ -12,14 +12,14 @@ import {
 import type { TeamMember } from '@/lib/types';
 
 const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  c_level: { label: 'Cofounder', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
-  executive: { label: 'Executive Team', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
-  founder: { label: 'Cofounder', color: '#818cf8', bg: 'rgba(99,102,241,0.12)' },
-  coo: { label: 'Operations & BD Lead', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  engineering: { label: 'Lead Engineer', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
-  ml_rd: { label: 'Lead AI Scientist', color: '#c084fc', bg: 'rgba(192,132,252,0.12)' },
-  bizdev: { label: 'Business Development', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-  intern: { label: 'Intern', color: '#f472b6', bg: 'rgba(244,114,182,0.12)' },
+  c_level: { label: 'Cofounder', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  executive: { label: 'Executive Team', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  founder: { label: 'Cofounder', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  coo: { label: 'Operations & BD Lead', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  engineering: { label: 'Lead Engineer', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  ml_rd: { label: 'Lead AI Scientist', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  bizdev: { label: 'Business Development', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
+  intern: { label: 'Intern', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
 };
 
 export default function MemberProfilePage() {
@@ -95,7 +95,7 @@ export default function MemberProfilePage() {
                  <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(true)}>
                      <Edit2 size={16} />
                  </button>
-                 <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#ef4444' }}>
+                 <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
                      <Trash2 size={16} />
                  </button>
              </div>
@@ -107,7 +107,7 @@ export default function MemberProfilePage() {
                 width: 64,
                 height: 64,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                background: 'linear-gradient(135deg, #000000, #000000)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -139,7 +139,7 @@ export default function MemberProfilePage() {
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#818cf8', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#000000', marginTop: '0.25rem' }}>
                 {member.designation || roleMeta.label}
               </div>
 
@@ -169,11 +169,11 @@ export default function MemberProfilePage() {
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Assigned Tasks</div>
             </div>
             <div className="card" style={{ padding: '0.75rem 1.25rem', textAlign: 'center', background: 'var(--bg-elevated)' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#38bdf8' }}>{memberProjects.length}</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#000000' }}>{memberProjects.length}</div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Initiatives</div>
             </div>
             <div className="card" style={{ padding: '0.75rem 1.25rem', textAlign: 'center', background: 'var(--bg-elevated)' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: member.overdueTasks > 0 ? '#ef4444' : '#10b981' }}>{member.overdueTasks || 0}</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: member.overdueTasks > 0 ? '#000000' : '#000000' }}>{member.overdueTasks || 0}</div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Overdue</div>
             </div>
           </div>
@@ -286,7 +286,7 @@ export default function MemberProfilePage() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                     <span>Hours: {task.actualHours} / {task.estimatedHours}h</span>
-                    <span style={{ color: due < 0 ? '#ef4444' : due <= 2 ? '#f59e0b' : 'var(--text-muted)' }}>
+                    <span style={{ color: due < 0 ? '#000000' : due <= 2 ? '#000000' : 'var(--text-muted)' }}>
                       Due: {task.dueDate} {due < 0 ? '(Overdue)' : ''}
                     </span>
                   </div>

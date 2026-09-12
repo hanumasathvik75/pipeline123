@@ -48,7 +48,7 @@ export default function RDWorkspacePage() {
       {/* KPI Stats */}
       <div className="grid-stats">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(167, 139, 250, 0.12)', color: '#a78bfa' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <FlaskConical size={20} />
           </div>
           <div>
@@ -58,7 +58,7 @@ export default function RDWorkspacePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Cpu size={20} />
           </div>
           <div>
@@ -68,7 +68,7 @@ export default function RDWorkspacePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Trophy size={20} />
           </div>
           <div>
@@ -78,7 +78,7 @@ export default function RDWorkspacePage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <BarChart3 size={20} />
           </div>
           <div>
@@ -99,8 +99,8 @@ export default function RDWorkspacePage() {
               className="btn btn-sm"
               style={{
                 background: isActive ? 'var(--accent-muted)' : 'transparent',
-                color: isActive ? '#818cf8' : 'var(--text-secondary)',
-                border: `1px solid ${isActive ? 'rgba(99,102,241,0.3)' : 'transparent'}`,
+                color: isActive ? '#000000' : 'var(--text-secondary)',
+                border: `1px solid ${isActive ? 'rgba(0, 0, 0, 0.3)' : 'transparent'}`,
                 fontWeight: isActive ? 600 : 500,
                 fontSize: '0.85rem'
               }}
@@ -117,7 +117,7 @@ export default function RDWorkspacePage() {
           <div className="card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <span className="badge" style={{ background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', marginBottom: '0.5rem' }}>
+                <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', marginBottom: '0.5rem' }}>
                   Track: {rdStageLabel(currentProject.stage)}
                 </span>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -151,7 +151,7 @@ export default function RDWorkspacePage() {
                 <span>{currentProject.progress}% complete</span>
               </div>
               <div className="progress-bar" style={{ height: 6, marginBottom: '1rem' }}>
-                <div className="progress-fill" style={{ width: `${currentProject.progress}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7)' }} />
+                <div className="progress-fill" style={{ width: `${currentProject.progress}%`, background: 'linear-gradient(90deg, #000000, #000000)' }} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.5rem' }}>
@@ -166,12 +166,12 @@ export default function RDWorkspacePage() {
                       style={{
                         padding: '0.5rem',
                         borderRadius: 'var(--radius)',
-                        background: isCurrent ? 'rgba(99, 102, 241, 0.15)' : isCompleted ? 'var(--bg-elevated)' : 'transparent',
-                        border: `1px solid ${isCurrent ? 'var(--accent)' : isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'var(--border)'}`,
+                        background: isCurrent ? 'rgba(0, 0, 0, 0.15)' : isCompleted ? 'var(--bg-elevated)' : 'transparent',
+                        border: `1px solid ${isCurrent ? 'var(--accent)' : isCompleted ? 'rgba(0, 0, 0, 0.3)' : 'var(--border)'}`,
                         textAlign: 'center',
                       }}
                     >
-                      <div style={{ fontSize: '0.65rem', color: isCompleted ? '#10b981' : isCurrent ? '#818cf8' : 'var(--text-muted)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.65rem', color: isCompleted ? '#000000' : isCurrent ? '#000000' : 'var(--text-muted)', fontWeight: 600 }}>
                         Step {idx + 1}
                       </div>
                       <div style={{ fontSize: '0.72rem', fontWeight: isCurrent ? 700 : 500, color: isCurrent ? '#fff' : 'var(--text-secondary)' }}>
@@ -238,15 +238,15 @@ export default function RDWorkspacePage() {
                       key={exp.id}
                       style={{
                         borderBottom: '1px solid var(--border)',
-                        background: exp.isBest ? 'rgba(16, 185, 129, 0.06)' : 'transparent',
+                        background: exp.isBest ? 'rgba(0, 0, 0, 0.06)' : 'transparent',
                       }}
                     >
                       <td style={{ padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <span>#{exp.number}</span>
                           {exp.isBest && (
-                            <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', fontSize: '0.65rem', border: '1px solid rgba(16, 185, 129, 0.4)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <Star size={10} fill="#10b981" /> Best SOTA
+                            <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.2)', color: '#000000', fontSize: '0.65rem', border: '1px solid rgba(0, 0, 0, 0.4)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <Star size={10} fill="#000000" /> Best SOTA
                             </span>
                           )}
                         </div>
@@ -261,10 +261,10 @@ export default function RDWorkspacePage() {
                           ))}
                         </div>
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: exp.isBest ? '#10b981' : 'var(--text-secondary)' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: exp.isBest ? '#000000' : 'var(--text-secondary)' }}>
                         {exp.rmse !== undefined ? exp.rmse.toFixed(4) : '—'}
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: exp.isBest ? '#10b981' : 'var(--text-secondary)' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: exp.isBest ? '#000000' : 'var(--text-secondary)' }}>
                         {exp.r2 !== undefined ? exp.r2.toFixed(4) : '—'}
                       </td>
                       <td style={{ padding: '0.75rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
@@ -301,7 +301,7 @@ export default function RDWorkspacePage() {
                 Run #{selectedExp.number}: {selectedExp.model}
               </h3>
               {selectedExp.isBest && (
-                <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981' }}>
+                <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.2)', color: '#000000' }}>
                   Best Model
                 </span>
               )}

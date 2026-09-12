@@ -146,7 +146,7 @@ export default function ProgressPage() {
                       />
                   </div>
                   {myLogForDate && (
-                      <div style={{ color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ color: '#000000', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <Check size={16} /> Log submitted ({myTotalHours}h total)
                       </div>
                   )}
@@ -239,7 +239,7 @@ export default function ProgressPage() {
                                   <h3 style={{ fontWeight: 700 }}>{cat.name}</h3>
                                   <div style={{ display: 'flex', gap: '0.25rem' }}>
                                       <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openCategoryModal(cat)}><Edit2 size={14}/></button>
-                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => deleteCategory(cat.id)} style={{ color: '#ef4444' }}><Trash2 size={14}/></button>
+                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => deleteCategory(cat.id)} style={{ color: '#000000' }}><Trash2 size={14}/></button>
                                   </div>
                               </div>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>

@@ -11,13 +11,13 @@ import {
 } from 'lucide-react';
 
 const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
-  { status: 'backlog', label: 'Backlog', color: '#64748b' },
-  { status: 'planned', label: 'Planned', color: '#38bdf8' },
-  { status: 'in_progress', label: 'In Progress', color: '#6366f1' },
-  { status: 'review', label: 'Review', color: '#a855f7' },
-  { status: 'testing', label: 'Testing', color: '#06b6d4' },
-  { status: 'blocked', label: 'Blocked', color: '#ef4444' },
-  { status: 'done', label: 'Done', color: '#10b981' },
+  { status: 'backlog', label: 'Backlog', color: '#000000' },
+  { status: 'planned', label: 'Planned', color: '#000000' },
+  { status: 'in_progress', label: 'In Progress', color: '#000000' },
+  { status: 'review', label: 'Review', color: '#000000' },
+  { status: 'testing', label: 'Testing', color: '#000000' },
+  { status: 'blocked', label: 'Blocked', color: '#000000' },
+  { status: 'done', label: 'Done', color: '#000000' },
 ];
 
 export default function TasksPage() {
@@ -288,7 +288,7 @@ export default function TasksPage() {
 
                         {/* Footer info: due date, hours, assignee, quick move */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border)', fontSize: '0.7rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: due < 0 ? '#ef4444' : due <= 2 ? '#f59e0b' : 'var(--text-muted)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: due < 0 ? '#000000' : due <= 2 ? '#000000' : 'var(--text-muted)' }}>
                             <Calendar size={12} />
                             <span>{due < 0 ? `${Math.abs(due)}d overdue` : due === 0 ? 'Today' : `${due}d left`}</span>
                           </div>
@@ -301,7 +301,7 @@ export default function TasksPage() {
                                   width: 22,
                                   height: 22,
                                   borderRadius: '50%',
-                                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                  background: 'linear-gradient(135deg, #000000, #000000)',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -329,7 +329,7 @@ export default function TasksPage() {
                               title="Change status"
                             >
                               {COLUMNS.map(c => (
-                                <option key={c.status} value={c.status} style={{ background: '#1e2230', color: '#fff' }}>
+                                <option key={c.status} value={c.status} style={{ background: '#000000', color: '#fff' }}>
                                   → {c.label}
                                 </option>
                               ))}
@@ -390,7 +390,7 @@ export default function TasksPage() {
                         style={{ border: 'none', cursor: 'pointer', outline: 'none' }}
                       >
                         {COLUMNS.map(c => (
-                          <option key={c.status} value={c.status} style={{ background: '#1e2230', color: '#fff' }}>
+                          <option key={c.status} value={c.status} style={{ background: '#000000', color: '#fff' }}>
                             {c.label}
                           </option>
                         ))}
@@ -404,14 +404,14 @@ export default function TasksPage() {
                     <td style={{ padding: '0.75rem' }}>
                       {assignee ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem' }}>
-                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff', fontWeight: 700 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff', fontWeight: 700 }}>
                             {getInitials(assignee.name)}
                           </div>
                           <span>{assignee.name}</span>
                         </div>
                       ) : '—'}
                     </td>
-                    <td style={{ padding: '0.75rem', fontSize: '0.78rem', color: due < 0 ? '#ef4444' : due <= 2 ? '#f59e0b' : 'var(--text-muted)' }}>
+                    <td style={{ padding: '0.75rem', fontSize: '0.78rem', color: due < 0 ? '#000000' : due <= 2 ? '#000000' : 'var(--text-muted)' }}>
                       {task.dueDate}
                     </td>
                     <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -443,7 +443,7 @@ export default function TasksPage() {
                     <button className="btn btn-icon btn-ghost btn-sm" onClick={startEditing}>
                       <Edit2 size={16} />
                     </button>
-                    <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#ef4444' }}>
+                    <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
                       <Trash2 size={16} />
                     </button>
                   </>
@@ -576,7 +576,7 @@ export default function TasksPage() {
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             {team.find(m => m.id === selectedTask.assigneeId) ? (
                               <>
-                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#fff', fontWeight: 700 }}>
+                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #000000, #000000)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#fff', fontWeight: 700 }}>
                                   {getInitials(team.find(m => m.id === selectedTask.assigneeId)!.name)}
                                 </div>
                                 <span style={{ fontSize: '0.85rem' }}>{team.find(m => m.id === selectedTask.assigneeId)!.name}</span>
@@ -597,7 +597,7 @@ export default function TasksPage() {
                             style={{ border: 'none', cursor: 'pointer', outline: 'none', padding: '0.25rem 0.5rem' }}
                           >
                             {COLUMNS.map(c => (
-                              <option key={c.status} value={c.status} style={{ background: '#1e2230', color: '#fff' }}>
+                              <option key={c.status} value={c.status} style={{ background: '#000000', color: '#fff' }}>
                                 {c.label}
                               </option>
                             ))}
@@ -611,7 +611,7 @@ export default function TasksPage() {
 
                        <div>
                          <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Due Date</div>
-                         <div style={{ fontSize: '0.85rem', color: daysUntil(selectedTask.dueDate) < 0 ? '#ef4444' : 'inherit' }}>
+                         <div style={{ fontSize: '0.85rem', color: daysUntil(selectedTask.dueDate) < 0 ? '#000000' : 'inherit' }}>
                            {selectedTask.dueDate || 'No Date'}
                          </div>
                        </div>

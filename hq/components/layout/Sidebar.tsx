@@ -252,7 +252,7 @@ export default function Sidebar() {
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Change Password</h2>
             
             {feedback && (
-              <div style={{ marginBottom: '1.5rem', padding: '0.75rem', borderRadius: 8, fontSize: '0.8rem', background: feedback.type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: feedback.type === 'error' ? '#ef4444' : '#10b981' }}>
+              <div style={{ marginBottom: '1.5rem', padding: '0.75rem', borderRadius: 8, fontSize: '0.8rem', background: feedback.type === 'error' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.1)', color: feedback.type === 'error' ? '#000000' : '#000000' }}>
                 {feedback.message}
               </div>
             )}

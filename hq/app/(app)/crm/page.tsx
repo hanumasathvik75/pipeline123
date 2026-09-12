@@ -15,14 +15,14 @@ import {
 } from 'lucide-react';
 
 const STAGES: { stage: LeadStage; label: string; color: string }[] = [
-  { stage: 'lead', label: 'New Lead', color: '#64748b' },
-  { stage: 'contacted', label: 'Contacted', color: '#38bdf8' },
-  { stage: 'interested', label: 'Interested', color: '#f59e0b' },
-  { stage: 'meeting', label: 'Meeting', color: '#eab308' },
-  { stage: 'pilot', label: 'Pilot / PoC', color: '#06b6d4' },
-  { stage: 'proposal', label: 'Proposal', color: '#6366f1' },
-  { stage: 'negotiation', label: 'Negotiation', color: '#a855f7' },
-  { stage: 'customer', label: 'Customer', color: '#10b981' },
+  { stage: 'lead', label: 'New Lead', color: '#000000' },
+  { stage: 'contacted', label: 'Contacted', color: '#000000' },
+  { stage: 'interested', label: 'Interested', color: '#000000' },
+  { stage: 'meeting', label: 'Meeting', color: '#000000' },
+  { stage: 'pilot', label: 'Pilot / PoC', color: '#000000' },
+  { stage: 'proposal', label: 'Proposal', color: '#000000' },
+  { stage: 'negotiation', label: 'Negotiation', color: '#000000' },
+  { stage: 'customer', label: 'Customer', color: '#000000' },
 ];
 
 export default function CRMPage() {
@@ -273,7 +273,7 @@ export default function CRMPage() {
           className={`badge ${leadStageColor(c.stage)}`}
           style={{ border: 'none', cursor: 'pointer', outline: 'none', fontSize: '0.7rem' }}
         >
-          {STAGES.map(s => <option key={s.stage} value={s.stage} style={{ background: '#1e2230', color: '#fff' }}>{s.label}</option>)}
+          {STAGES.map(s => <option key={s.stage} value={s.stage} style={{ background: '#000000', color: '#fff' }}>{s.label}</option>)}
         </select>
       </div>
 
@@ -333,7 +333,7 @@ export default function CRMPage() {
           className="btn btn-icon btn-ghost btn-sm" 
           title="Delete Contact"
           onClick={(e) => handleDeleteContact(c.id, e)} 
-          style={{ color: '#ef4444' }}
+          style={{ color: '#000000' }}
         >
           <Trash2 size={14} />
         </button>
@@ -359,10 +359,10 @@ export default function CRMPage() {
               className="btn" 
               onClick={() => setIsExportModalOpen(true)}
               style={{ 
-                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                background: 'linear-gradient(135deg, #000000 0%, #000000 100%)',
                 color: '#ffffff',
                 border: 'none',
-                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
                 fontWeight: 600,
                 padding: '0.55rem 1.1rem',
                 display: 'flex',
@@ -494,7 +494,7 @@ export default function CRMPage() {
                 onClick={() => setStageFilter('all')}
                 style={{ height: 34, fontSize: '0.75rem', color: 'var(--accent)' }}
               >
-                Clear Category Filter ✕
+                Clear Category Filter 
               </button>
             )}
           </>
@@ -688,7 +688,7 @@ export default function CRMPage() {
                           className={`badge ${leadStageColor(c.stage)}`}
                           style={{ border: 'none', cursor: 'pointer', outline: 'none', fontSize: '0.75rem' }}
                         >
-                          {STAGES.map(s => <option key={s.stage} value={s.stage} style={{ background: '#1e2230', color: '#fff' }}>{s.label}</option>)}
+                          {STAGES.map(s => <option key={s.stage} value={s.stage} style={{ background: '#000000', color: '#fff' }}>{s.label}</option>)}
                         </select>
                       </td>
                       <td>
@@ -731,7 +731,7 @@ export default function CRMPage() {
                           className="btn btn-icon btn-ghost btn-sm" 
                           title="Delete Contact"
                           onClick={(e) => handleDeleteContact(c.id, e)} 
-                          style={{ color: '#ef4444' }}
+                          style={{ color: '#000000' }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -758,7 +758,7 @@ export default function CRMPage() {
           {/* Summary KPI Cards */}
           <div className="grid-stats" style={{ marginBottom: '1.5rem' }}>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#818cf8' }}>
+              <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
                 <Building2 size={20} />
               </div>
               <div>
@@ -768,7 +768,7 @@ export default function CRMPage() {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+              <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
                 <DollarSign size={20} />
               </div>
               <div>
@@ -778,7 +778,7 @@ export default function CRMPage() {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: 'rgba(6, 182, 212, 0.12)', color: '#06b6d4' }}>
+              <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
                 <ActivityIcon size={20} />
               </div>
               <div>
@@ -788,7 +788,7 @@ export default function CRMPage() {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+              <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
                 <UserCheck size={20} />
               </div>
               <div>
@@ -843,7 +843,7 @@ export default function CRMPage() {
                             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
                               {lead.companyName}
                             </h4>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#000000' }}>
                               {formatCurrency(lead.potentialValue, lead.currency)}
                             </span>
                           </div>
@@ -876,7 +876,7 @@ export default function CRMPage() {
                             }}
                           >
                             {STAGES.map(st => (
-                              <option key={st.stage} value={st.stage} style={{ background: '#1e2230', color: '#fff' }}>
+                              <option key={st.stage} value={st.stage} style={{ background: '#000000', color: '#fff' }}>
                                 → {st.label}
                               </option>
                             ))}
@@ -911,7 +911,7 @@ export default function CRMPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                  background: 'linear-gradient(135deg, #000000, #000000)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', flexShrink: 0
                 }}>
@@ -981,7 +981,7 @@ export default function CRMPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Sparkles size={16} style={{ color: '#818cf8' }} />
+                  <Sparkles size={16} style={{ color: '#000000' }} />
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Strategic Notes & Engagement History (Read-Only)
                   </h3>
@@ -992,7 +992,7 @@ export default function CRMPage() {
                     onClick={() => copyNotesToClipboard(viewNotesContact.notes)}
                     style={{ fontSize: '0.75rem', height: 30 }}
                   >
-                    {copiedNotes ? <Check size={13} style={{ color: '#10b981' }} /> : <Copy size={13} />}
+                    {copiedNotes ? <Check size={13} style={{ color: '#000000' }} /> : <Copy size={13} />}
                     <span>{copiedNotes ? 'Copied!' : 'Copy Notes'}</span>
                   </button>
                 )}
@@ -1065,7 +1065,7 @@ export default function CRMPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ 
                   width: 44, height: 44, borderRadius: 'var(--radius)', 
-                  background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                  background: 'linear-gradient(135deg, #000000, #000000)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' 
                 }}>
                   <Database size={22} />
@@ -1073,7 +1073,7 @@ export default function CRMPage() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Export All Website Data</h3>
-                    <span className="badge" style={{ background: '#10b981', color: '#fff', fontSize: '0.65rem' }}>
+                    <span className="badge" style={{ background: '#000000', color: '#fff', fontSize: '0.65rem' }}>
                       Admin Access
                     </span>
                   </div>
@@ -1156,13 +1156,13 @@ export default function CRMPage() {
                   padding: '0.85rem 1.25rem', 
                   fontSize: '0.95rem', 
                   fontWeight: 700, 
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                  background: 'linear-gradient(135deg, #000000 0%, #000000 100%)',
                   justifyContent: 'center',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
                   border: 'none',
-                  boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
                   cursor: 'pointer'
                 }}
               >
@@ -1343,7 +1343,7 @@ export default function CRMPage() {
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedLead.type} · {selectedLead.location}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
                   {formatCurrency(selectedLead.potentialValue, selectedLead.currency)}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Est. Contract Value</div>
@@ -1370,7 +1370,7 @@ export default function CRMPage() {
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Lead Owner</div>
                   <div style={{ fontSize: '0.825rem' }}>{team.find(m => m.id === selectedLead.assignedTo)?.name || 'Unassigned'}</div>
                   {selectedLead.nextFollowUp && (
-                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.2rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#000000', marginTop: '0.2rem' }}>
                       Next Follow-up: {selectedLead.nextFollowUp}
                     </div>
                   )}

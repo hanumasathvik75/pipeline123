@@ -10,14 +10,14 @@ import {
 import { formatCurrency } from '@/lib/utils';
 
 const STAGES: { stage: InvestorStage; label: string; color: string }[] = [
-  { stage: 'research', label: 'Research', color: '#64748b' },
-  { stage: 'intro', label: 'Warm Intro', color: '#38bdf8' },
-  { stage: 'first_meeting', label: '1st Pitch', color: '#f59e0b' },
-  { stage: 'partner_meeting', label: 'Partner Mtg', color: '#eab308' },
-  { stage: 'due_diligence', label: 'Due Diligence', color: '#6366f1' },
-  { stage: 'term_sheet', label: 'Term Sheet', color: '#a855f7' },
-  { stage: 'closed', label: 'Closed / Committed', color: '#10b981' },
-  { stage: 'pass', label: 'Passed', color: '#ef4444' },
+  { stage: 'research', label: 'Research', color: '#000000' },
+  { stage: 'intro', label: 'Warm Intro', color: '#000000' },
+  { stage: 'first_meeting', label: '1st Pitch', color: '#000000' },
+  { stage: 'partner_meeting', label: 'Partner Mtg', color: '#000000' },
+  { stage: 'due_diligence', label: 'Due Diligence', color: '#000000' },
+  { stage: 'term_sheet', label: 'Term Sheet', color: '#000000' },
+  { stage: 'closed', label: 'Closed / Committed', color: '#000000' },
+  { stage: 'pass', label: 'Passed', color: '#000000' },
 ];
 
 export default function FundraisingPage() {
@@ -105,7 +105,7 @@ export default function FundraisingPage() {
       {/* KPI Stats */}
       <div className="grid-stats">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#818cf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <TrendingUp size={20} />
           </div>
           <div>
@@ -115,7 +115,7 @@ export default function FundraisingPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Users size={20} />
           </div>
           <div>
@@ -125,7 +125,7 @@ export default function FundraisingPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <DollarSign size={20} />
           </div>
           <div>
@@ -135,7 +135,7 @@ export default function FundraisingPage() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+          <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
             <Briefcase size={20} />
           </div>
           <div>
@@ -200,7 +200,7 @@ export default function FundraisingPage() {
                           {inv.name}
                         </h4>
                         {inv.ticketSize && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#10b981' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#000000' }}>
                             {inv.ticketSize}
                           </span>
                         )}
@@ -236,7 +236,7 @@ export default function FundraisingPage() {
                         }}
                       >
                         {STAGES.map(st => (
-                          <option key={st.stage} value={st.stage} style={{ background: '#1e2230', color: '#fff' }}>
+                          <option key={st.stage} value={st.stage} style={{ background: '#000000', color: '#fff' }}>
                             → {st.label}
                           </option>
                         ))}
@@ -266,14 +266,14 @@ export default function FundraisingPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 580, padding: '1.75rem', background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <span className="badge" style={{ marginBottom: '0.35rem', background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
+                <span className="badge" style={{ marginBottom: '0.35rem', background: 'rgba(0, 0, 0, 0.15)', color: '#000000' }}>
                   {selectedInvestor.round} · {selectedInvestor.stage}
                 </span>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{selectedInvestor.name}</h2>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{selectedInvestor.firm}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
                   {selectedInvestor.ticketSize || 'Undisclosed'}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Ticket Size</div>
@@ -295,7 +295,7 @@ export default function FundraisingPage() {
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Next Action</div>
                   <div>{selectedInvestor.nextAction}</div>
                   {selectedInvestor.nextActionDate && (
-                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.2rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#000000', marginTop: '0.2rem' }}>
                       Target: {selectedInvestor.nextActionDate}
                     </div>
                   )}

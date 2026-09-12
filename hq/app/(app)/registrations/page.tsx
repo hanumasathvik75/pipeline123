@@ -9,7 +9,7 @@ export default async function RegistrationsPage() {
   if (!demoSupabaseAdmin.from) {
     return (
       <div className="page animate-fade-in">
-        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', border: '1px solid #ef4444' }}>
+        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#000000', border: '1px solid #000000' }}>
           <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Configuration Missing</h3>
           <p>The external Supabase client is not configured.</p>
           <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
@@ -51,7 +51,7 @@ export default async function RegistrationsPage() {
       </div>
 
       {error ? (
-        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', border: '1px solid #ef4444' }}>
+        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#000000', border: '1px solid #000000' }}>
           <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Error Loading Data</h3>
           <p>{error.message}</p>
           <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>

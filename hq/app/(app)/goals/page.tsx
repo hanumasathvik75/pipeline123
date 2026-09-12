@@ -117,7 +117,7 @@ export default function GoalsPage() {
                         <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openEditModal(group)}>
                             <Edit2 size={16} />
                         </button>
-                        <button className="btn btn-icon btn-ghost btn-sm" onClick={() => handleDelete(group.id)} style={{ color: '#ef4444' }}>
+                        <button className="btn btn-icon btn-ghost btn-sm" onClick={() => handleDelete(group.id)} style={{ color: '#000000' }}>
                             <Trash2 size={16} />
                         </button>
                     </div>
@@ -125,7 +125,7 @@ export default function GoalsPage() {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem', paddingRight: '4rem' }}>
                   <div>
-                    <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8', marginBottom: '0.4rem' }}>
+                    <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', marginBottom: '0.4rem' }}>
                       {group.quarter}
                     </span>
                     <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -141,7 +141,7 @@ export default function GoalsPage() {
                 </div>
 
                 <div className="progress-bar" style={{ height: 6, marginBottom: '1.25rem' }}>
-                  <div className="progress-fill" style={{ width: `${group.progress}%`, background: group.progress >= 80 ? '#10b981' : 'var(--accent)' }} />
+                  <div className="progress-fill" style={{ width: `${group.progress}%`, background: group.progress >= 80 ? '#000000' : 'var(--accent)' }} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -159,7 +159,7 @@ export default function GoalsPage() {
                         <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '80%' }}>
                           {kr.title}
                         </div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: kr.progress >= 80 ? '#10b981' : '#f59e0b' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: kr.progress >= 80 ? '#000000' : '#000000' }}>
                           {kr.progress}%
                         </span>
                       </div>
@@ -169,7 +169,7 @@ export default function GoalsPage() {
                           className="progress-fill"
                           style={{
                             width: `${kr.progress}%`,
-                            background: kr.progress >= 80 ? '#10b981' : '#f59e0b',
+                            background: kr.progress >= 80 ? '#000000' : '#000000',
                           }}
                         />
                       </div>
@@ -265,7 +265,7 @@ export default function GoalsPage() {
                             <div key={kr.id} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>KR #{index + 1}</span>
-                                    <button type="button" className="btn btn-icon btn-ghost btn-sm" onClick={() => handleRemoveKR(index)} style={{ color: '#ef4444' }}>
+                                    <button type="button" className="btn btn-icon btn-ghost btn-sm" onClick={() => handleRemoveKR(index)} style={{ color: '#000000' }}>
                                         <MinusCircle size={14} />
                                     </button>
                                 </div>
