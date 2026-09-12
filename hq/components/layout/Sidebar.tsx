@@ -29,6 +29,7 @@ const NAV_SECTIONS = [
       { href: '/crm', icon: Building2, label: 'CRM' },
       { href: '/fundraising', icon: TrendingUp, label: 'Fundraising' },
       { href: '/meetings', icon: CalendarDays, label: 'Meetings' },
+      { href: '/registrations', icon: Target, label: 'Registrations' },
     ],
   },
   {
