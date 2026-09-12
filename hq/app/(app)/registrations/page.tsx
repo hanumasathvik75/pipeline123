@@ -1,15 +1,38 @@
-import { externalSupabaseAdmin } from '@/lib/externalSupabase';
+import { demoSupabaseAdmin } from '@/lib/demoSupabase';
 import { Target, Mail, Calendar, User, Building } from 'lucide-react';
 import { format } from 'date-fns';
 
 export const revalidate = 0; // Disable caching to always fetch fresh data
 
 export default async function RegistrationsPage() {
+  // Check if client is initialized
+  if (!demoSupabaseAdmin.from) {
+    return (
+      <div className="page animate-fade-in">
+        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#ef4444', border: '1px solid #ef4444' }}>
+          <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Configuration Missing</h3>
+          <p>The external Supabase client is not configured.</p>
+          <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            Please ensure you have set NEXT_PUBLIC_DEMO_SUPABASE_URL and DEMO_SUPABASE_SERVICE_KEY in .env.local and <strong>restarted your development server</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Fetch data from the external Supabase project
-  const { data: requests, error } = await externalSupabaseAdmin
-    .from('demo_requests')
-    .select('*')
-    .order('created_at', { ascending: false });
+  let requests = null;
+  let error = null;
+  try {
+    const res = await demoSupabaseAdmin
+      .from('demo_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+    requests = res.data;
+    error = res.error;
+  } catch (err: any) {
+    error = err;
+  }
 
   return (
     <div className="page animate-fade-in">
@@ -32,7 +55,7 @@ export default async function RegistrationsPage() {
           <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Error Loading Data</h3>
           <p>{error.message}</p>
           <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Please ensure you have set the correct NEXT_PUBLIC_EXTERNAL_SUPABASE_URL and EXTERNAL_SUPABASE_SERVICE_ROLE_KEY in .env.local
+            Please ensure you have set the correct NEXT_PUBLIC_DEMO_SUPABASE_URL and DEMO_SUPABASE_SERVICE_KEY in .env.local
           </p>
         </div>
       ) : (
