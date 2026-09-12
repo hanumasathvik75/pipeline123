@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, daysUntil, getInitials } from '@/lib/utils';
-import { Plus, LayoutGrid, Table, Search, ArrowUpRight, X, Edit2, Trash2 } from 'lucide-react';
+
 import Link from 'next/link';
 import type { Project, Priority, ProjectStatus } from '@/lib/types';
 
@@ -141,7 +141,7 @@ export default function ProjectsPage() {
         </div>
         {currentUser?.role !== 'intern' && (
           <button className="btn btn-primary" onClick={openAddModal}>
-            <Plus size={15} />
+            <></>
             New Project
           </button>
         )}
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
       {/* Filters */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: '0 0 240px' }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input className="input" placeholder="Search projects…" value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: 34, fontSize: '0.8rem' }} />
         </div>
         {['all', 'in_progress', 'planned', 'product', 'rd', 'bizdev', 'operations'].map(f => (
@@ -168,8 +168,8 @@ export default function ProjectsPage() {
           </button>
         ))}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.25rem' }}>
-          <button onClick={() => setView('grid')} className={`btn btn-icon btn-sm ${view === 'grid' ? 'btn-secondary' : 'btn-ghost'}`}><LayoutGrid size={14} /></button>
-          <button onClick={() => setView('table')} className={`btn btn-icon btn-sm ${view === 'table' ? 'btn-secondary' : 'btn-ghost'}`}><Table size={14} /></button>
+          <button onClick={() => setView('grid')} className={`btn btn-icon btn-sm ${view === 'grid' ? 'btn-secondary' : 'btn-ghost'}`}><></></button>
+          <button onClick={() => setView('table')} className={`btn btn-icon btn-sm ${view === 'table' ? 'btn-secondary' : 'btn-ghost'}`}><></></button>
         </div>
       </div>
 
@@ -186,10 +186,10 @@ export default function ProjectsPage() {
                   {/* Actions overlay */}
                   <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', gap: '0.25rem' }}>
                      <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
-                        <Edit2 size={14} />
+                        <></>
                      </button>
                      <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#000000' }}>
-                        <Trash2 size={14} />
+                        <></>
                      </button>
                   </div>
 
@@ -306,10 +306,10 @@ export default function ProjectsPage() {
                     <td style={{ textAlign: 'right' }}>
                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
                           <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => openEditModal(p, e)}>
-                            <Edit2 size={14} />
+                            <></>
                           </button>
                           <button className="btn btn-icon btn-ghost btn-sm" onClick={(e) => handleDelete(p.id, e)} style={{ color: '#000000' }}>
-                            <Trash2 size={14} />
+                            <></>
                           </button>
                         </div>
                     </td>
@@ -339,7 +339,7 @@ export default function ProjectsPage() {
                 </p>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => { setIsAddModalOpen(false); setEditingProject(null); }}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 
@@ -470,7 +470,7 @@ export default function ProjectsPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingProject ? 'Save Changes' : <><Plus size={14} /> Launch Project</>}
+                  {editingProject ? 'Save Changes' : <><></> Launch Project</>}
                 </button>
               </div>
             </form>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useHQStore } from '@/lib/store';
-import { Hash, Plus, MessageSquare, RefreshCw, Search, Users, Trash2, AlertCircle } from 'lucide-react';
+
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -142,7 +142,7 @@ export default function ChatSidebar() {
         fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'space-between' 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
-          <MessageSquare size={18} className="text-primary" />
+          <></>
           <span>Ignition Chat</span>
         </div>
         <button 
@@ -150,7 +150,7 @@ export default function ChatSidebar() {
           title="Refresh channels"
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '6px' }}
         >
-          <RefreshCw size={15} style={{ transform: isRefreshing ? 'rotate(180deg)' : 'none', transition: 'transform 0.5s ease' }} />
+          <></>
         </button>
       </div>
 
@@ -160,7 +160,7 @@ export default function ChatSidebar() {
           border: '1px solid rgba(0, 0, 0, 0.3)', borderRadius: '6px', fontSize: '0.75rem', 
           color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.375rem' 
         }}>
-          <AlertCircle size={14} style={{ flexShrink: 0 }} />
+          <></>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sidebarError}</span>
         </div>
       )}
@@ -186,7 +186,7 @@ export default function ChatSidebar() {
                   display: 'flex', alignItems: 'center', gap: '2px', padding: '3px 8px', fontSize: '0.7rem', fontWeight: 600
                 }}
               >
-                <Plus size={12} /> Add
+                <></> Add
               </button>
             )}
           </div>
@@ -232,7 +232,7 @@ export default function ChatSidebar() {
                       fontSize: '0.875rem'
                     }}
                   >
-                    <Hash size={16} style={{ color: isActive ? 'var(--primary)' : 'var(--text-muted)', flexShrink: 0 }} /> 
+                    <></> 
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
                   </Link>
 
@@ -247,7 +247,7 @@ export default function ChatSidebar() {
                       }}
                       className="hover-bg"
                     >
-                      <Trash2 size={13} style={{ color: 'var(--danger)' }} />
+                      <></>
                     </button>
                   )}
                 </div>
@@ -273,7 +273,7 @@ export default function ChatSidebar() {
                 display: 'flex', alignItems: 'center', gap: '2px', padding: '3px 8px', fontSize: '0.7rem', fontWeight: 600
               }}
             >
-              <Plus size={12} /> New DM
+              <></> New DM
             </button>
           </div>
 
@@ -334,7 +334,7 @@ export default function ChatSidebar() {
                     }}
                     className="hover-bg"
                   >
-                    <Trash2 size={13} style={{ color: 'var(--danger)' }} />
+                    <></>
                   </button>
                 </div>
               );
@@ -349,7 +349,7 @@ export default function ChatSidebar() {
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowCreateModal(false)} />
           <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 420, padding: '1.75rem', zIndex: 1 }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Hash size={20} className="text-primary" /> Create Group Channel
+              <></> Create Group Channel
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
               Channels are public spaces where your team can communicate.
@@ -407,14 +407,14 @@ export default function ChatSidebar() {
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowDMModal(false)} />
           <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 440, padding: '1.75rem', zIndex: 1, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={20} className="text-primary" /> Start a Direct Message
+              <></> Start a Direct Message
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Choose a team member to start a 1-on-1 private conversation.
             </p>
 
             <div style={{ position: 'relative', marginBottom: '1rem' }}>
-              <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <></>
               <input
                 className="input"
                 type="text"

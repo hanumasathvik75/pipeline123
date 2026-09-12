@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Lock, AlertCircle, Briefcase, Mail, Building, Loader2, CheckCircle2 } from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -84,7 +84,7 @@ export default function RegisterPage() {
           {status === 'pending' && (
             <>
               <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                <Loader2 size={32} color="var(--accent)" className="animate-spin" />
+                <></>
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Request Submitted</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
@@ -99,7 +99,7 @@ export default function RegisterPage() {
           {status === 'active' && (
             <>
               <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                <CheckCircle2 size={32} color="#000000" />
+                <></>
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Account Approved!</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
@@ -111,7 +111,7 @@ export default function RegisterPage() {
            {status === 'rejected' && (
             <>
               <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(0, 0, 0, 0.1)', borderRadius: '50%', marginBottom: '1.5rem' }}>
-                <AlertCircle size={32} color="#000000" />
+                <></>
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>Request Denied</h2>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '2rem' }}>
@@ -185,7 +185,7 @@ export default function RegisterPage() {
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Desired Username *</label>
               <div style={{ position: 'relative' }}>
-                <User size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <></>
                 <input
                   className="input"
                   type="text"
@@ -202,7 +202,7 @@ export default function RegisterPage() {
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Password *</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <></>
                   <input
                     className="input"
                     type="password"
@@ -217,7 +217,7 @@ export default function RegisterPage() {
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Confirm *</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <></>
                   <input
                     className="input"
                     type="password"
@@ -232,13 +232,13 @@ export default function RegisterPage() {
 
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: 8 }}>
-                <AlertCircle size={14} color="#000000" style={{ flexShrink: 0 }} />
+                <></>
                 <span style={{ fontSize: '0.8rem', color: '#000000' }}>{error}</span>
               </div>
             )}
 
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-              {loading ? <Loader2 size={16} className="animate-spin" /> : 'Submit Request'}
+              {loading ? <></> : 'Submit Request'}
             </button>
           </form>
 

@@ -4,11 +4,7 @@ import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, daysUntil, getInitials, avatarColor } from '@/lib/utils';
 import type { Task, TaskStatus, Priority } from '@/lib/types';
-import {
-  Plus, Search, Filter, CheckCircle2, Clock, AlertTriangle, ChevronRight,
-  User as UserIcon, Calendar, CheckSquare, MoreVertical, LayoutGrid, List,
-  ArrowRight, X, Edit2, Trash2
-} from 'lucide-react';
+
 
 const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
   { status: 'backlog', label: 'Backlog', color: '#000000' },
@@ -145,7 +141,7 @@ export default function TasksPage() {
           </p>
         </div>
         <button className="btn btn-primary" onClick={openNewModal}>
-          <Plus size={15} />
+          <></>
           New Task
         </button>
       </div>
@@ -153,7 +149,7 @@ export default function TasksPage() {
       {/* Filter bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: '0 0 240px' }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input
             className="input"
             placeholder="Search tasks…"
@@ -209,14 +205,14 @@ export default function TasksPage() {
             className={`btn btn-icon btn-sm ${view === 'kanban' ? 'btn-secondary' : 'btn-ghost'}`}
             title="Kanban view"
           >
-            <LayoutGrid size={14} />
+            <></>
           </button>
           <button
             onClick={() => setView('list')}
             className={`btn btn-icon btn-sm ${view === 'list' ? 'btn-secondary' : 'btn-ghost'}`}
             title="List view"
           >
-            <List size={14} />
+            <></>
           </button>
         </div>
       </div>
@@ -289,7 +285,7 @@ export default function TasksPage() {
                         {/* Footer info: due date, hours, assignee, quick move */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border)', fontSize: '0.7rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: due < 0 ? '#000000' : due <= 2 ? '#000000' : 'var(--text-muted)' }}>
-                            <Calendar size={12} />
+                            <></>
                             <span>{due < 0 ? `${Math.abs(due)}d overdue` : due === 0 ? 'Today' : `${due}d left`}</span>
                           </div>
 
@@ -441,15 +437,15 @@ export default function TasksPage() {
                 {!showNewModal && !isEditing && (
                   <>
                     <button className="btn btn-icon btn-ghost btn-sm" onClick={startEditing}>
-                      <Edit2 size={16} />
+                      <></>
                     </button>
                     <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
-                      <Trash2 size={16} />
+                      <></>
                     </button>
                   </>
                 )}
                 <button className="btn btn-icon btn-ghost btn-sm" onClick={() => { setShowNewModal(false); setSelectedTask(null); setIsEditing(false); }}>
-                  <X size={16} />
+                  <></>
                 </button>
               </div>
             </div>

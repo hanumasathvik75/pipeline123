@@ -5,24 +5,24 @@ import { ChatMessage, ChatReference } from '@/lib/types';
 import { useHQStore } from '@/lib/store';
 import { getInitials } from '@/lib/utils';
 import { format } from 'date-fns';
-import { CheckSquare, FolderKanban, BookOpen, Trash2, MessageSquare, ExternalLink } from 'lucide-react';
+
 import Link from 'next/link';
 
 function ReferenceCard({ reference }: { reference: ChatReference }) {
-  let icon = <CheckSquare size={14} className="text-primary" />;
+  let icon = <></>;
   let href = `/tasks`;
   let badgeText = 'Task';
   let badgeColor = 'rgba(0, 0, 0, 0.1)';
   let textColor = 'var(--primary)';
 
   if (reference.type === 'project') {
-    icon = <FolderKanban size={14} style={{ color: '#000000' }} />;
+    icon = <></>;
     href = `/projects`;
     badgeText = 'Project';
     badgeColor = 'rgba(0, 0, 0, 0.1)';
     textColor = '#000000';
   } else if (reference.type === 'wiki') {
-    icon = <BookOpen size={14} style={{ color: '#000000' }} />;
+    icon = <></>;
     href = `/wiki`;
     badgeText = 'Wiki';
     badgeColor = 'rgba(0, 0, 0, 0.1)';
@@ -51,7 +51,7 @@ function ReferenceCard({ reference }: { reference: ChatReference }) {
       <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {reference.title}
       </span>
-      <ExternalLink size={12} style={{ color: 'var(--text-muted)', marginLeft: 'auto', flexShrink: 0 }} />
+      <></>
     </Link>
   );
 }
@@ -86,7 +86,7 @@ export default function MessageList({ channelId }: { channelId: string }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem',
           color: 'var(--primary)' 
         }}>
-          <MessageSquare size={26} />
+          <></>
         </div>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.375rem' }}>
           No messages here yet
@@ -193,7 +193,7 @@ export default function MessageList({ channelId }: { channelId: string }) {
                   }}
                   className="hover-bg"
                 >
-                  <Trash2 size={13} style={{ color: 'var(--danger)' }} />
+                  <></>
                 </button>
               </div>
             )}

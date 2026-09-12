@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
-import { Target, Plus, CheckCircle2, TrendingUp, Award, Calendar, Edit2, Trash2, X, PlusCircle, MinusCircle } from 'lucide-react';
+
 import type { Goal, KeyResult } from '@/lib/types';
 
 export default function GoalsPage() {
@@ -96,7 +96,7 @@ export default function GoalsPage() {
         </div>
         {isAdmin && (
             <button className="btn btn-primary" onClick={openNewModal}>
-            <Plus size={15} />
+            <></>
             New Goal
             </button>
         )}
@@ -104,7 +104,7 @@ export default function GoalsPage() {
 
       {goals.length === 0 ? (
           <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <Target size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
+              <></>
               <h3>No Goals Set</h3>
               <p>Add your first OKR to start tracking progress.</p>
           </div>
@@ -115,10 +115,10 @@ export default function GoalsPage() {
                 {isAdmin && (
                     <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.25rem' }}>
                         <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openEditModal(group)}>
-                            <Edit2 size={16} />
+                            <></>
                         </button>
                         <button className="btn btn-icon btn-ghost btn-sm" onClick={() => handleDelete(group.id)} style={{ color: '#000000' }}>
-                            <Trash2 size={16} />
+                            <></>
                         </button>
                     </div>
                 )}
@@ -204,7 +204,7 @@ export default function GoalsPage() {
                 </h3>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsModalOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 
@@ -256,7 +256,7 @@ export default function GoalsPage() {
                             Key Results
                         </label>
                         <button type="button" className="btn btn-sm btn-ghost" onClick={handleAddKR}>
-                            <PlusCircle size={14} /> Add KR
+                            <></> Add KR
                         </button>
                     </div>
 
@@ -266,7 +266,7 @@ export default function GoalsPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>KR #{index + 1}</span>
                                     <button type="button" className="btn btn-icon btn-ghost btn-sm" onClick={() => handleRemoveKR(index)} style={{ color: '#000000' }}>
-                                        <MinusCircle size={14} />
+                                        <></>
                                     </button>
                                 </div>
                                 <input

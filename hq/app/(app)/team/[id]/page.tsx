@@ -5,10 +5,7 @@ import { useHQStore } from '@/lib/store';
 import { getInitials, priorityColor, statusColor, statusLabel, daysUntil } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound, useParams, useRouter } from 'next/navigation';
-import {
-  ArrowLeft, Mail, Calendar, Briefcase, CheckCircle2, AlertCircle,
-  Award, Shield, FileText, Clock, Edit2, Trash2, X
-} from 'lucide-react';
+
 import type { TeamMember } from '@/lib/types';
 
 const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -83,7 +80,7 @@ export default function MemberProfilePage() {
       {/* Back button */}
       <div>
         <Link href="/team" className="btn btn-ghost btn-sm" style={{ paddingLeft: 0, gap: '0.4rem', color: 'var(--text-muted)' }}>
-          <ArrowLeft size={14} />
+          <></>
           Back to Team Directory
         </Link>
       </div>
@@ -93,10 +90,10 @@ export default function MemberProfilePage() {
          {isEditable && (
              <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem' }}>
                  <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(true)}>
-                     <Edit2 size={16} />
+                     <></>
                  </button>
                  <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
-                     <Trash2 size={16} />
+                     <></>
                  </button>
              </div>
          )}
@@ -149,7 +146,7 @@ export default function MemberProfilePage() {
                     <>
                         <span>·</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <Mail size={13} />
+                        <></>
                         {member.email}
                         </span>
                     </>
@@ -316,7 +313,7 @@ export default function MemberProfilePage() {
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Edit Member Profile</h3>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 

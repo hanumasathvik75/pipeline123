@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useHQStore } from '@/lib/store';
-import { MessageSquare, Plus, Hash, Users, ArrowRight, Sparkles } from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
 
 export default function ChatPage() {
@@ -84,7 +84,7 @@ export default function ChatPage() {
             color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', 
             margin: '0 auto 0.75rem auto' 
           }}>
-            <MessageSquare size={22} />
+            <></>
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.375rem', letterSpacing: '-0.02em' }}>
             Ignition HQ Chat
@@ -100,7 +100,7 @@ export default function ChatPage() {
                 className="btn btn-primary"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '8px 16px' }}
               >
-                <Plus size={16} /> Create Channel
+                <></> Create Channel
               </button>
             )}
             {groups.length === 0 && currentUser?.role === 'c_level' && (
@@ -110,7 +110,7 @@ export default function ChatPage() {
                 className="btn btn-primary"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '8px 16px' }}
               >
-                <Sparkles size={16} /> Quick Setup #general
+                <></> Quick Setup #general
               </button>
             )}
           </div>
@@ -120,7 +120,7 @@ export default function ChatPage() {
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Hash size={17} className="text-primary" /> Group Channels ({groups.length})
+              <></> Group Channels ({groups.length})
             </h2>
             {currentUser?.role === 'c_level' && (
               <button 
@@ -151,12 +151,12 @@ export default function ChatPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                    <Hash size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <></>
                     <span style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {c.name}
                     </span>
                   </div>
-                  <ArrowRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  <></>
                 </div>
               ))}
             </div>
@@ -167,7 +167,7 @@ export default function ChatPage() {
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={17} className="text-primary" /> Direct Message Colleagues
+              <></> Direct Message Colleagues
             </h2>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{team.length} members</span>
           </div>
@@ -214,7 +214,7 @@ export default function ChatPage() {
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowCreateModal(false)} />
           <div className="card" style={{ position: 'relative', width: '100%', maxWidth: 400, padding: '1.5rem', zIndex: 1 }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Hash size={18} className="text-primary" /> Create Group Channel
+              <></> Create Group Channel
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Group channels can be joined and viewed by all members in HQ.

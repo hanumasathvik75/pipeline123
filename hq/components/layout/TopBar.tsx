@@ -3,10 +3,7 @@
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
-import {
-  Search, Bell, Plus, ChevronDown, X, CheckSquare, FolderKanban,
-  Calendar, Building2, TrendingUp, Sparkles, Menu
-} from 'lucide-react';
+
 import { getInitials } from '@/lib/utils';
 import type { Priority, ProjectStatus, LeadStage, InvestorStage } from '@/lib/types';
 
@@ -178,7 +175,7 @@ export default function TopBar() {
             onClick={() => useHQStore.getState().toggleMobileMenu()}
             style={{ marginRight: '0.25rem' }}
           >
-            <Menu size={18} />
+            <></>
           </button>
           <h2 style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             {title}
@@ -189,7 +186,7 @@ export default function TopBar() {
 
         {/* Search */}
         <div className="desktop-only" style={{ position: 'relative', width: 240 }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input
             className="input"
             placeholder="Search anything…"
@@ -211,7 +208,7 @@ export default function TopBar() {
             onClick={() => setIsQuickOpen(true)}
             style={{ gap: '0.375rem', fontSize: '0.8rem', height: 34, padding: '0 0.875rem' }}
           >
-            <Plus size={14} />
+            <></>
             <span className="desktop-only">New</span>
           </button>
 
@@ -220,7 +217,7 @@ export default function TopBar() {
             style={{ position: 'relative', height: 34, width: 34 }}
             onClick={() => showToast('All systems operational. Telemetry stream healthy.')}
           >
-            <Bell size={16} />
+            <></>
             {hasNotif && (
               <span style={{
                 position: 'absolute', top: 6, right: 6,
@@ -243,7 +240,7 @@ export default function TopBar() {
                 {getInitials(currentUser.name)}
               </div>
               <span className="desktop-only" style={{ fontWeight: 600 }}>{currentUser.name}</span>
-              <ChevronDown className="desktop-only" size={12} style={{ color: 'var(--text-muted)' }} />
+              <></>
             </button>
           )}
         </div>
@@ -258,7 +255,7 @@ export default function TopBar() {
           boxShadow: '0 10px 25px rgba(0,0,0,0.5)', zIndex: 2000,
           display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600
         }}>
-          <Sparkles size={16} />
+          <></>
           {toast}
         </div>
       )}
@@ -277,25 +274,25 @@ export default function TopBar() {
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Instantly launch an action across the IgnitionAI OS.</p>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsQuickOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 
             {/* Tabs */}
             <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '1.25rem', background: 'var(--bg-elevated)', padding: '0.25rem', borderRadius: 8 }}>
               {[
-                { id: 'task', label: 'Task', icon: CheckSquare },
-                { id: 'project', label: 'Project', icon: FolderKanban },
-                { id: 'meeting', label: 'Meeting', icon: Calendar },
-                { id: 'lead', label: 'Lead', icon: Building2 },
-                { id: 'investor', label: 'Investor', icon: TrendingUp },
+                { id: 'task', label: 'Task', },
+                { id: 'project', label: 'Project', },
+                { id: 'meeting', label: 'Meeting', },
+                { id: 'lead', label: 'Lead', },
+                { id: 'investor', label: 'Investor', },
               ].filter(tab => {
                 if (currentUser?.role === 'intern') {
                   return ['task', 'lead'].includes(tab.id);
                 }
                 return true;
               }).map(tab => {
-                const Icon = tab.icon;
+
                 const active = activeTab === tab.id;
                 return (
                   <button
@@ -313,7 +310,7 @@ export default function TopBar() {
                       boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                     }}
                   >
-                    <Icon size={13} />
+
                     {tab.label}
                   </button>
                 );
@@ -498,7 +495,7 @@ export default function TopBar() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  <Plus size={14} />
+                  <></>
                   Create Record
                 </button>
               </div>

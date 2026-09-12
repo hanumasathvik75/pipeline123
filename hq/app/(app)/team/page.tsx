@@ -5,10 +5,7 @@ import { useHQStore } from '@/lib/store';
 import { getInitials } from '@/lib/utils';
 import type { UserRole } from '@/lib/types';
 import Link from 'next/link';
-import {
-  Users, UserCheck, AlertCircle, Briefcase, Mail, ArrowUpRight,
-  Search, Shield, CheckCircle2, Award, Plus, Lock, Sparkles, X
-} from 'lucide-react';
+
 
 const ROLE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   c_level: { label: 'Cofounder', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
@@ -121,7 +118,7 @@ export default function TeamPage() {
         </div>
         {currentUser?.role !== 'intern' && (
           <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-            <Plus size={15} />
+            <></>
             Add Team Member
           </button>
         )}
@@ -131,7 +128,7 @@ export default function TeamPage() {
       <div className="grid-stats">
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Users size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{team.length}</div>
@@ -141,7 +138,7 @@ export default function TeamPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Briefcase size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{projects.length}</div>
@@ -151,7 +148,7 @@ export default function TeamPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <CheckCircle2 size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{tasks.filter(t => t.status === 'done').length}</div>
@@ -161,7 +158,7 @@ export default function TeamPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <AlertCircle size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{team.reduce((sum, m) => sum + (m.overdueTasks || 0), 0)}</div>
@@ -218,7 +215,7 @@ export default function TeamPage() {
           {/* Search & Filters */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
             <div style={{ position: 'relative', flex: '0 0 280px' }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input
             className="input"
             placeholder="Search member, designation, skill…"
@@ -288,7 +285,7 @@ export default function TeamPage() {
                       <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {member.name}
                       </h3>
-                      <ArrowUpRight size={14} style={{ color: 'var(--text-muted)' }} />
+                      <></>
                     </div>
 
                     {/* Explicit Designation */}
@@ -317,7 +314,7 @@ export default function TeamPage() {
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   <div>{member.department} · Joined {member.joiningDate}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)' }}>
-                    <Mail size={12} />
+                    <></>
                     <span>{member.email}</span>
                   </div>
                 </div>
@@ -373,7 +370,7 @@ export default function TeamPage() {
         <div className="grid-auto">
           {pendingUsers.length === 0 ? (
             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
-              <UserCheck size={32} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+              <></>
               <p>No pending registration requests.</p>
             </div>
           ) : (
@@ -436,7 +433,7 @@ export default function TeamPage() {
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Provision credentials, title, designation, and department access.</p>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setShowAddModal(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 
@@ -553,7 +550,7 @@ export default function TeamPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  <Sparkles size={14} />
+                  <></>
                   {isSubmitting ? 'Provisioning…' : 'Create & Provision Account'}
                 </button>
               </div>

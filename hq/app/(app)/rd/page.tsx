@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { rdStageLabel, getInitials } from '@/lib/utils';
 import type { RDProject, Experiment, RDStage } from '@/lib/types';
-import {
-  FlaskConical, Cpu, Trophy, Sparkles, Plus, ArrowRight, BarChart3,
-  FileCheck, Database, Sliders, CheckCircle2, ChevronRight, Star
-} from 'lucide-react';
+
 
 const STAGES: { stage: RDStage; label: string }[] = [
   { stage: 'hypothesis', label: 'Hypothesis' },
@@ -40,7 +37,7 @@ export default function RDWorkspacePage() {
           </p>
         </div>
         <button className="btn btn-primary" onClick={() => setIsLogModalOpen(true)}>
-          <Plus size={15} />
+          <></>
           Log Experiment
         </button>
       </div>
@@ -49,7 +46,7 @@ export default function RDWorkspacePage() {
       <div className="grid-stats">
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <FlaskConical size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{rdProjects.length}</div>
@@ -59,7 +56,7 @@ export default function RDWorkspacePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Cpu size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{allExperiments.length}</div>
@@ -69,7 +66,7 @@ export default function RDWorkspacePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Trophy size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{bestExperiments.length}</div>
@@ -79,7 +76,7 @@ export default function RDWorkspacePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <BarChart3 size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">R² 0.962</div>
@@ -188,7 +185,7 @@ export default function RDWorkspacePage() {
               {currentProject.dataset && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-                    <Database size={13} />
+                    <></>
                     <span>Dataset Reference</span>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{currentProject.dataset}</div>
@@ -197,7 +194,7 @@ export default function RDWorkspacePage() {
               {currentProject.methodology && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-                    <Sliders size={13} />
+                    <></>
                     <span>Methodology</span>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{currentProject.methodology}</div>
@@ -246,7 +243,7 @@ export default function RDWorkspacePage() {
                           <span>#{exp.number}</span>
                           {exp.isBest && (
                             <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.2)', color: '#000000', fontSize: '0.65rem', border: '1px solid rgba(0, 0, 0, 0.4)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <Star size={10} fill="#000000" /> Best SOTA
+                              <></> Best SOTA
                             </span>
                           )}
                         </div>

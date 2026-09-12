@@ -1,5 +1,5 @@
 import { demoSupabaseAdmin } from '@/lib/demoSupabase';
-import { Target, Mail, Calendar, User, Building } from 'lucide-react';
+
 import { format } from 'date-fns';
 
 export const revalidate = 0; // Disable caching to always fetch fresh data
@@ -76,25 +76,25 @@ export default async function RegistrationsPage() {
                     <tr key={req.id || Math.random()} className="hover-row">
                       <td style={{ whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
-                          <Calendar size={14} />
+                          <></>
                           {req.created_at ? format(new Date(req.created_at), 'MMM dd, yyyy HH:mm') : 'Unknown Date'}
                         </div>
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          <User size={14} style={{ color: 'var(--accent)' }} />
+                          <></>
                           {req.name || req.full_name || req.first_name || 'N/A'}
                         </div>
                         {(req.company || req.company_name) && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                            <Building size={12} />
+                            <></>
                             {req.company || req.company_name}
                           </div>
                         )}
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
-                          <Mail size={14} />
+                          <></>
                           <a href={`mailto:${req.email}`} style={{ color: 'var(--accent)' }}>{req.email || 'No email provided'}</a>
                         </div>
                         {req.phone && (

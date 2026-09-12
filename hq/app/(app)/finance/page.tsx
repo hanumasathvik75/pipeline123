@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, TrendingDown, Clock, ShieldCheck, Edit, Plus, Trash2, Loader2 } from 'lucide-react';
+
 import { formatCurrency } from '@/lib/utils';
 import { useHQStore } from '@/lib/store';
 import { FinanceExpense } from '@/lib/types';
@@ -41,7 +41,7 @@ export default function FinancePage() {
   if (currentUser?.role === 'intern') {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <ShieldCheck size={48} style={{ color: 'var(--text-muted)' }} />
+        <></>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Access Denied</h2>
         <p style={{ color: 'var(--text-muted)' }}>You do not have clearance to view financial data.</p>
       </div>
@@ -51,7 +51,7 @@ export default function FinancePage() {
   if (!financeData) {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <Loader2 size={24} className="spin" style={{ color: 'var(--text-muted)' }} />
+        <></>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading Finance Data...</p>
         <button 
           className="btn btn-secondary" 
@@ -82,7 +82,7 @@ export default function FinancePage() {
         </div>
         {currentUser?.role === 'c_level' && (
           <button className="btn btn-primary" onClick={handleOpenEdit}>
-            <Edit size={15} />
+            <></>
             Edit Financials
           </button>
         )}
@@ -92,7 +92,7 @@ export default function FinancePage() {
       <div className="grid-stats">
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <DollarSign size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{formatCurrency(financeData.cashBalance, 'INR')}</div>
@@ -102,7 +102,7 @@ export default function FinancePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <TrendingDown size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{formatCurrency(financeData.monthlyBurn, 'INR')}</div>
@@ -112,7 +112,7 @@ export default function FinancePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Clock size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{financeData.runwayMonths} Months</div>
@@ -122,7 +122,7 @@ export default function FinancePage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <ShieldCheck size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{formatCurrency(financeData.committedArr, 'INR')}</div>
@@ -194,7 +194,7 @@ export default function FinancePage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <label className="label" style={{ marginBottom: 0 }}>Monthly Expenses Breakdown</label>
                   <button type="button" onClick={() => setExpenses([...expenses, { category: '', amount: 0, percentage: 0 }])} className="btn btn-sm">
-                    <Plus size={14} /> Add Line Item
+                    <></> Add Line Item
                   </button>
                 </div>
                 
@@ -208,7 +208,7 @@ export default function FinancePage() {
                         <span style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>%</span>
                       </div>
                       <button type="button" onClick={() => setExpenses(expenses.filter((_, idx) => idx !== i))} className="btn-icon" style={{ color: '#000000' }}>
-                        <Trash2 size={16} />
+                        <></>
                       </button>
                     </div>
                   ))}

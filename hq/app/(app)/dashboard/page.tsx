@@ -2,11 +2,7 @@
 
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, formatDate, daysUntil, getInitials, formatCurrency } from '@/lib/utils';
-import {
-  FolderKanban, CheckSquare, Users, Building2, TrendingUp,
-  FlaskConical, AlertTriangle, Clock, Zap, CalendarDays,
-  ArrowRight, ChevronRight,
-} from 'lucide-react';
+
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import Link from 'next/link';
 
@@ -27,7 +23,7 @@ function StatWidget({ icon: Icon, label, value, sub, accent, link }: {
         }}>
           <Icon size={18} color={accent || 'var(--text-secondary)'} />
         </div>
-        {link && <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />}
+        {link && <></>}
       </div>
       <div>
         <div className="stat-label">{label}</div>
@@ -105,24 +101,14 @@ export default function DashboardPage() {
             Here&apos;s everything happening at IgnitionAI today.
           </p>
         </div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)',
-          borderRadius: 8, padding: '0.5rem 0.875rem',
-        }}>
-          <AlertTriangle size={14} color="#000000" />
-          <span style={{ fontSize: '0.8rem', color: '#000000', fontWeight: 600 }}>
-            {blockedTasks.length} blocked · {atRiskProjects.length} at risk
-          </span>
-        </div>
       </div>
 
       {/* Top stats */}
       <div className="grid-4">
-        <StatWidget icon={FolderKanban} label="Active Projects" value={activeProjects.length} sub={`${atRiskProjects.length} at risk`} accent="#000000" link="/projects" />
-        <StatWidget icon={CheckSquare} label="Tasks In Progress" value={inProgressTasks.length} sub={`${blockedTasks.length} blocked`} accent="#000000" link="/tasks" />
-        <StatWidget icon={Building2} label="CRM Leads" value={totalLeads} sub={`${pilotLeads} in pilot/meetings`} accent="#000000" link="/crm" />
-        <StatWidget icon={TrendingUp} label="Active Investors" value={activeInvestors} sub="Pre-seed round" accent="#000000" link="/fundraising" />
+        <StatWidget icon={null as any} label="Active Projects" value={activeProjects.length} sub={`${atRiskProjects.length} at risk`} accent="#000000" link="/projects" />
+        <StatWidget icon={null as any} label="Tasks In Progress" value={inProgressTasks.length} sub={`${blockedTasks.length} blocked`} accent="#000000" link="/tasks" />
+        <StatWidget icon={null as any} label="CRM Leads" value={totalLeads} sub={`${pilotLeads} in pilot/meetings`} accent="#000000" link="/crm" />
+        <StatWidget icon={null as any} label="Active Investors" value={activeInvestors} sub="Pre-seed round" accent="#000000" link="/fundraising" />
       </div>
 
       {/* Main grid */}
@@ -135,11 +121,11 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <FolderKanban size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Active Projects</span>
               </div>
               <Link href="/projects" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
-                View all <ArrowRight size={12} />
+                View all <></>
               </Link>
             </div>
             <div style={{ padding: '0.75rem' }}>
@@ -190,11 +176,11 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <CheckSquare size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Priority Tasks</span>
               </div>
               <Link href="/tasks" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
-                View all <ArrowRight size={12} />
+                View all <></>
               </Link>
             </div>
             <div style={{ padding: '0.75rem' }}>
@@ -242,11 +228,11 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <FlaskConical size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>R&D Progress</span>
               </div>
               <Link href="/rd" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#000000', textDecoration: 'none', fontWeight: 500 }}>
-                View lab <ArrowRight size={12} />
+                View lab <></>
               </Link>
             </div>
             <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -304,7 +290,7 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <CalendarDays size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Upcoming</span>
               </div>
               <Link href="/meetings" style={{ fontSize: '0.7rem', color: '#000000', textDecoration: 'none' }}>All</Link>
@@ -324,7 +310,7 @@ export default function DashboardPage() {
                     {m.title}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Clock size={11} style={{ color: 'var(--text-muted)' }} />
+                    <></>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                       {formatDate(m.date)} · {m.time}
                     </span>
@@ -338,7 +324,7 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <TrendingUp size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Fundraising</span>
               </div>
               <Link href="/fundraising" style={{ fontSize: '0.7rem', color: '#000000', textDecoration: 'none' }}>All</Link>
@@ -380,7 +366,7 @@ export default function DashboardPage() {
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <Users size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Team ({team.length})</span>
               </div>
             </div>

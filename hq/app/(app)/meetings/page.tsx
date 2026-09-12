@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import { formatDate, getInitials, avatarColor } from '@/lib/utils';
 import type { Meeting } from '@/lib/types';
-import {
-  Calendar, Clock, Users, CheckCircle2, ArrowRight, Plus, ChevronDown,
-  ChevronRight, ListTodo, FileText, CheckSquare, Sparkles, ExternalLink, Check, X, Trash2
-} from 'lucide-react';
+
 
 const TYPE_COLORS: Record<string, { label: string; color: string; bg: string }> = {
   internal: { label: 'Internal Sync', color: '#000000', bg: 'rgba(0, 0, 0, 0.12)' },
@@ -61,7 +58,7 @@ export default function MeetingsPage() {
           boxShadow: '0 10px 25px rgba(0,0,0,0.5)', zIndex: 1000,
           display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600
         }}>
-          <Sparkles size={16} />
+          <></>
           {convertedToast}
         </div>
       )}
@@ -76,7 +73,7 @@ export default function MeetingsPage() {
         </div>
         {currentUser?.role !== 'intern' && (
           <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
-            <Plus size={15} />
+            <></>
             Schedule Meeting
           </button>
         )}
@@ -107,7 +104,7 @@ export default function MeetingsPage() {
           {/* Upcoming section */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <Clock size={14} style={{ color: '#000000' }} />
+              <></>
               <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
                 Upcoming ({upcomingMeetings.length})
               </h3>
@@ -125,7 +122,7 @@ export default function MeetingsPage() {
           {/* Past section */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
+              <></>
               <h3 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
                 Recent & Past ({pastMeetings.length})
               </h3>
@@ -161,7 +158,7 @@ export default function MeetingsPage() {
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sync with founders, venture investors, OEM partners, or internal leads.</p>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsAddModalOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 
@@ -343,7 +340,7 @@ export default function MeetingsPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  <Calendar size={14} />
+                  <></>
                   Schedule & Invite
                 </button>
               </div>
@@ -387,7 +384,7 @@ export default function MeetingsPage() {
             {typeMeta.label}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.725rem', color: 'var(--text-muted)' }}>
-            <Calendar size={12} />
+            <></>
             <span>{m.date}</span>
             <span>·</span>
             <span>{m.time}</span>
@@ -427,7 +424,7 @@ export default function MeetingsPage() {
           {/* Action items badge */}
           {m.actionItems.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: pendingActions > 0 ? '#000000' : '#000000' }}>
-              <ListTodo size={12} />
+              <></>
               <span>{pendingActions} action{pendingActions === 1 ? '' : 's'} pending</span>
             </div>
           )}
@@ -486,7 +483,7 @@ export default function MeetingsPage() {
             }}
             title="Delete Meeting"
           >
-            <Trash2 size={16} />
+            <></>
           </button>
         </div>
 
@@ -574,10 +571,7 @@ export default function MeetingsPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flex: 1, minWidth: 0 }}>
-                    <CheckCircle2
-                      size={16}
-                      style={{ color: item.completed ? '#000000' : 'var(--text-muted)', flexShrink: 0 }}
-                    />
+                    <></>
                     <div style={{ minWidth: 0 }}>
                       <div style={{
                         fontSize: '0.825rem', fontWeight: 500,
@@ -598,7 +592,7 @@ export default function MeetingsPage() {
                   <div>
                     {item.convertedToTask ? (
                       <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Check size={11} /> Converted to Task
+                        <></> Converted to Task
                       </span>
                     ) : (
                       <button
@@ -606,7 +600,7 @@ export default function MeetingsPage() {
                         className="btn btn-sm btn-primary"
                         style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem', whiteSpace: 'nowrap' }}
                       >
-                        <Sparkles size={12} />
+                        <></>
                         Convert to Task
                       </button>
                     )}

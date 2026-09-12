@@ -4,7 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import MessageList from '@/components/chat/MessageList';
 import MessageInput from '@/components/chat/MessageInput';
-import { Hash, ArrowLeft, Trash2, Users } from 'lucide-react';
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -87,14 +87,14 @@ export default function ChannelPage({ params }: { params: Promise<{ channelId: s
               color: 'var(--text-primary)', textDecoration: 'none', flexShrink: 0
             }}
           >
-            <ArrowLeft size={18} />
+            <></>
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
             {isDirect ? (
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
             ) : (
-              <Hash size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+              <></>
             )}
             <div style={{ overflow: 'hidden' }}>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -124,7 +124,7 @@ export default function ChannelPage({ params }: { params: Promise<{ channelId: s
                 cursor: 'pointer'
               }}
             >
-              <Trash2 size={13} />
+              <></>
               <span className="desktop-only">{isDeleting ? 'Deleting...' : 'Delete'}</span>
             </button>
           )}

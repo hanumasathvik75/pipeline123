@@ -6,51 +6,46 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import { getInitials, avatarColor } from '@/lib/utils';
-import {
-  Zap, LayoutDashboard, FolderKanban, CheckSquare, Users,
-  CalendarDays, Building2, FlaskConical, TrendingUp, BookOpen,
-  Target, DollarSign, ChevronLeft, ChevronRight,
-  LogOut, Settings, X, MessageSquare,
-} from 'lucide-react';
+
 
 const NAV_SECTIONS = [
   {
     label: 'Core',
     items: [
-      { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { href: '/projects', icon: FolderKanban, label: 'Projects' },
-      { href: '/tasks', icon: CheckSquare, label: 'Tasks' },
-      { href: '/progress', icon: Zap, label: 'Progress Logger' },
+      { href: '/dashboard',  label: 'Dashboard' },
+      { href: '/projects',  label: 'Projects' },
+      { href: '/tasks',  label: 'Tasks' },
+      { href: '/progress',  label: 'Progress Logger' },
     ],
   },
   {
     label: 'Business',
     items: [
-      { href: '/crm', icon: Building2, label: 'CRM' },
-      { href: '/fundraising', icon: TrendingUp, label: 'Fundraising' },
-      { href: '/meetings', icon: CalendarDays, label: 'Meetings' },
-      { href: '/registrations', icon: Target, label: 'Registrations' },
+      { href: '/crm',  label: 'CRM' },
+      { href: '/fundraising',  label: 'Fundraising' },
+      { href: '/meetings',  label: 'Meetings' },
+      { href: '/registrations',  label: 'Registrations' },
     ],
   },
   {
     label: 'R&D',
     items: [
-      { href: '/rd', icon: FlaskConical, label: 'R&D' },
+      { href: '/rd',  label: 'R&D' },
     ],
   },
   {
     label: 'People',
     items: [
-      { href: '/team', icon: Users, label: 'Team' },
-      { href: '/chat', icon: MessageSquare, label: 'Chat' },
+      { href: '/team',  label: 'Team' },
+      { href: '/chat',  label: 'Chat' },
     ],
   },
   {
     label: 'Strategy',
     items: [
-      { href: '/goals', icon: Target, label: 'Goals & OKRs' },
-      { href: '/wiki', icon: BookOpen, label: 'Knowledge Base' },
-      { href: '/finance', icon: DollarSign, label: 'Finance' },
+      { href: '/goals',  label: 'Goals & OKRs' },
+      { href: '/wiki',  label: 'Knowledge Base' },
+      { href: '/finance',  label: 'Finance' },
     ],
   },
 ];
@@ -146,7 +141,7 @@ export default function Sidebar() {
           onClick={useHQStore.getState().closeMobileMenu}
           style={{ padding: '0.25rem' }}
         >
-          <X size={20} />
+          <></>
         </button>
       </div>
 
@@ -165,7 +160,7 @@ export default function Sidebar() {
               </div>
             )}
             {section.items.map(item => {
-              const Icon = item.icon;
+
               const active = pathname === item.href || pathname?.startsWith(item.href + '/');
               return (
                 <Link
@@ -175,7 +170,7 @@ export default function Sidebar() {
                   title={collapsed ? item.label : undefined}
                   style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
                 >
-                  <Icon size={16} className="nav-icon" style={{ flexShrink: 0 }} />
+
                   {!collapsed && <span>{item.label}</span>}
                 </Link>
               );
@@ -217,7 +212,7 @@ export default function Sidebar() {
           style={{ justifyContent: collapsed ? 'center' : 'flex-start', border: 'none', width: '100%' }}
           title={collapsed ? 'Settings' : undefined}
         >
-          <Settings size={14} style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
+          <></>
           {!collapsed && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Change Password</span>}
         </button>
 
@@ -227,7 +222,7 @@ export default function Sidebar() {
           style={{ justifyContent: collapsed ? 'center' : 'flex-start', border: 'none', width: '100%' }}
           title={collapsed ? 'Sign Out' : undefined}
         >
-          <LogOut size={14} style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
+          <></>
           {!collapsed && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sign Out</span>}
         </button>
 
@@ -238,8 +233,8 @@ export default function Sidebar() {
           title={collapsed ? 'Expand' : 'Collapse'}
         >
           {collapsed
-            ? <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />
-            : <><ChevronLeft size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /><span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Collapse</span></>
+            ? <></>
+            : <><></><span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Collapse</span></>
           }
         </button>
       </div>

@@ -5,10 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 import { priorityColor, statusColor, statusLabel, formatDate, daysUntil, getInitials } from '@/lib/utils';
 import type { Project, Task, Priority, ProjectStatus } from '@/lib/types';
-import {
-  ArrowLeft, Users, Calendar, Target, AlertTriangle, CheckSquare,
-  ChevronRight, Clock, Tag, Flag, Check, Edit2, Trash2, X, Plus
-} from 'lucide-react';
+
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -83,7 +80,7 @@ export default function ProjectDetailPage() {
     <div className="page animate-fade-in">
       {/* Back */}
       <button onClick={() => router.back()} className="btn btn-ghost btn-sm" style={{ width: 'fit-content', paddingLeft: 0 }}>
-        <ArrowLeft size={14} />
+        <></>
         Projects
       </button>
 
@@ -92,7 +89,7 @@ export default function ProjectDetailPage() {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
             <span className={`badge ${priorityColor(project.priority)}`}>
-              <Flag size={10} />
+              <></>
               {project.priority}
             </span>
             <span className={`badge ${statusColor(project.status)}`}>{statusLabel(project.status)}</span>
@@ -106,10 +103,10 @@ export default function ProjectDetailPage() {
             
             <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(true)}>
-                <Edit2 size={16} />
+                <></>
               </button>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={handleDelete} style={{ color: '#000000' }}>
-                <Trash2 size={16} />
+                <></>
               </button>
             </div>
           </div>
@@ -142,7 +139,7 @@ export default function ProjectDetailPage() {
           {/* Tasks Kanban */}
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <CheckSquare size={16} color="#000000" />
+              <></>
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Tasks ({projectTasks.length})</span>
             </div>
             <div style={{ padding: '1rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
@@ -183,7 +180,7 @@ export default function ProjectDetailPage() {
           {/* Milestones */}
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <Target size={16} color="#000000" />
+              <></>
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Milestones</span>
             </div>
             <div style={{ padding: '0.75rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -195,7 +192,7 @@ export default function ProjectDetailPage() {
                     background: m.completed ? '#000000' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {m.completed && <Check size={12} color="white" />}
+                    {m.completed && <></>}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem', color: m.completed ? 'var(--text-secondary)' : 'var(--text-primary)', textDecoration: m.completed ? 'line-through' : 'none' }}>
@@ -214,14 +211,14 @@ export default function ProjectDetailPage() {
           {project.risks.length > 0 && (
             <div className="card" style={{ overflow: 'hidden' }}>
               <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <AlertTriangle size={16} color="#000000" />
+                <></>
                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Risks</span>
               </div>
               <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 {project.risks.map(r => (
                   <div key={r.id} style={{ padding: '0.875rem', background: r.severity === 'high' ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-elevated)', borderRadius: 8, border: `1px solid ${r.severity === 'high' ? 'rgba(0, 0, 0, 0.2)' : 'var(--border)'}` }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <AlertTriangle size={14} color={r.severity === 'high' ? '#000000' : r.severity === 'medium' ? '#000000' : '#000000'} style={{ flexShrink: 0, marginTop: 1 }} />
+                      <></>
                       <div>
                         <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>{r.description}</div>
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Mitigation: {r.mitigation}</div>
@@ -305,7 +302,7 @@ export default function ProjectDetailPage() {
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Update project details and settings.</p>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsEditModalOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
 

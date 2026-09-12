@@ -3,10 +3,7 @@
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import type { Investor, InvestorStage } from '@/lib/types';
-import {
-  TrendingUp, DollarSign, Users, Briefcase, Plus, Search, Calendar,
-  ArrowRight, CheckCircle2, FileText, ChevronRight, Edit, Loader2, Shield
-} from 'lucide-react';
+
 import { formatCurrency } from '@/lib/utils';
 
 const STAGES: { stage: InvestorStage; label: string; color: string }[] = [
@@ -63,7 +60,7 @@ export default function FundraisingPage() {
   if (currentUser?.role === 'intern') {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <Shield size={48} style={{ color: 'var(--text-muted)' }} />
+        <></>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Access Denied</h2>
         <p style={{ color: 'var(--text-muted)' }}>You do not have clearance to view fundraising data.</p>
       </div>
@@ -73,7 +70,7 @@ export default function FundraisingPage() {
   if (!fundraisingMeta) {
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
-        <Loader2 size={24} className="spin" style={{ color: 'var(--text-muted)' }} />
+        <></>
       </div>
     );
   }
@@ -91,12 +88,12 @@ export default function FundraisingPage() {
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           {currentUser?.role === 'c_level' && (
             <button className="btn" onClick={handleOpenEditMeta}>
-              <Edit size={15} />
+              <></>
               Edit Goals
             </button>
           )}
           <button className="btn btn-primary" onClick={() => setIsAddInvestorModalOpen(true)}>
-            <Plus size={15} />
+            <></>
             Add Investor
           </button>
         </div>
@@ -106,7 +103,7 @@ export default function FundraisingPage() {
       <div className="grid-stats">
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <TrendingUp size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{formatCurrency(fundraisingMeta.targetAmount, fundraisingMeta.currency)}</div>
@@ -116,7 +113,7 @@ export default function FundraisingPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Users size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{activeInvestors.length}</div>
@@ -126,7 +123,7 @@ export default function FundraisingPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <DollarSign size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{committedInvestors.length}</div>
@@ -136,7 +133,7 @@ export default function FundraisingPage() {
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-            <Briefcase size={20} />
+            <></>
           </div>
           <div>
             <div className="stat-value">{fundraisingMeta.pitchDeckVersion}</div>
@@ -148,7 +145,7 @@ export default function FundraisingPage() {
       {/* Search */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <div style={{ position: 'relative', flex: '0 0 280px' }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input
             className="input"
             placeholder="Search VC firm, partner, thesis…"

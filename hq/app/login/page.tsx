@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
-import { User, Lock, AlertCircle } from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 Username
               </label>
               <div style={{ position: 'relative' }}>
-                <User size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <></>
                 <input
                   className="input"
                   type="text"
@@ -91,7 +91,7 @@ export default function LoginPage() {
                 Password
               </label>
               <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <></>
                 <input
                   className="input"
                   type="password"
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(0, 0, 0, 0.1)', border: '1px solid rgba(0, 0, 0, 0.2)', borderRadius: 8 }}>
-                <AlertCircle size={14} color="#000000" />
+                <></>
                 <span style={{ fontSize: '0.8rem', color: '#000000' }}>{error}</span>
               </div>
             )}

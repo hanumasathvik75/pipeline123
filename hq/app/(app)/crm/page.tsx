@@ -7,12 +7,7 @@ import type { Lead, LeadStage, CrmContact } from '@/lib/types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { exportAllDataMaster, downloadCSV } from '@/lib/exportAllData';
-import {
-  Building2, DollarSign, Mail, Phone, Plus,
-  Search, UserCheck, Activity as ActivityIcon, Upload, Edit2, Trash2, X,
-  Download, Layers, Eye, Copy, Check, Database, DownloadCloud, Shield,
-  Briefcase, Sparkles, Filter
-} from 'lucide-react';
+
 
 const STAGES: { stage: LeadStage; label: string; color: string }[] = [
   { stage: 'lead', label: 'New Lead', color: '#000000' },
@@ -258,11 +253,11 @@ export default function CRMPage() {
         <div>
           <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{c.name}</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem' }}>
-            <Briefcase size={12} style={{ color: 'var(--text-muted)' }} />
+            <></>
             <span>{c.designation || 'No Title'}</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem' }}>
-            <Building2 size={12} />
+            <></>
             <span>{c.company || 'Unknown Company'}</span>
           </div>
         </div>
@@ -279,11 +274,11 @@ export default function CRMPage() {
 
       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <Mail size={12} style={{ color: 'var(--text-muted)' }} /> 
+          <></> 
           <span>{c.email || '—'}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <Phone size={12} style={{ color: 'var(--text-muted)' }} /> 
+          <></> 
           <span>{c.phone || '—'}</span>
         </div>
       </div>
@@ -311,7 +306,7 @@ export default function CRMPage() {
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
           <strong>Notes:</strong> {c.notes || '—'}
         </span>
-        <Eye size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+        <></>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginTop: '0.25rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
@@ -320,14 +315,14 @@ export default function CRMPage() {
           title="View Full Notes & Profile"
           onClick={(e) => { e.stopPropagation(); setViewNotesContact(c); }}
         >
-          <Eye size={14} />
+          <></>
         </button>
         <button 
           className="btn btn-icon btn-ghost btn-sm" 
           title="Edit Contact"
           onClick={(e) => openEditContactModal(c, e)}
         >
-          <Edit2 size={14} />
+          <></>
         </button>
         <button 
           className="btn btn-icon btn-ghost btn-sm" 
@@ -335,7 +330,7 @@ export default function CRMPage() {
           onClick={(e) => handleDeleteContact(c.id, e)} 
           style={{ color: '#000000' }}
         >
-          <Trash2 size={14} />
+          <></>
         </button>
       </div>
     </div>
@@ -373,7 +368,7 @@ export default function CRMPage() {
               }}
               title="Export complete database for all 12 modules across the website"
             >
-              <Database size={16} />
+              <></>
               <span>Export All Website Data (CSV)</span>
               <span style={{ 
                 fontSize: '0.65rem', 
@@ -399,18 +394,18 @@ export default function CRMPage() {
                 onChange={handleFileUpload}
               />
               <button className="btn btn-secondary" onClick={() => fileInputRef.current?.click()}>
-                <Upload size={15} /> Import CSV
+                <></> Import CSV
               </button>
               <button className="btn btn-secondary" onClick={handleExportContactsOnly} title="Export only CRM Contacts to CSV">
-                <Download size={15} /> Export Contacts CSV
+                <></> Export Contacts CSV
               </button>
               <button className="btn btn-primary" onClick={openNewContactModal}>
-                <Plus size={15} /> Add Contact
+                <></> Add Contact
               </button>
             </>
           ) : (
             <button className="btn btn-primary" onClick={() => setIsAddLeadModalOpen(true)}>
-              <Plus size={15} /> Add Lead
+              <></> Add Lead
             </button>
           )}
         </div>
@@ -423,14 +418,14 @@ export default function CRMPage() {
           style={{ borderBottom: activeTab === 'contacts' ? '2px solid var(--accent)' : '2px solid transparent', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('contacts')}
         >
-          <UserCheck size={16} /> Contacts Directory ({crmContacts.length})
+          <></> Contacts Directory ({crmContacts.length})
         </button>
         <button 
           className={`btn btn-ghost ${activeTab === 'pipeline' ? 'active' : ''}`}
           style={{ borderBottom: activeTab === 'pipeline' ? '2px solid var(--accent)' : '2px solid transparent', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('pipeline')}
         >
-          <ActivityIcon size={16} /> Sales Pipeline ({leads.length})
+          <></> Sales Pipeline ({leads.length})
         </button>
       </div>
 
@@ -438,7 +433,7 @@ export default function CRMPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {/* Search */}
         <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: 360 }}>
-          <Search size={13} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <></>
           <input
             className="input"
             placeholder={activeTab === 'contacts' ? "Search name, company, title, email, notes…" : "Search company, contact, opportunity…"}
@@ -452,7 +447,7 @@ export default function CRMPage() {
           <>
             {/* Category / Stage Filter */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Filter size={14} style={{ color: 'var(--text-muted)' }} />
+              <></>
               <select 
                 className="input" 
                 style={{ height: 36, fontSize: '0.8rem', width: 'auto', minWidth: 160 }}
@@ -473,7 +468,7 @@ export default function CRMPage() {
 
             {/* Group By Selector: None | Company | Title | Company & Title */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Layers size={14} style={{ color: 'var(--text-muted)' }} />
+              <></>
               <select
                 className="input"
                 style={{ height: 36, fontSize: '0.8rem', width: 'auto', minWidth: 190 }}
@@ -529,7 +524,7 @@ export default function CRMPage() {
                       marginBottom: '1rem'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Building2 size={18} style={{ color: 'var(--accent)' }} />
+                        <></>
                         <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {company}
                         </h3>
@@ -566,7 +561,7 @@ export default function CRMPage() {
                       marginBottom: '1rem'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Briefcase size={18} style={{ color: 'var(--accent)' }} />
+                        <></>
                         <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {title}
                         </h3>
@@ -606,7 +601,7 @@ export default function CRMPage() {
                         marginBottom: '1.25rem'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <Building2 size={20} style={{ color: 'var(--accent)' }} />
+                          <></>
                           <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                             {company}
                           </h3>
@@ -621,7 +616,7 @@ export default function CRMPage() {
                         {Object.entries(titleGroups).map(([title, contacts]) => (
                           <div key={title} style={{ paddingLeft: '0.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.65rem' }}>
-                              <Briefcase size={14} style={{ color: 'var(--text-muted)' }} />
+                              <></>
                               <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                                 {title}
                               </span>
@@ -675,10 +670,10 @@ export default function CRMPage() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          <Mail size={12} /> {c.email || '—'}
+                          <></> {c.email || '—'}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
-                          <Phone size={12} /> {c.phone || '—'}
+                          <></> {c.phone || '—'}
                         </div>
                       </td>
                       <td onClick={e => e.stopPropagation()}>
@@ -709,7 +704,7 @@ export default function CRMPage() {
                           title="Click to view full notes in non-edit viewer"
                         >
                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.notes || '—'}</span>
-                          <Eye size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                          <></>
                         </div>
                       </td>
                       <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
@@ -718,14 +713,14 @@ export default function CRMPage() {
                           title="View Full Notes & Profile"
                           onClick={() => setViewNotesContact(c)}
                         >
-                          <Eye size={14} />
+                          <></>
                         </button>
                         <button 
                           className="btn btn-icon btn-ghost btn-sm" 
                           title="Edit Contact"
                           onClick={(e) => openEditContactModal(c, e)}
                         >
-                          <Edit2 size={14} />
+                          <></>
                         </button>
                         <button 
                           className="btn btn-icon btn-ghost btn-sm" 
@@ -733,7 +728,7 @@ export default function CRMPage() {
                           onClick={(e) => handleDeleteContact(c.id, e)} 
                           style={{ color: '#000000' }}
                         >
-                          <Trash2 size={14} />
+                          <></>
                         </button>
                       </td>
                     </tr>
@@ -759,7 +754,7 @@ export default function CRMPage() {
           <div className="grid-stats" style={{ marginBottom: '1.5rem' }}>
             <div className="stat-card">
               <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-                <Building2 size={20} />
+                <></>
               </div>
               <div>
                 <div className="stat-value">{leads.length}</div>
@@ -769,7 +764,7 @@ export default function CRMPage() {
 
             <div className="stat-card">
               <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-                <DollarSign size={20} />
+                <></>
               </div>
               <div>
                 <div className="stat-value">{formatCurrency(totalPipelineValue, 'INR')}</div>
@@ -779,7 +774,7 @@ export default function CRMPage() {
 
             <div className="stat-card">
               <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-                <ActivityIcon size={20} />
+                <></>
               </div>
               <div>
                 <div className="stat-value">{leads.filter(l => l.stage === 'pilot').length}</div>
@@ -789,7 +784,7 @@ export default function CRMPage() {
 
             <div className="stat-card">
               <div className="stat-icon" style={{ background: 'rgba(0, 0, 0, 0.12)', color: '#000000' }}>
-                <UserCheck size={20} />
+                <></>
               </div>
               <div>
                 <div className="stat-value">{formatCurrency(closedValue, 'INR')}</div>
@@ -928,17 +923,17 @@ export default function CRMPage() {
                   </div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <Building2 size={13} /> {viewNotesContact.company || 'Unknown Company'}
+                      <></> {viewNotesContact.company || 'Unknown Company'}
                     </span>
                     <span>•</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <Briefcase size={13} /> {viewNotesContact.designation || 'No Title'}
+                      <></> {viewNotesContact.designation || 'No Title'}
                     </span>
                   </div>
                 </div>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setViewNotesContact(null)}>
-                <X size={18} />
+                <></>
               </button>
             </div>
 
@@ -981,7 +976,7 @@ export default function CRMPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Sparkles size={16} style={{ color: '#000000' }} />
+                  <></>
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Strategic Notes & Engagement History (Read-Only)
                   </h3>
@@ -992,7 +987,7 @@ export default function CRMPage() {
                     onClick={() => copyNotesToClipboard(viewNotesContact.notes)}
                     style={{ fontSize: '0.75rem', height: 30 }}
                   >
-                    {copiedNotes ? <Check size={13} style={{ color: '#000000' }} /> : <Copy size={13} />}
+                    {copiedNotes ? <></> : <></>}
                     <span>{copiedNotes ? 'Copied!' : 'Copy Notes'}</span>
                   </button>
                 )}
@@ -1043,7 +1038,7 @@ export default function CRMPage() {
                   openEditContactModal(target);
                 }}
               >
-                <Edit2 size={14} /> Edit Contact &amp; Notes
+                <></> Edit Contact &amp; Notes
               </button>
               <button className="btn btn-primary" onClick={() => setViewNotesContact(null)}>
                 Close Viewer
@@ -1068,7 +1063,7 @@ export default function CRMPage() {
                   background: 'linear-gradient(135deg, #000000, #000000)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' 
                 }}>
-                  <Database size={22} />
+                  <></>
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1083,7 +1078,7 @@ export default function CRMPage() {
                 </div>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsExportModalOpen(false)}>
-                <X size={18} />
+                <></>
               </button>
             </div>
 
@@ -1166,7 +1161,7 @@ export default function CRMPage() {
                   cursor: 'pointer'
                 }}
               >
-                <DownloadCloud size={18} />
+                <></>
                 <span>Download Complete Master CSV (All 12 Modules)</span>
               </button>
 
@@ -1175,7 +1170,7 @@ export default function CRMPage() {
                   className="btn btn-secondary btn-sm" 
                   onClick={() => { handleExportContactsOnly(); setIsExportModalOpen(false); }}
                 >
-                  <Download size={13} /> Export CRM Contacts Only
+                  <></> Export CRM Contacts Only
                 </button>
                 <button 
                   className="btn btn-secondary btn-sm" 
@@ -1200,7 +1195,7 @@ export default function CRMPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{editingContact ? 'Edit Contact & Notes' : 'Add New Contact'}</h3>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsContactModalOpen(false)}>
-                <X size={16} />
+                <></>
               </button>
             </div>
             

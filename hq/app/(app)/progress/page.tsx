@@ -3,9 +3,7 @@
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
 import type { ProgressCategory, ProgressSubComponent, DailyLog } from '@/lib/types';
-import {
-  ClipboardList, Plus, Settings, Edit2, Trash2, X, Check, Save, User
-} from 'lucide-react';
+
 
 export default function ProgressPage() {
   const { currentUser, progressCategories, progressLogs, team, addProgressCategory, updateProgressCategory, deleteProgressCategory, addProgressLog } = useHQStore();
@@ -127,7 +125,7 @@ export default function ProgressPage() {
                      className={`btn ${activeTab === 'admin' ? 'btn-primary' : 'btn-secondary'}`} 
                      onClick={() => setActiveTab('admin')}
                  >
-                     <Settings size={15} /> Admin View
+                     <></> Admin View
                  </button>
              </div>
         )}
@@ -147,14 +145,14 @@ export default function ProgressPage() {
                   </div>
                   {myLogForDate && (
                       <div style={{ color: '#000000', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Check size={16} /> Log submitted ({myTotalHours}h total)
+                          <></> Log submitted ({myTotalHours}h total)
                       </div>
                   )}
               </div>
 
               {progressCategories.length === 0 ? (
                   <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                      <ClipboardList size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
+                      <></>
                       <h3>No Categories Defined</h3>
                       <p>An admin needs to configure progress categories before you can log time.</p>
                   </div>
@@ -212,7 +210,7 @@ export default function ProgressPage() {
               {!myLogForDate && progressCategories.length > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                       <button className="btn btn-primary" onClick={submitLog}>
-                          <Save size={16} /> Submit Daily Log
+                          <></> Submit Daily Log
                       </button>
                   </div>
               )}
@@ -228,7 +226,7 @@ export default function ProgressPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                       <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Log Categories Config</h2>
                       <button className="btn btn-sm btn-primary" onClick={() => openCategoryModal(null)}>
-                          <Plus size={14} /> Add Category
+                          <></> Add Category
                       </button>
                   </div>
                   
@@ -238,8 +236,8 @@ export default function ProgressPage() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                                   <h3 style={{ fontWeight: 700 }}>{cat.name}</h3>
                                   <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openCategoryModal(cat)}><Edit2 size={14}/></button>
-                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => deleteCategory(cat.id)} style={{ color: '#000000' }}><Trash2 size={14}/></button>
+                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openCategoryModal(cat)}><></></button>
+                                      <button className="btn btn-icon btn-ghost btn-sm" onClick={() => deleteCategory(cat.id)} style={{ color: '#000000' }}><></></button>
                                   </div>
                               </div>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
@@ -352,11 +350,11 @@ export default function ProgressPage() {
                                    if(subComponents.length > 1) {
                                        setSubComponents(subComponents.filter((_, i) => i !== idx));
                                    }
-                               }}><X size={14}/></button>
+                               }}><></></button>
                            </div>
                        ))}
                        <button type="button" className="btn btn-sm btn-secondary" onClick={() => setSubComponents([...subComponents, { id: `sub-${Date.now()}`, name: '' }])}>
-                           <Plus size={14} /> Add Sub-Component
+                           <></> Add Sub-Component
                        </button>
                    </div>
 

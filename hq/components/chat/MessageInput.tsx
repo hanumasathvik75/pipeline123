@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useHQStore } from '@/lib/store';
-import { Send, Paperclip, CheckSquare, FolderKanban, BookOpen, X } from 'lucide-react';
+
 import { ChatReference } from '@/lib/types';
 
 export default function MessageInput({ channelId }: { channelId: string }) {
@@ -92,7 +92,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                 onClick={() => setReferences(references.filter((_, i) => i !== idx))} 
                 style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: 'var(--text-muted)' }}
               >
-                <X size={12} />
+                <></>
               </button>
             </div>
           ))}
@@ -115,7 +115,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
             }}>
               <span>Attach Context</span>
               <button onClick={() => setShowRefMenu(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                <X size={14} />
+                <></>
               </button>
             </div>
 
@@ -131,7 +131,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                     style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
                     className="hover-bg"
                   >
-                    <CheckSquare size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <></>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
                   </div>
                 ))}
@@ -150,7 +150,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                     style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
                     className="hover-bg"
                   >
-                    <FolderKanban size={14} style={{ color: '#000000', flexShrink: 0 }} />
+                    <></>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                   </div>
                 ))}
@@ -169,7 +169,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
                     style={{ padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} 
                     className="hover-bg"
                   >
-                    <BookOpen size={14} style={{ color: '#000000', flexShrink: 0 }} />
+                    <></>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</span>
                   </div>
                 ))}
@@ -196,7 +196,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
             }}
             className="hover-bg"
           >
-            <Paperclip size={18} />
+            <></>
           </button>
 
           <textarea
@@ -223,7 +223,7 @@ export default function MessageInput({ channelId }: { channelId: string }) {
               flexShrink: 0, minWidth: '40px', minHeight: '36px' 
             }}
           >
-            <Send size={15} />
+            <></>
           </button>
         </div>
       </div>
