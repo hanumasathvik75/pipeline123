@@ -311,26 +311,26 @@ export default function CRMPage() {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginTop: '0.25rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
         <button 
-          className="btn btn-icon btn-ghost btn-sm" 
+          className="btn btn-ghost btn-sm" 
           title="View Full Notes & Profile"
           onClick={(e) => { e.stopPropagation(); setViewNotesContact(c); }}
         >
-          <></>
+          View
         </button>
         <button 
-          className="btn btn-icon btn-ghost btn-sm" 
+          className="btn btn-ghost btn-sm" 
           title="Edit Contact"
           onClick={(e) => openEditContactModal(c, e)}
         >
-          <></>
+          Edit
         </button>
         <button 
-          className="btn btn-icon btn-ghost btn-sm" 
+          className="btn btn-ghost btn-sm" 
           title="Delete Contact"
           onClick={(e) => handleDeleteContact(c.id, e)} 
           style={{ color: '#000000' }}
         >
-          <></>
+          Delete
         </button>
       </div>
     </div>
@@ -709,26 +709,26 @@ export default function CRMPage() {
                       </td>
                       <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
                         <button 
-                          className="btn btn-icon btn-ghost btn-sm" 
+                          className="btn btn-ghost btn-sm" 
                           title="View Full Notes & Profile"
                           onClick={() => setViewNotesContact(c)}
                         >
-                          <></>
+                          View
                         </button>
                         <button 
-                          className="btn btn-icon btn-ghost btn-sm" 
+                          className="btn btn-ghost btn-sm" 
                           title="Edit Contact"
                           onClick={(e) => openEditContactModal(c, e)}
                         >
-                          <></>
+                          Edit
                         </button>
                         <button 
-                          className="btn btn-icon btn-ghost btn-sm" 
+                          className="btn btn-ghost btn-sm" 
                           title="Delete Contact"
                           onClick={(e) => handleDeleteContact(c.id, e)} 
                           style={{ color: '#000000' }}
                         >
-                          <></>
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -1194,8 +1194,8 @@ export default function CRMPage() {
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 520, padding: '1.75rem', background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{editingContact ? 'Edit Contact & Notes' : 'Add New Contact'}</h3>
-              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsContactModalOpen(false)}>
-                <></>
+              <button className="btn btn-ghost btn-sm" onClick={() => setIsContactModalOpen(false)} style={{ fontWeight: 600 }}>
+                X
               </button>
             </div>
             

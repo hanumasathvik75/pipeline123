@@ -171,11 +171,11 @@ export default function TopBar() {
       <header className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
           <button 
-            className="btn btn-ghost btn-icon mobile-only" 
+            className="btn btn-ghost mobile-only" 
             onClick={() => useHQStore.getState().toggleMobileMenu()}
-            style={{ marginRight: '0.25rem' }}
+            style={{ marginRight: '0.25rem', padding: '0.25rem 0.5rem', fontWeight: 600 }}
           >
-            <></>
+            Menu
           </button>
           <h2 style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             {title}
@@ -193,8 +193,7 @@ export default function TopBar() {
             onClick={() => setIsQuickOpen(true)}
             style={{ gap: '0.375rem', fontSize: '0.8rem', height: 34, padding: '0 0.875rem' }}
           >
-            <></>
-            <span className="desktop-only">New</span>
+            <span style={{ fontWeight: 600 }}>New</span>
           </button>
 
 

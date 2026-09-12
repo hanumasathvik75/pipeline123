@@ -366,9 +366,9 @@ export const useHQStore = create<HQStore>()(
       syncWithServer: async () => {
         try {
           const [res, financeRes, fundraisingRes] = await Promise.all([
-            fetch('/api/sync'),
-            fetch('/api/finance'),
-            fetch('/api/fundraising/meta')
+            fetch('/api/sync', { cache: 'no-store' }),
+            fetch('/api/finance', { cache: 'no-store' }),
+            fetch('/api/fundraising/meta', { cache: 'no-store' })
           ]);
           
           if (res.ok) {
@@ -834,6 +834,7 @@ export const useHQStore = create<HQStore>()(
             set(s => ({
               financeData: s.financeData ? { ...s.financeData, ...updates, updatedAt: new Date().toISOString() } : null
             }));
+            get().broadcastUpdates({ financeData: updates });
             return { success: true };
           }
           const data = await res.json();
@@ -853,6 +854,7 @@ export const useHQStore = create<HQStore>()(
             set(s => ({
               fundraisingMeta: s.fundraisingMeta ? { ...s.fundraisingMeta, ...updates, updatedAt: new Date().toISOString() } : null
             }));
+            get().broadcastUpdates({ fundraisingMeta: updates });
             return { success: true };
           }
           const data = await res.json();
