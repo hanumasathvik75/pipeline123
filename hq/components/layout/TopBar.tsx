@@ -197,20 +197,7 @@ export default function TopBar() {
             <span className="desktop-only">New</span>
           </button>
 
-          <button
-            className="btn btn-ghost btn-icon"
-            style={{ position: 'relative', height: 34, width: 34 }}
-            onClick={() => showToast('All systems operational. Telemetry stream healthy.')}
-          >
-            <></>
-            {hasNotif && (
-              <span style={{
-                position: 'absolute', top: 6, right: 6,
-                width: 6, height: 6, borderRadius: '50%',
-                background: '#000000', border: '1.5px solid var(--bg-surface)',
-              }} />
-            )}
-          </button>
+
 
           {currentUser && (
             <button

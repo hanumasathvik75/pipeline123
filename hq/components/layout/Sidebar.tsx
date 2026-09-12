@@ -151,8 +151,7 @@ export default function Sidebar() {
           <div key={section.label} style={{ marginBottom: '0.5rem' }}>
             {!collapsed && (
               <div style={{
-                fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.1em',
+                fontSize: '0.95rem', fontWeight: 800, color: '#000000',
                 padding: '0.25rem 0.75rem',
                 marginBottom: '0.125rem',
               }}>

@@ -14,17 +14,7 @@ function StatWidget({ icon: Icon, label, value, sub, accent, link }: {
 }) {
   const content = (
     <div className="card stat-card" style={{ gap: '0.875rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: accent ? `${accent}18` : 'var(--bg-hover)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: `1px solid ${accent ? `${accent}30` : 'var(--border)'}`,
-        }}>
-          {Icon && <Icon size={18} color={accent || 'var(--text-secondary)'} />}
-        </div>
-        {link && <></>}
-      </div>
+
       <div>
         <div className="stat-label">{label}</div>
         <div className="stat-value" style={{ color: accent || 'var(--text-primary)' }}>{value}</div>
