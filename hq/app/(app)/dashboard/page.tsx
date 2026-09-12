@@ -21,7 +21,7 @@ function StatWidget({ icon: Icon, label, value, sub, accent, link }: {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: `1px solid ${accent ? `${accent}30` : 'var(--border)'}`,
         }}>
-          <Icon size={18} color={accent || 'var(--text-secondary)'} />
+          {Icon && <Icon size={18} color={accent || 'var(--text-secondary)'} />}
         </div>
         {link && <></>}
       </div>
