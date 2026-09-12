@@ -184,22 +184,7 @@ export default function TopBar() {
           <span className="desktop-only" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>IgnitionAI HQ</span>
         </div>
 
-        {/* Search */}
-        <div className="desktop-only" style={{ position: 'relative', width: 240 }}>
-          <></>
-          <input
-            className="input"
-            placeholder="Search anything…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ paddingLeft: '2.25rem', height: 34, fontSize: '0.8rem' }}
-          />
-          <kbd style={{
-            position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
-            fontSize: '0.6rem', color: 'var(--text-muted)', background: 'var(--bg-hover)',
-            border: '1px solid var(--border)', borderRadius: 4, padding: '0 4px', lineHeight: '18px',
-          }}>⌘K</kbd>
-        </div>
+
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
