@@ -1,6 +1,10 @@
 @echo off
 echo ===================================================
+<<<<<<< HEAD
 echo Building IgnitionAI 2.0 Integrated Phase 1-7 Pipeline...
+=======
+echo Building IgnitionAI 2.0 Phase 4 Modules...
+>>>>>>> remotes/origin/phase4/expected-residual-anomaly
 echo ===================================================
 
 if not exist "out" mkdir "out"
@@ -18,7 +22,6 @@ if %ERRORLEVEL% NEQ 0 (
 echo ===================================================
 echo Running Tests...
 echo ===================================================
-
 echo [TEST] Technical Sources
 java -ea -cp out com.ignitionai.technicalsources.test.TechnicalSourceTest
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
@@ -67,6 +70,30 @@ if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 echo.
 echo [TEST] Phase 3 to Phase 4 Contract Integration
 java -ea -cp out tools.pipeline_runner.Phase3ToPhase4ContractTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 4 End-to-End Tests
+java -ea -cp out tools.pipeline_runner.Phase4PipelineRunner
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 2 to Phase 3 End-to-End Integration
+java -ea -cp out tools.pipeline_runner.Phase2ToPhase3IntegrationTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] OBD Input and Pre-processing
+java -cp out com.ignitionai.obdinput.ObdInputTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+java -cp out com.ignitionai.obdinput.test.ContractValidationTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+java -cp out com.ignitionai.obdinput.test.BluetoothAdapterTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] OBD Generator
+java -cp out com.ignitionai.obdgenerator.GeneratorTest
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo.

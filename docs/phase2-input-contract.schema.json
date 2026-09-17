@@ -30,6 +30,7 @@
     "source_type": { "type": "string", "enum": ["simulation", "replay", "vehicle"] },
     "emitted_at": { "type": "string", "format": "date-time" },
     "received_at": { "type": "string", "format": "date-time" },
+    "dtc_snapshot_completeness": { "type": "string", "enum": ["complete", "incremental", "unknown"] },
     "vehicle_ref": {
       "type": "object",
       "additionalProperties": false,
