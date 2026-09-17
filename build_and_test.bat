@@ -1,10 +1,6 @@
 @echo off
 echo ===================================================
-<<<<<<< HEAD
 echo Building IgnitionAI 2.0 Integrated Phase 1-7 Pipeline...
-=======
-echo Building IgnitionAI 2.0 Phase 4 Modules...
->>>>>>> remotes/origin/phase4/expected-residual-anomaly
 echo ===================================================
 
 if not exist "out" mkdir "out"
@@ -22,6 +18,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo ===================================================
 echo Running Tests...
 echo ===================================================
+
 echo [TEST] Technical Sources
 java -ea -cp out com.ignitionai.technicalsources.test.TechnicalSourceTest
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
