@@ -12,28 +12,38 @@ import java.util.List;
 public class SubsystemScoreCalculator {
     
     private final SeverityClassifier severityClassifier;
+    private final ScoringConfiguration scoringConfig;
+
+    public SubsystemScoreCalculator(SeverityClassifier severityClassifier, ScoringConfiguration scoringConfig) {
+        this.severityClassifier = severityClassifier;
+        this.scoringConfig = scoringConfig != null ? scoringConfig : ScoringConfiguration.getDefault();
+    }
 
     public SubsystemScoreCalculator(SeverityClassifier severityClassifier) {
-        this.severityClassifier = severityClassifier;
+        this(severityClassifier, ScoringConfiguration.getDefault());
     }
 
     public SubsystemHealthAssessment calculateScore(DegradationOutput output) {
         if (output == null) {
-            return new SubsystemHealthAssessment("unknown", SeverityLevel.UNKNOWN, null, 0.0, 1.0, List.of("NO_DATA"));
+            return new SubsystemHealthAssessment("unknown", "Unknown", SeverityLevel.UNKNOWN, null, 0.0, 1.0, List.of("NO_DATA"), new ArrayList<>(), false);
         }
 
         String subsystemId = output.getSubsystemId();
+        String subsystemName = output.getSubsystemId();
         List<String> degradedFlags = new ArrayList<>();
+        List<String> evidence = new ArrayList<>();
         
         if (output.getDataSufficiencyStatus() == DataSufficiency.INSUFFICIENT) {
             degradedFlags.add("INSUFFICIENT_DATA");
-            return new SubsystemHealthAssessment(subsystemId, SeverityLevel.UNKNOWN, null, 0.0, 1.0, degradedFlags);
+            return new SubsystemHealthAssessment(subsystemId, subsystemName, SeverityLevel.UNKNOWN, null, 0.0, 1.0, degradedFlags, evidence, false);
         }
 
         SeverityLevel severity = severityClassifier.classify(output);
+        boolean dataQualitySufficient = true;
         
         if (output.getDataSufficiencyStatus() == DataSufficiency.SPARSE) {
             degradedFlags.add("SPARSE_DATA");
+            dataQualitySufficient = false;
         }
 
         // Base health starts at 100
@@ -45,10 +55,10 @@ public class SubsystemScoreCalculator {
         double recurrence = output.getRecurrenceScore() != null ? output.getRecurrenceScore() : 0.0; // 0 to 1
 
         // Deductions
-        double degDeduction = degScore * 0.5; // Max 50 points lost from degradation
-        double riskDeduction = eventRisk * 30.0; // Max 30 points lost from event risk
-        double persistenceDeduction = persistence * 10.0; // Max 10 points lost
-        double recurrenceDeduction = recurrence * 10.0; // Max 10 points lost
+        double degDeduction = degScore * scoringConfig.getDegradationWeight(); 
+        double riskDeduction = eventRisk * scoringConfig.getEventRiskWeight(); 
+        double persistenceDeduction = persistence * scoringConfig.getPersistenceWeight();
+        double recurrenceDeduction = recurrence * scoringConfig.getRecurrenceWeight();
         
         healthScore = healthScore - degDeduction - riskDeduction - persistenceDeduction - recurrenceDeduction;
         
@@ -63,6 +73,6 @@ public class SubsystemScoreCalculator {
         
         double uncertainty = output.getUncertainty() != null ? output.getUncertainty() : 0.5;
 
-        return new SubsystemHealthAssessment(subsystemId, severity, healthScore, baseConfidence, uncertainty, degradedFlags);
+        return new SubsystemHealthAssessment(subsystemId, subsystemName, severity, healthScore, baseConfidence, uncertainty, degradedFlags, evidence, dataQualitySufficient);
     }
 }

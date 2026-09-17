@@ -27,6 +27,11 @@ public class SubsystemHealthAssessment {
         this.dataQualitySufficient = dataQualitySufficient;
     }
 
+    public SubsystemHealthAssessment(String subsystemId, Double healthScore, SeverityLevel severityLevel, 
+                                     Double confidence, List<String> evidenceReferences, boolean dataQualitySufficient) {
+        this(subsystemId, subsystemId, severityLevel, healthScore, confidence, 0.0, null, evidenceReferences, dataQualitySufficient);
+    }
+
     public String getSubsystemId() { return subsystemId; }
     public String getSubsystemName() { return subsystemName != null ? subsystemName : subsystemId; }
     public SeverityLevel getSeverityLevel() { return severityLevel; }

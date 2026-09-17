@@ -6,7 +6,7 @@ echo ===================================================
 if not exist "out" mkdir "out"
 
 rem Compile all modules
-powershell -Command "Get-ChildItem -Recurse -Filter *.java | ForEach-Object { '\"' + $_.FullName.Replace('\', '/') + '\"' } | Out-File -Encoding ascii sources.txt"
+dir /s /b *.java > sources.txt
 javac -encoding UTF-8 -d out @sources.txt
 del sources.txt
 

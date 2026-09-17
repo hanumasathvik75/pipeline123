@@ -75,6 +75,17 @@ public class VehicleHealthAssessment {
         this.modelVersions = modelVersions;
     }
 
+    public VehicleHealthAssessment(String vehicleId, String vinOrIdentityStatus, String vehicleConfiguration,
+                                   String assessmentTimestamp, String assessmentWindow, Double odometerKm,
+                                   Double vehicleHealthIndex, VehicleHealthBand vehicleHealthBand,
+                                   SeverityLevel overallSeverity, Double overallConfidence, Double overallUncertainty,
+                                   String dataQualityStatus, List<SubsystemHealthAssessment> subsystemAssessments,
+                                   String calculationVersion, String registryReleaseVersion, String modelVersions) {
+        this(vehicleId, null, null, vinOrIdentityStatus, vehicleConfiguration, assessmentTimestamp, assessmentWindow, odometerKm,
+             vehicleHealthIndex, vehicleHealthBand, overallSeverity, overallConfidence, overallUncertainty, dataQualityStatus,
+             1.0, null, null, subsystemAssessments, null, null, calculationVersion, registryReleaseVersion, modelVersions, modelVersions);
+    }
+
     public String getVehicleId() { return vehicleId; }
     public Long getAssessmentTimestampMs() { return assessmentTimestampMs; }
     public Long getAssessmentWindowMs() { return assessmentWindowMs; }
