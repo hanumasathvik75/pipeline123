@@ -101,6 +101,15 @@ echo.
 echo [TEST] Phase 5 Labelled History Generator
 java -ea -cp out tools.pipeline_runner.LabelledHistoryGenerator
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+echo.
+echo [TEST] Phase 7 Certificate and App
+java -ea -cp out com.ignitionai.phase7.test.Phase7Tests
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 7 Demo
+java -ea -cp out tools.pipeline_runner.Phase7DemoRunner
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo.
 echo ===================================================
