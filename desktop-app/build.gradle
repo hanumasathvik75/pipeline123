@@ -1,0 +1,16 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':vehicle-health-index')
+    implementation project(':subsystem-health-score')
+    implementation project(':severity-indicator')
+    implementation project(':certificate-snapshot')
+    implementation project(':obd-input-and-pre-processing')
+    implementation project(':phase6-contract')
+}
+
+application {
+    mainClass = 'ai.ignition.desktop.DealershipDesktopApp'
+}
