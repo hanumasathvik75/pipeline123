@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://ignitionai.com/schemas/phase6-health-assessment.v1.json",
+    "title": "Phase 6 Vehicle Health Assessment",
+    "description": "Structured output contract for Phase 6 health scoring",
+    "type": "object",
+    "properties": {
+        "vehicleId": { "type": "string" },
+        "assessmentTimestamp": { "type": "string" },
+        "assessmentWindow": { "type": "string" },
+        "vehicleHealthIndex": { "type": "number", "minimum": 0, "maximum": 100 },
+        "healthBand": { "type": "string" },
+        "overallSeverity": { "type": "string" },
+        "overallConfidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overallUncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+        "dataQualityStatus": { "type": "string" },
+        "subsystemCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "excludedSubsystemIds": { "type": "array", "items": { "type": "string" } },
+        "calculationVersion": { "type": "string" },
+        "registryReleaseVersion": { "type": "string" },
+        "contextVersion": { "type": "string" },
+        "subsystemAssessments": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "subsystemId": { "type": "string" },
+                    "severityLevel": { "type": "string" },
+                    "healthScore": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "degradedDataFlags": { "type": "array", "items": { "type": "string" } },
+                    "evidenceReferences": { "type": "array", "items": { "type": "string" } }
+                },
+                "required": ["subsystemId", "severityLevel"]
+            }
+        },
+        "componentWeights": {
+            "type": "object",
+            "additionalProperties": { "type": "number" }
+        },
+        "evidenceReferences": {
+            "type": "array",
+            "items": { "type": "string" }
+        }
+    },
+    "required": [
+        "vehicleId", "assessmentTimestamp", "calculationVersion", "subsystemAssessments"
+    ]
+}

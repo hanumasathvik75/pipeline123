@@ -6,13 +6,12 @@ echo ===================================================
 if not exist "out" mkdir "out"
 
 rem Compile all modules
-dir /s /b *.java > sources.txt
-javac -encoding UTF-8 -d out @sources.txt
-del sources.txt
+powershell -ExecutionPolicy Bypass -File compile.ps1
+set COMPILE_STATUS=%ERRORLEVEL%
 
-if %ERRORLEVEL% NEQ 0 (
+if %COMPILE_STATUS% NEQ 0 (
     echo [ERROR] Compilation failed!
-    exit /b %ERRORLEVEL%
+    exit /b %COMPILE_STATUS%
 )
 
 echo ===================================================

@@ -60,7 +60,7 @@ public class LatexGenerator {
         latex.append("\\textbf{Subsystem} & \\textbf{Score} & \\textbf{Severity} & \\textbf{Evidence} \\\\\n");
         latex.append("\\midrule\n");
         
-        if (ha.getSubsystemAssessments() != null) {
+        if (ha.getSubsystemAssessments() != null && !ha.getSubsystemAssessments().isEmpty()) {
             for (SubsystemHealthAssessment sub : ha.getSubsystemAssessments()) {
                 String subScore = (sub.getScore() != null) ? String.format("%.2f", sub.getScore()) : "UNAVAILABLE";
                 String severity = sub.getSeverity().name();
