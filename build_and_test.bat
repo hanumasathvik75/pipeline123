@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo Building IgnitionAI 2.0 Phase 3 Modules...
+echo Building IgnitionAI 2.0 Integrated Phase 1-7 Pipeline...
 echo ===================================================
 
 if not exist "out" mkdir "out"
@@ -105,6 +105,21 @@ if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 echo.
 echo [TEST] Phase 6 Pipeline Runner
 java -ea -cp out tools.pipeline_runner.Phase6PipelineRunner
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 7 Certificate and App
+java -ea -cp out com.ignitionai.phase7.test.Phase7Tests
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 7 Demo
+java -ea -cp out tools.pipeline_runner.Phase7DemoRunner
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] Phase 1-7 IgnitionAI Cumulative Pipeline
+java -ea -cp out tools.pipeline_runner.IgnitionAiPipelineRunner
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo.

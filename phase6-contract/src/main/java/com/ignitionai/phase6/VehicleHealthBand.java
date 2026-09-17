@@ -6,5 +6,11 @@ public enum VehicleHealthBand {
     GOOD,
     FAIR,
     POOR,
-    CRITICAL
+    CRITICAL,
+    A_EXCELLENT,
+    B_GOOD,
+    C_FAIR,
+    D_POOR,
+    E_CRITICAL,
+    UNASSESSED
 }

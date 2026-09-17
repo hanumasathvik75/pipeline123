@@ -5,5 +5,9 @@ public enum SeverityLevel {
     NORMAL,
     WATCH,
     DEGRADED,
-    CRITICAL
+    CRITICAL,
+    NONE,
+    LOW,
+    MEDIUM,
+    HIGH
 }
