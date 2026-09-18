@@ -30,6 +30,7 @@ Implemented a shared application orchestration service, native Swing assessment/
 Verification performed on the isolated worktree:
 
 - `build_and_test.bat`: passes existing module/integration suites and `NativeWorkflowTest`.
+- Source-archive rebuild: the complete Java suite passes outside the original checkout after fixing source discovery to exclude build directories relative to the repository (rather than matching parent-directory names).
 - `NativeWorkflowTest`: deterministic generation/replay, fractional sampling, DTC recovery, invalid input, unknown identity/mileage/risk, sustained-fault detection, source labels, distinct identifiers for different evidence.
 - `DesktopSmokeTest`: opens real Swing controls and generates an assessment through the backend. Passed again using the packaged runtime and application JARs.
 - Packaged `IgnitionAI.exe`: launched and stayed running; closed after launch verification. Package includes a Java runtime and discoverable sensor catalog.

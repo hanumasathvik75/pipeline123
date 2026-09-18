@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = $PSScriptRoot
 Push-Location $repoRoot
 try {
-    $files = Get-ChildItem -Recurse -Filter *.java | Where-Object { $_.FullName -notmatch '[\\/](android-app|build|out|releases|\.gradle)[\\/]' } | Select-Object -ExpandProperty FullName
+    $files = Get-ChildItem -Recurse -Filter *.java | Where-Object { $_.FullName.Substring($repoRoot.Length) -notmatch '[\\/](android-app|build|out|releases|\.gradle)[\\/]' } | Select-Object -ExpandProperty FullName
     New-Item -ItemType Directory -Force out | Out-Null
     $argsFile = Join-Path $repoRoot 'out/sources.txt'
     $files | ForEach-Object { '"' + $_.Replace('\', '/') + '"' } | Set-Content -Encoding utf8 $argsFile
