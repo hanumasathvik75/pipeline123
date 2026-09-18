@@ -38,6 +38,7 @@ public class Phase2ToPhase3IntegrationTest {
             genConfig.setSupportedSignals(List.of("engine_rpm", "vehicle_speed_kph", "engine_coolant_temperature", "ambient_air_temperature"));
             genConfig.setDurationMs(30000); // 30 seconds
             genConfig.setRandomSeed(12345);
+            genConfig.setSignalPrograms(Map.of("ambient_air_temperature", new com.ignitionai.obdgenerator.config.SignalProgram("Cel", Map.of(0L, 25.0))));
             genConfig.setScenarioType(ScenarioType.CITY_DRIVING);
             // Simulate some missingness for testing Quality mapping
             genConfig.setMissingnessProbability(0.01); 

@@ -27,7 +27,7 @@ public class Phase7Tests {
         try { testHistoricalComparison(); passed++; System.out.println("  PASS  testHistoricalComparison"); } catch(Throwable t) { failed++; System.out.println("  FAIL  testHistoricalComparison: " + t.getMessage()); }
         try { testInvalidInputRejection(); passed++; System.out.println("  PASS  testInvalidInputRejection"); } catch(Throwable t) { failed++; System.out.println("  FAIL  testInvalidInputRejection: " + t.getMessage()); }
         try { testPhase6FixtureCompatibility(); passed++; System.out.println("  PASS  testPhase6FixtureCompatibility"); } catch(Throwable t) { failed++; System.out.println("  FAIL  testPhase6FixtureCompatibility: " + t.getMessage()); }
-        try { testLatexCompilation(); passed++; System.out.println("  PASS  testLatexCompilation"); } catch(Throwable t) { failed++; System.out.println("  FAIL  testLatexCompilation: " + t.getMessage()); }
+        try { testLatexStructure(); passed++; System.out.println("  PASS  testLatexStructure"); } catch(Throwable t) { failed++; System.out.println("  FAIL  testLatexStructure: " + t.getMessage()); }
         
         System.out.println("\n=== Results: " + passed + " passed, " + failed + " failed ===");
         if (failed > 0) {
@@ -65,7 +65,7 @@ public class Phase7Tests {
         String latex = gen.generateCertificate(snap);
         
         if (!latex.contains("68.00")) throw new AssertionError("VHI score not rendered correctly");
-        if (!latex.contains("C\\_FAIR")) throw new AssertionError("Health band not rendered correctly");
+        if (!latex.replace("\\allowbreak{}", "").contains("C\\_FAIR")) throw new AssertionError("Health band not rendered correctly");
         if (!latex.contains("MEDIUM")) throw new AssertionError("Severity not rendered correctly");
     }
 
@@ -85,7 +85,7 @@ public class Phase7Tests {
         LatexGenerator gen = new LatexGenerator();
         String latex = gen.generateCertificate(snap);
         
-        if (!latex.contains("evt-51, rep-01")) throw new AssertionError("Evidence references not preserved in LaTeX");
+        if (!latex.replace("\\allowbreak{}", "").contains("evt-51, rep-01")) throw new AssertionError("Evidence references not preserved in LaTeX");
     }
 
     private static void testHistoricalComparison() {
@@ -134,7 +134,7 @@ public class Phase7Tests {
         }
     }
 
-    private static void testLatexCompilation() {
+    private static void testLatexStructure() {
         // Test validator checks LaTeX structure.
         LatexGenerator gen = new LatexGenerator();
         String latex = gen.generateCertificate(new CertificateSnapshot(Phase6Fixtures.getHealthyVehicle()));

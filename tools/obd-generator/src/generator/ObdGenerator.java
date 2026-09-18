@@ -17,6 +17,16 @@ public class ObdGenerator {
     }
 
     public GenerationResult generate() {
+        if (config.getVehicleId() == null || config.getVehicleId().isBlank()) throw new IllegalArgumentException("Vehicle ID required");
+        if (config.getDurationMs() <= 0 || config.getDurationMs() > 3_600_000) throw new IllegalArgumentException("Duration must be within one hour");
+        if (!Double.isFinite(config.getMissingnessProbability()) || config.getMissingnessProbability() < 0 || config.getMissingnessProbability() > 1)
+            throw new IllegalArgumentException("Missing fraction must be within 0..1");
+        for (String signal : config.getSupportedSignals()) {
+            double rate = config.getSamplingRatesHz().getOrDefault(signal, 1.0);
+            if (!Double.isFinite(rate) || rate <= 0 || rate > 100) throw new IllegalArgumentException("Sampling rate must be >0 and <=100 Hz");
+        }
+        random.setSeed(config.getRandomSeed());
+        Map<String, Double> nextDue = new HashMap<>();
         List<ObdMessage> publicStream = new ArrayList<>();
         List<GroundTruthRecord> groundTruth = new ArrayList<>();
         
@@ -58,19 +68,27 @@ public class ObdGenerator {
             
             for (String signal : config.getSupportedSignals()) {
                 double rateHz = config.getSamplingRatesHz().getOrDefault(signal, 1.0);
-                long intervalMs = (long) (1000.0 / rateHz);
+                double intervalMs = 1000.0 / rateHz;
                 
-                if (currentTimeMs % intervalMs == 0) {
+                if (currentTimeMs + 0.00001 >= nextDue.getOrDefault(signal, 0.0)) {
+                    nextDue.put(signal, nextDue.getOrDefault(signal, 0.0) + intervalMs);
                     double trueValue = 0.0;
                     String unit = "unknown";
                     
                     switch (signal) {
                         case "engine_rpm": trueValue = rpm; unit = "rpm"; break;
+                        case "vehicle_speed_kph":
                         case "vehicle_speed": trueValue = speed; unit = "km/h"; break;
+                        case "engine_coolant_temperature":
                         case "coolant_temperature": trueValue = coolant; unit = "Cel"; break;
                         case "calculated_engine_load": trueValue = load; unit = "%"; break;
                         case "throttle_position": trueValue = throttle; unit = "%"; break;
-                        default: trueValue = 100.0; unit = "raw";
+                        default:
+                            if (!config.getSignalPrograms().containsKey(signal)) throw new IllegalArgumentException("Provide a trajectory and unit for " + signal);
+                    }
+                    if (config.getSignalPrograms().containsKey(signal)) {
+                        trueValue = config.getSignalPrograms().get(signal).valueAt(currentTimeMs);
+                        unit = config.getSignalPrograms().get(signal).getUnit();
                     }
                     
                     trueValues.put(signal, trueValue);
@@ -81,17 +99,18 @@ public class ObdGenerator {
                     
                     double noisedValue = trueValue;
                     
-                    if (config.getStuckValues() != null && config.getStuckValues().containsKey(signal)) {
+                    boolean faultActive = currentTimeMs >= config.getFaultStartMs() && currentTimeMs < config.getFaultEndMs();
+                    if (faultActive && config.getStuckValues() != null && config.getStuckValues().containsKey(signal)) {
                         noisedValue = config.getStuckValues().get(signal);
                     } else {
-                        if (config.getBias() != null && config.getBias().containsKey(signal)) {
+                        if (faultActive && config.getBias() != null && config.getBias().containsKey(signal)) {
                             noisedValue += config.getBias().get(signal);
                         }
-                        if (config.getDriftPerSecond() != null && config.getDriftPerSecond().containsKey(signal)) {
-                            noisedValue += config.getDriftPerSecond().get(signal) * (currentTimeMs / 1000.0);
+                        if (faultActive && config.getDriftPerSecond() != null && config.getDriftPerSecond().containsKey(signal)) {
+                            noisedValue += config.getDriftPerSecond().get(signal) * ((currentTimeMs - config.getFaultStartMs()) / 1000.0);
                         }
                         if (config.getNoiseVariance() != null && config.getNoiseVariance().containsKey(signal)) {
-                            noisedValue += random.nextGaussian() * config.getNoiseVariance().get(signal);
+                            noisedValue += random.nextGaussian() * Math.sqrt(config.getNoiseVariance().get(signal));
                         }
                     }
 
@@ -110,7 +129,7 @@ public class ObdGenerator {
 
             List<DtcObservation> dtcs = new ArrayList<>();
             List<String> activeDtcs = new ArrayList<>();
-            if (config.getInjectedDtcs() != null) {
+            if (config.getInjectedDtcs() != null && currentTimeMs >= config.getFaultStartMs() && currentTimeMs < config.getFaultEndMs()) {
                 activeDtcs.addAll(config.getInjectedDtcs());
             }
             if (config.getScenarioType() == ScenarioType.HARD_ACCELERATION_WITH_FAULT && currentTimeMs >= 15000) {
@@ -130,7 +149,8 @@ public class ObdGenerator {
                 }
             }
 
-            if (!readings.isEmpty() || !dtcs.isEmpty()) {
+            boolean dtcPoll = currentTimeMs % 1000 == 0;
+            if (!readings.isEmpty() || dtcPoll) {
                 ObdMessage.Builder builder = ObdMessage.builder()
                     .messageId("MSG-" + sequence)
                     .sessionId(sessionId)
@@ -143,7 +163,7 @@ public class ObdGenerator {
                     .sensorReadings(readings)
                     .rawProvenance(new Provenance("generator", "1.0", "ref", config.getRandomSeed()));
                     
-                if (!dtcs.isEmpty()) {
+                if (dtcPoll) {
                     builder.dtcObservations(dtcs);
                     builder.dtcSnapshotCompleteness(DtcSnapshotCompleteness.COMPLETE);
                 }

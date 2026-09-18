@@ -65,16 +65,17 @@ public class GeneratorTest {
             config.setSupportedSignals(List.of("vehicle_speed"));
             config.setDurationMs(500);
             config.setRandomSeed(999);
+            config.setVehicleId("MISSING-TEST");
             config.setMissingnessProbability(1.0); // 100% missing data
             
             ObdGenerator gen = new ObdGenerator(config);
             GenerationResult res = gen.generate();
             
-            if (res.getPublicStream().isEmpty()) { // since all missing, empty output
+            if (res.getPublicStream().stream().allMatch(m -> m.getSensorReadings().isEmpty())) { // DTC scan records remain even if sensor readings are missing
                 System.out.println("  PASS  test_newScenarioViaConfig");
                 return true;
             } else {
-                System.out.println("  FAIL  test_newScenarioViaConfig: Expected empty stream");
+                System.out.println("  FAIL  test_newScenarioViaConfig: Expected no sensor readings");
                 return false;
             }
         } catch (Exception e) {

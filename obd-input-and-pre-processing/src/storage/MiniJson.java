@@ -4,7 +4,11 @@ import java.util.*;
 
 public class MiniJson {
     public static Object parse(String json) {
-        return parseValue(new StringIterator(json.trim()));
+        StringIterator iter = new StringIterator(json.trim());
+        Object result = parseValue(iter);
+        iter.skipWhitespace();
+        if (iter.hasNext()) throw new IllegalArgumentException("Trailing JSON content");
+        return result;
     }
 
     private static Object parseValue(StringIterator iter) {
@@ -33,6 +37,7 @@ public class MiniJson {
             iter.skipWhitespace();
             iter.expect(":");
             Object value = parseValue(iter);
+            if (map.containsKey(key)) throw new IllegalArgumentException("Duplicate JSON key: " + key);
             map.put(key, value);
             iter.skipWhitespace();
             char next = iter.next();
@@ -59,7 +64,7 @@ public class MiniJson {
     }
 
     private static String parseString(StringIterator iter) {
-        iter.next(); // skip '"'
+        iter.expect("\"");
         StringBuilder sb = new StringBuilder();
         while (true) {
             char c = iter.next();
@@ -72,8 +77,13 @@ public class MiniJson {
                 else if (esc == 't') sb.append('\t');
                 else if (esc == 'b') sb.append('\b');
                 else if (esc == 'f') sb.append('\f');
-                else throw new RuntimeException("Unsupported escape: \\" + esc);
+                else if (esc == 'u') {
+                    StringBuilder hex = new StringBuilder();
+                    for (int i = 0; i < 4; i++) hex.append(iter.next());
+                    sb.append((char) Integer.parseInt(hex.toString(), 16));
+                } else throw new RuntimeException("Unsupported escape: \\" + esc);
             } else {
+                if (c < 32) throw new IllegalArgumentException("Unescaped control character");
                 sb.append(c);
             }
         }
@@ -90,6 +100,8 @@ public class MiniJson {
             }
         }
         String s = sb.toString();
+        if (!s.matches("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?")) throw new IllegalArgumentException("Invalid JSON number");
+        if (!Double.isFinite(Double.parseDouble(s))) throw new IllegalArgumentException("Nonfinite JSON number");
         if (s.contains(".") || s.contains("e") || s.contains("E")) return Double.parseDouble(s);
         return Long.parseLong(s);
     }

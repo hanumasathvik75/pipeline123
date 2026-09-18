@@ -3,14 +3,14 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="IgnitionAI"
         android:roundIcon="@android:drawable/sym_def_app_icon"
@@ -18,7 +18,7 @@
         android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.ignitionai.nativeapp.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +27,7 @@
         </activity>
 
         <service
-            android:name=".BluetoothObdService"
+            android:name="com.ignitionai.nativeapp.CaptureService"
             android:foregroundServiceType="connectedDevice"
             android:exported="false" />
     </application>

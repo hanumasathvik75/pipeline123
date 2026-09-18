@@ -10,10 +10,11 @@ public class WindowBuffer {
     private final Map<String, List<SensorReading>> buffer = new HashMap<>();
 
     public void addReading(SensorReading reading) {
-        buffer.computeIfAbsent(reading.getSignalId(), k -> new ArrayList<>()).add(reading);
+        buffer.computeIfAbsent(com.ignitionai.obd.SignalIds.canonical(reading.getSignalId()), k -> new ArrayList<>()).add(reading);
     }
 
     public List<SensorReading> getReadings(String signalId, Long currentTimestampMs, Long windowSizeMs) {
+        signalId = com.ignitionai.obd.SignalIds.canonical(signalId);
         if (!buffer.containsKey(signalId)) return new ArrayList<>();
         
         Long cutoff = currentTimestampMs - windowSizeMs;

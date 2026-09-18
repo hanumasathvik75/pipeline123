@@ -18,6 +18,18 @@ public class GeneratorConfig {
     private Map<String, Double> stuckValues = new java.util.HashMap<>();
     private List<String> injectedDtcs = new java.util.ArrayList<>();
     private double missingnessProbability;
+    private Map<String, SignalProgram> signalPrograms = new java.util.TreeMap<>();
+    private long faultStartMs = 0;
+    private long faultEndMs = Long.MAX_VALUE;
+
+    public Map<String, SignalProgram> getSignalPrograms() { return signalPrograms; }
+    public void setSignalPrograms(Map<String, SignalProgram> value) { signalPrograms = new java.util.TreeMap<>(value); }
+    public long getFaultStartMs() { return faultStartMs; }
+    public long getFaultEndMs() { return faultEndMs; }
+    public void setFaultWindow(long start, long end) {
+        if (start < 0 || end <= start) throw new IllegalArgumentException("Fault end must follow start");
+        faultStartMs = start; faultEndMs = end;
+    }
     
     // Getters and Setters
     public String getVehicleId() { return vehicleId; }

@@ -42,10 +42,10 @@ public class VehicleContextManager {
         OperatingConditions newConditions = new OperatingConditions(
             engineRunning,
             newObservations.get("engine_rpm"),
-            newObservations.get("vehicle_speed_kph"),
+            newObservations.getOrDefault("vehicle_speed", newObservations.get("vehicle_speed_kph")),
             newObservations.get("calculated_engine_load"),
             newObservations.get("throttle_position"),
-            newObservations.get("engine_coolant_temperature"),
+            newObservations.getOrDefault("coolant_temperature", newObservations.get("engine_coolant_temperature")),
             newObservations.get("intake_air_temperature"),
             newObservations.get("ambient_air_temperature"),
             currentRegime,
@@ -68,7 +68,7 @@ public class VehicleContextManager {
 
     private OperatingRegime determineRegime(Map<String, Double> obs) {
         Double rpm = obs.get("engine_rpm");
-        Double speed = obs.get("vehicle_speed_kph");
+        Double speed = obs.getOrDefault("vehicle_speed", obs.get("vehicle_speed_kph"));
         
         if (rpm == null) return OperatingRegime.UNKNOWN;
         if (rpm == 0) return OperatingRegime.ENGINE_OFF;

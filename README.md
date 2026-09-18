@@ -4,7 +4,9 @@ A modular knowledge engineering and vehicle health assessment system. Each direc
 
 ## Repository Structure
 
-The complete Phase 1-7 integrated pipeline is fully implemented on the `master` branch.
+This is a development preview. Module presence and passing synthetic tests do not establish customer or vehicle validation. See [native preview instructions and current limitations](docs/NATIVE_PREVIEW.md).
+
+The native Swing Windows app and Java Android app call the same `application` service. The Windows app includes a configurable simulator. Run `run-desktop.bat` from source, or use the packaged Windows executable. The Android Gradle module is `android-app`; its launcher is `com.ignitionai.nativeapp.MainActivity`.
 
 ```
 IgnitionAI 2.0/

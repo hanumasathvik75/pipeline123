@@ -17,6 +17,7 @@ public class LatexGenerator {
         latex.append("\\usepackage{graphicx}\n");
         latex.append("\\usepackage{geometry}\n");
         latex.append("\\usepackage{booktabs}\n");
+        latex.append("\\usepackage{tabularx}\n");
         latex.append("\\usepackage{xcolor}\n");
         latex.append("\\geometry{margin=1in}\n");
         latex.append("\n\\begin{document}\n\n");
@@ -29,6 +30,9 @@ public class LatexGenerator {
         latex.append("\\vspace{0.2cm}\n");
         latex.append("\\normalsize{Generated on: ").append(escapeLatex(ha.getAssessmentTimestamp())).append("}\n");
         latex.append("\\end{center}\n\n");
+        latex.append("\\noindent\\textbf{Preliminary report. Source: ").append(escapeLatex(snapshot.getSourceType())).append(".}\\\\\n");
+        latex.append("Generic models are uncalibrated. Unknown systems are unassessed; simulation is not a vehicle inspection.\\\\\n");
+        latex.append("Session: ").append(escapeLatex(snapshot.getSessionId())).append("\n");
         
         latex.append("\\vspace{1cm}\n");
         
@@ -55,7 +59,7 @@ public class LatexGenerator {
         latex.append("\\section*{Subsystem Health Scores}\n");
         latex.append("\\begin{table}[h!]\n");
         latex.append("\\centering\n");
-        latex.append("\\begin{tabular}{l l c l}\n");
+        latex.append("\\small\\begin{tabularx}{\\textwidth}{@{}X l l X@{}}\n");
         latex.append("\\toprule\n");
         latex.append("\\textbf{Subsystem} & \\textbf{Score} & \\textbf{Severity} & \\textbf{Evidence} \\\\\n");
         latex.append("\\midrule\n");
@@ -77,7 +81,7 @@ public class LatexGenerator {
         }
         
         latex.append("\\bottomrule\n");
-        latex.append("\\end{tabular}\n");
+        latex.append("\\end{tabularx}\n");
         latex.append("\\end{table}\n\n");
         
         // Confidence and Data Quality Section
@@ -109,12 +113,18 @@ public class LatexGenerator {
     
     private String escapeLatex(String text) {
         if (text == null) return "";
-        return text.replace("&", "\\&")
-                   .replace("%", "\\%")
-                   .replace("$", "\\$")
-                   .replace("#", "\\#")
-                   .replace("_", "\\_")
-                   .replace("{", "\\{")
-                   .replace("}", "\\}");
+        StringBuilder escaped = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            switch (c) {
+                case '\\': escaped.append("\\textbackslash{}"); break;
+                case '&': case '%': case '$': case '#': case '{': case '}': escaped.append('\\').append(c); break;
+                case '_': escaped.append("\\_\\allowbreak{}"); break;
+                case '^': escaped.append("\\textasciicircum{}"); break;
+                case '~': escaped.append("\\textasciitilde{}"); break;
+                case '/': case '-': escaped.append(c).append("\\allowbreak{}"); break;
+                default: escaped.append(Character.isISOControl(c) ? ' ' : c);
+            }
+        }
+        return escaped.toString();
     }
 }
