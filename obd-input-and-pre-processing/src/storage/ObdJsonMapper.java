@@ -6,24 +6,8 @@ import java.util.*;
 
 public class ObdJsonMapper {
     
-    public static String toJson(ObdMessage msg) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        appendString(sb, "schema_version", msg.getSchemaVersion(), true);
-        appendString(sb, "message_id", msg.getMessageId(), true);
-        appendString(sb, "session_id", msg.getSessionId(), true);
-        appendNumber(sb, "sequence", msg.getSequence(), true);
-        appendString(sb, "message_type", msg.getMessageType() != null ? msg.getMessageType().name().toLowerCase() : null, true);
-        appendString(sb, "source_type", msg.getSourceType() != null ? msg.getSourceType().name().toLowerCase() : null, true);
-        appendString(sb, "emitted_at", msg.getEmittedAt() != null ? msg.getEmittedAt().toString() : null, true);
-        appendString(sb, "received_at", msg.getReceivedAt() != null ? msg.getReceivedAt().toString() : null, true);
-        // Write the rest using simple StringBuilder strategy but since time is short and the requirements is simply to have a round trip...
-        return sb.toString() + "}";
-    }
+    public static String toJson(ObdMessage msg) { return serialize(msg); }
 
-    // A full round-trip compliant serializer/deserializer would be over 300 lines of boilerplate.
-    // For this prototype, I will provide a robust string building logic for the exact structure needed.
-    
     public static String serialize(ObdMessage msg) {
         Map<String, Object> map = new HashMap<>();
         map.put("schema_version", msg.getSchemaVersion());
@@ -124,8 +108,12 @@ public class ObdJsonMapper {
 
     private static String buildJsonString(Object obj) {
         if (obj == null) return "null";
-        if (obj instanceof String) return "\"" + ((String)obj).replace("\"", "\\\"") + "\"";
-        if (obj instanceof Number || obj instanceof Boolean) return obj.toString();
+        if (obj instanceof String) return quote((String) obj);
+        if (obj instanceof Number) {
+            if (!Double.isFinite(((Number)obj).doubleValue())) throw new IllegalArgumentException("Nonfinite JSON number");
+            return obj.toString();
+        }
+        if (obj instanceof Boolean) return obj.toString();
         if (obj instanceof List) {
             List<?> list = (List<?>) obj;
             StringBuilder sb = new StringBuilder("[");
@@ -141,7 +129,7 @@ public class ObdJsonMapper {
             StringBuilder sb = new StringBuilder("{");
             int i = 0;
             for (Map.Entry<?, ?> e : map.entrySet()) {
-                sb.append("\"").append(e.getKey()).append("\":").append(buildJsonString(e.getValue()));
+                sb.append(quote(e.getKey().toString())).append(":").append(buildJsonString(e.getValue()));
                 if (i < map.size() - 1) sb.append(",");
                 i++;
             }
@@ -151,16 +139,27 @@ public class ObdJsonMapper {
         return "null";
     }
     
-    private static void appendString(StringBuilder sb, String key, String val, boolean comma) {
-        // unused in new logic
-    }
-    private static void appendNumber(StringBuilder sb, String key, Number val, boolean comma) {
-        // unused in new logic
+    public static String quote(String value) {
+        StringBuilder b = new StringBuilder("\"");
+        for (char c : value.toCharArray()) {
+            switch (c) {
+                case '"': b.append("\\\""); break;
+                case '\\': b.append("\\\\"); break;
+                case '\n': b.append("\\n"); break;
+                case '\r': b.append("\\r"); break;
+                case '\t': b.append("\\t"); break;
+                default:
+                    if (c < 32) b.append(String.format(Locale.ROOT, "\\u%04x", (int)c));
+                    else b.append(c);
+            }
+        }
+        return b.append('"').toString();
     }
 
     @SuppressWarnings("unchecked")
     public static ObdMessage deserialize(String json) {
         Map<String, Object> map = (Map<String, Object>) MiniJson.parse(json);
+        if (!"obd-input.v1".equals(map.get("schema_version"))) throw new IllegalArgumentException("Unsupported OBD schema version");
         
         ObdMessage.Builder builder = ObdMessage.builder();
         builder.messageId((String)map.get("message_id"));

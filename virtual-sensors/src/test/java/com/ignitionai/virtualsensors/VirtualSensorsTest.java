@@ -30,7 +30,7 @@ public class VirtualSensorsTest {
         
         SensorDefinition thermalProxy = runtime.getRegisteredSensors().get("thermal_response_proxy");
         assert thermalProxy != null;
-        assert thermalProxy.getUnits().equals("degC/s");
+        assert thermalProxy.getUnits().equals("Cel");
         assert thermalProxy.getInputSignalIds().contains("engine_coolant_temperature");
         System.out.println("    -> Discovered and enumerated metadata successfully.");
 

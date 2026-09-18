@@ -1,0 +1,14 @@
+plugins { id 'java-library' }
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+def modules = ['application','anomaly-monitoring','certificate-snapshot','certificate-validation','consistency-checks',
+    'degradation-evidence-store','degradation-feature-builder','degradation-state-estimator','direct-features',
+    'episode-store','event-risk-estimator','evidence-store','expected-behaviour-model','fact-extraction',
+    'health-evidence','latex-certificate-generator','linked-registries','obd-input-and-pre-processing','obd-input-contract',
+    'phase4-contract','phase5-contract','phase6-contract','residual-calculation','severity-indicator',
+    'subsystem-health-score','technical-sources','trend-and-persistence-analyzer','uncertainty-calculation',
+    'vehicle-context','vehicle-health-index','virtual-sensors','tools/obd-generator']
+sourceSets.main.java {
+    setSrcDirs(modules.collect { rootProject.file(it + (rootProject.file(it + '/src/main/java').exists() ? '/src/main/java' : '/src')) })
+    exclude '**/*Test*.java', '**/Phase6Fixtures.java'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }

@@ -95,6 +95,7 @@ public class VirtualSensorRuntime {
         if (def.getInputSignalIds() != null) {
             for (String dep : def.getInputSignalIds()) {
                 AnalyticalObservation reading = featureValues.get(dep);
+                if (reading == null) reading = featureValues.get(com.ignitionai.obd.SignalIds.canonical(dep));
                 if (reading == null || reading.getQualityState() != QualityState.AVAILABLE) {
                     return AnalyticalObservation.unavailable(sensorId, QualityState.MISSING_INPUTS, def.getSensorVersion(), timestampMs, "Missing required input: " + dep);
                 }
@@ -103,7 +104,8 @@ public class VirtualSensorRuntime {
                 // Assuming we would look up expected unit in a registry in production
                 
                 inputObs.put(dep, reading);
-                sources.add(dep + "@" + reading.getTimestampMs());
+                sources.addAll(reading.getSourceObservationReferences());
+                if (reading.getSourceObservationReferences().isEmpty()) sources.add(dep + "@" + reading.getTimestampMs());
             }
         }
 

@@ -39,7 +39,7 @@ public class BluetoothAdapter implements ObdAdapter {
             sendCommand("ATE0");  // Echo off
             sendCommand("ATL0");  // Linefeeds off
             sendCommand("ATS0");  // Spaces off
-            sendCommand("ATH1");  // Headers on
+            sendCommand("ATH0");  // Headers off; ECU-specific diagnostics require a separate capture profile
             
             // Capability probe
             String capResp = sendCommand("0100");
@@ -47,7 +47,7 @@ public class BluetoothAdapter implements ObdAdapter {
                 supportedPids.addAll(Arrays.asList("010C", "010D", "0105", "0104", "0111"));
             }
             
-            sessionStartTime = System.currentTimeMillis();
+            sessionStartTime = System.nanoTime();
             sessionSequenceCounter = 1;
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize Bluetooth adapter", e);
@@ -63,7 +63,7 @@ public class BluetoothAdapter implements ObdAdapter {
             List<DtcObservation> dtcs = new ArrayList<>();
             StringBuilder rawTranscript = new StringBuilder();
             
-            long msgMonotonicMs = System.currentTimeMillis() - sessionStartTime;
+            long msgMonotonicMs = (System.nanoTime() - sessionStartTime) / 1_000_000L;
             
             // 1. RPM
             String rpmResp = sendCommand("010C");
@@ -128,20 +128,20 @@ public class BluetoothAdapter implements ObdAdapter {
             // 6. DTCs
             String dtcResp = sendCommand("03");
             rawTranscript.append("03:").append(dtcResp).append(";");
-            if (dtcResp.contains("43")) {
-                // Mock simple parsing for P0301 just for the test capability
-                if (dtcResp.contains("03 01") || dtcResp.contains("0301")) {
-                    dtcs.add(DtcObservation.builder()
-                        .code("P0301")
-                        .status(DtcStatus.CONFIRMED)
-                        .observationType(ObservationType.SNAPSHOT)
-                        .observedAt(Instant.now())
-                        .monotonicMs(msgMonotonicMs)
-                        .provenance(new DtcProvenance("03", dtcResp))
-                        .build());
+            boolean completeDtcScan = false;
+            String cleanedDtc = dtcResp.replaceAll("\\s+", "");
+            if (cleanedDtc.startsWith("43") && cleanedDtc.substring(2).matches("(?:[0-9A-Fa-f]{4})*")) {
+                completeDtcScan = true;
+                for (int i=2; i+4<=cleanedDtc.length(); i+=4) {
+                    int packed = Integer.parseInt(cleanedDtc.substring(i,i+4),16);
+                    if (packed == 0) continue;
+                    String code = "PCBU".charAt((packed >> 14) & 3) + String.format(Locale.ROOT, "%04X", packed & 0x3fff);
+                    dtcs.add(DtcObservation.builder().code(code).status(DtcStatus.CONFIRMED)
+                        .observationType(ObservationType.SNAPSHOT).observedAt(Instant.now()).monotonicMs(msgMonotonicMs)
+                        .provenance(new DtcProvenance("03", dtcResp)).build());
                 }
             }
-            
+
             if (readings.isEmpty() && dtcs.isEmpty() && rawTranscript.toString().contains("NO DATA")) {
                 return Optional.empty(); // Device stopped responding
             }
@@ -154,17 +154,17 @@ public class BluetoothAdapter implements ObdAdapter {
                 .sourceType(SourceType.VEHICLE)
                 .emittedAt(Instant.now())
                 .receivedAt(Instant.now())
-                .vehicleRef(new VehicleRef(vehicleId, null, IdentityStatus.VERIFIED))
+                .vehicleRef(new VehicleRef(vehicleId, null, IdentityStatus.UNKNOWN))
                 .rawProvenance(new Provenance(adapterId, "1.0", "multi-poll", null));
                 
             if (!readings.isEmpty()) builder.sensorReadings(readings);
-            if (!dtcs.isEmpty()) {
+            if (completeDtcScan) {
                 builder.dtcObservations(dtcs);
                 builder.dtcSnapshotCompleteness(DtcSnapshotCompleteness.COMPLETE);
             }
                 
             ObdMessage msg = builder.build();
-            String rawPayload = "{\"transcript\":\"" + rawTranscript.toString() + "\"}";
+            String rawPayload = "{\"transcript\":" + com.ignitionai.obdinput.storage.ObdJsonMapper.quote(rawTranscript.toString()) + "}";
             return Optional.of(new AdapterResult(msg, rawPayload));
             
         } catch (Exception e) {
@@ -185,15 +185,20 @@ public class BluetoothAdapter implements ObdAdapter {
         
         StringBuilder sb = new StringBuilder();
         int b;
+        boolean prompt = false;
         while ((b = in.read()) != -1) {
             char c = (char) b;
-            if (c == '>') { // ELM327 prompt
+            if (c == '>') {
+                prompt = true; // ELM327 prompt
                 break;
             }
+            if (sb.length() > 16384) throw new IOException("Adapter response exceeds limit");
+            if (Thread.currentThread().isInterrupted()) throw new IOException("Capture cancelled");
             if (c != '\r' && c != '\n') {
                 sb.append(c);
             }
         }
+        if (!prompt) throw new IOException("Adapter disconnected before response prompt");
         return sb.toString().trim();
     }
     
@@ -203,9 +208,9 @@ public class BluetoothAdapter implements ObdAdapter {
             .pidOrDid(pid)
             .value(value)
             .unit(unit)
-            .measuredAt(Instant.now())
-            .measurementTimeBasis(MeasurementTimeBasis.ADAPTER)
-            .monotonicMs(monotonicMs)
+            .measuredAt(null)
+            .measurementTimeBasis(MeasurementTimeBasis.PHONE_RECEIVE)
+            .monotonicMs((System.nanoTime() - sessionStartTime) / 1_000_000L)
             .receivedAt(Instant.now())
             .quality(new Quality(QualityStatus.VALID, rawResp, 0))
             .provenance(new SignalProvenance(pid, rawResp))

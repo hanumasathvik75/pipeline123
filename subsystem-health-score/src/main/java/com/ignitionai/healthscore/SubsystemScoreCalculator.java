@@ -31,9 +31,9 @@ public class SubsystemScoreCalculator {
         String subsystemId = output.getSubsystemId();
         String subsystemName = output.getSubsystemId();
         List<String> degradedFlags = new ArrayList<>();
-        List<String> evidence = new ArrayList<>();
+        List<String> evidence = output.getEvidenceReferences() == null ? new ArrayList<>() : new ArrayList<>(output.getEvidenceReferences());
         
-        if (output.getDataSufficiencyStatus() == DataSufficiency.INSUFFICIENT) {
+        if (output.getDataSufficiencyStatus() == null || output.getDataSufficiencyStatus() == DataSufficiency.INSUFFICIENT || output.getDegradationScore() == null) {
             degradedFlags.add("INSUFFICIENT_DATA");
             return new SubsystemHealthAssessment(subsystemId, subsystemName, SeverityLevel.UNKNOWN, null, 0.0, 1.0, degradedFlags, evidence, false);
         }
@@ -45,6 +45,8 @@ public class SubsystemScoreCalculator {
             degradedFlags.add("SPARSE_DATA");
             dataQualitySufficient = false;
         }
+
+        if (output.getEventRiskEstimate() == null) { degradedFlags.add("RISK_UNAVAILABLE"); dataQualitySufficient = false; }
 
         // Base health starts at 100
         double healthScore = 100.0;
