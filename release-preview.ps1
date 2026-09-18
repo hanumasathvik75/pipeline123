@@ -6,6 +6,10 @@ Push-Location $PSScriptRoot
 try {
     $androidJava = 'C:\Program Files\Android\Android Studio\jbr'
     if (Test-Path (Join-Path $androidJava 'bin/java.exe')) { $env:JAVA_HOME = $androidJava }
+    $androidSdk = if ($env:ANDROID_HOME -and (Test-Path $env:ANDROID_HOME)) { $env:ANDROID_HOME } else { Join-Path $env:LOCALAPPDATA 'Android\Sdk' }
+    if (-not (Test-Path (Join-Path $androidSdk 'platforms'))) { throw "Android SDK not found. Set ANDROID_HOME to a valid SDK directory." }
+    $env:ANDROID_HOME = $androidSdk
+    $env:ANDROID_SDK_ROOT = $androidSdk
     Write-Host "== Java verification ==" -ForegroundColor Cyan
     cmd /c build_and_test.bat
     if ($LASTEXITCODE -ne 0) { throw "Java verification failed" }
