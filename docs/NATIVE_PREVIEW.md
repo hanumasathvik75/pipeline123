@@ -23,6 +23,14 @@ This branch supplies a working desktop assessment/simulator flow and a buildable
 
 ## Reproducible checks
 
+One command creates a tested Android APK, a self-contained Windows application ZIP, and SHA-256 checksums:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\release-preview.ps1
+```
+
+Use `-ReleaseName IgnitionAI-preview-01` to choose a stable output name. The command never deletes an existing release directory; choose a new name when rebuilding.
+
 ```text
 build_and_test.bat
 java -ea -cp out com.ignitionai.desktop.DesktopSmokeTest
