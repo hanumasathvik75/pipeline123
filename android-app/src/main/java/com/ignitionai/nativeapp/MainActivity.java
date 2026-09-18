@@ -82,7 +82,7 @@ public final class MainActivity extends Activity {
             catch (Exception e) { runOnUiThread(() -> { if (!destroyed) { status.setText("Unable to finish: " + e.getMessage()); busyButtons.forEach(b -> b.setEnabled(true)); } }); }
         });
     }
-    private InspectionService service() { return new InspectionService(new File(getFilesDir(),"sensors")); }
+    private AssessmentHistory service() { return new AssessmentHistory(new File(getFilesDir(),"sensors"), new File(getFilesDir(),"sessions").toPath()); }
     private void installSensors() throws IOException {
         File dir=new File(getFilesDir(),"sensors");dir.mkdirs();
         for(String name: getAssets().list("sensors")) try(InputStream in=getAssets().open("sensors/"+name)) { Files.copy(in,new File(dir,name).toPath(),StandardCopyOption.REPLACE_EXISTING); }

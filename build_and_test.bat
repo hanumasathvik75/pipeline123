@@ -151,4 +151,6 @@ echo ALL TESTS PASSED SUCCESSFULLY!
 echo ===================================================
 java -ea -cp out com.ignitionai.application.NativeWorkflowTest
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+java -ea -cp out com.ignitionai.application.HistoryWorkflowTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 exit /b 0

@@ -25,7 +25,7 @@ No claim of customer-deliverable completion until these gates are evidenced. Sim
 
 Concurrent Antigravity changes appeared at commit `741d891`; they were preserved. Continued in an isolated `codex/native-mvp-delivery` worktree. User confirmed Antigravity is still working. No merge or deletion of its branches is performed.
 
-Implemented a shared application orchestration service, native Swing assessment/simulator/history UI, native Java Android Activity and foreground Bluetooth capture service, strict JSON replay, configurable trajectory generation, sampling fixes, score-scale and coverage corrections, explicit unknowns, preliminary source-labelled reports and data-dependent certificate identifiers. Sustained anomalies quarantine their baseline from suspect samples. Report LaTeX escapes metacharacters and wraps evidence references.
+Implemented a shared application orchestration service, native Swing assessment/simulator/history UI, native Java Android Activity and foreground Bluetooth capture service, strict JSON replay, configurable trajectory generation, sampling fixes, score-scale and coverage corrections, explicit unknowns, preliminary source-labelled reports and data-dependent certificate identifiers. Sustained anomalies quarantine their baseline from suspect samples. Report LaTeX escapes metacharacters and wraps evidence references. The report now emits a low-confidence preliminary weighted indicator score for observed signals while labelling the result `PARTIAL` and withholding calibrated risk.
 
 Verification performed on the isolated worktree:
 

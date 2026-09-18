@@ -54,7 +54,7 @@ public final class IgnitionDesktop extends JFrame {
         sim.add(new JLabel("Edit trajectories, rates and fault windows. This produces labelled simulation data, not a real inspection."), BorderLayout.NORTH);
         scenario.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13)); sim.add(new JScrollPane(scenario));
         JPanel simActions = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        addAction(simActions, "Generate and assess", () -> { String input = scenario.getText(); runTask(() -> new InspectionService(sensorDirectory()).assess(new ObdGenerator(ScenarioFile.parse(input)).generate().getPublicStream())); });
+        addAction(simActions, "Generate and assess", () -> { String input = scenario.getText(); runTask(() -> new AssessmentHistory(sensorDirectory(), storage).assess(new ObdGenerator(ScenarioFile.parse(input)).generate().getPublicStream())); });
         addAction(simActions, "Load scenario", () -> scenarioFile(false)); addAction(simActions, "Save scenario", () -> scenarioFile(true));
         sim.add(simActions, BorderLayout.SOUTH); tabs.addTab("Simulator", sim);
         JPanel charts = new JPanel(new BorderLayout()); charts.add(chartSignal, BorderLayout.NORTH); charts.add(trace);
@@ -131,7 +131,7 @@ public final class IgnitionDesktop extends JFrame {
         return path;
     }
     private void openSession() { Path p = choose(false, null); if (p != null) load(p); }
-    private void load(Path p) { runTask(() -> new InspectionService(sensorDirectory()).assess(SessionFiles.read(p))); }
+    private void load(Path p) { runTask(() -> new AssessmentHistory(sensorDirectory(), storage).assess(SessionFiles.read(p))); }
     private void saveSession() {
         if (result == null) { status.setText("Generate or open a session first"); return; }
         attempt(() -> { Files.createDirectories(storage); Path p = storage.resolve(result.certificate.getCertificateId() + ".jsonl"); SessionFiles.write(p, result.messages); refreshHistory(); status.setText("Saved " + p); });
@@ -151,7 +151,7 @@ public final class IgnitionDesktop extends JFrame {
         if (p == null || result == null) { status.setText("Select a saved session and open a current assessment first"); return; }
         InspectionResult current = result;
         runTask(() -> {
-            InspectionResult previous = new InspectionService(sensorDirectory()).assess(SessionFiles.read(p));
+            InspectionResult previous = new AssessmentHistory(sensorDirectory(), storage).assess(SessionFiles.read(p));
             VehicleHealthAssessment a = previous.certificate.getHealthAssessment(), b = current.certificate.getHealthAssessment();
             if (!a.getVehicleId().equals(b.getVehicleId())) throw new IllegalArgumentException("Compare assessments from the same vehicle");
             List<String> notes = new ArrayList<>(current.notes);

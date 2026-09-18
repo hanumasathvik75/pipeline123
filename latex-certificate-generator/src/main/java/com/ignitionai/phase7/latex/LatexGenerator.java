@@ -18,6 +18,7 @@ public class LatexGenerator {
         latex.append("\\usepackage{geometry}\n");
         latex.append("\\usepackage{booktabs}\n");
         latex.append("\\usepackage{tabularx}\n");
+        latex.append("\\renewcommand{\\labelitemi}{}\n");
         latex.append("\\usepackage{xcolor}\n");
         latex.append("\\geometry{margin=1in}\n");
         latex.append("\n\\begin{document}\n\n");

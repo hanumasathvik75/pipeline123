@@ -34,6 +34,7 @@ public class VhiCalculator {
         SeverityLevel overallSeverity = SeverityLevel.UNKNOWN;
         List<String> excludedSubsystemIds = new ArrayList<>();
         Map<String, String> exclusionReasons = new java.util.HashMap<>();
+        boolean hasInsufficientEvidence = false;
         
         for (SubsystemHealthAssessment sub : subsystemAssessments) {
             Double weight = componentWeights.getOrDefault(sub.getSubsystemId(), 1.0);
@@ -44,6 +45,7 @@ public class VhiCalculator {
                 exclusionReasons.put(sub.getSubsystemId(), sub.getDegradedDataFlags().isEmpty() ? "UNKNOWN_REASON" : sub.getDegradedDataFlags().get(0));
                 continue; // Skip unknown subsystems
             }
+            if (!sub.isDataQualitySufficient()) hasInsufficientEvidence = true;
             
             if (!Double.isFinite(sub.getHealthScore()) || sub.getHealthScore() < 0 || sub.getHealthScore() > 100)
                 throw new IllegalArgumentException("Invalid subsystem score");
@@ -71,7 +73,7 @@ public class VhiCalculator {
         Double overallConf = null;
         Double overallUnc = null;
         Double coverage = totalWeightSum > 0 ? (validWeightSum / totalWeightSum) : 0.0;
-        String dataQuality = excludedSubsystemIds.isEmpty() ? "SUFFICIENT" : "PARTIAL";
+        String dataQuality = excludedSubsystemIds.isEmpty() && !hasInsufficientEvidence ? "SUFFICIENT" : "PARTIAL";
 
         if (validWeightSum > 0) {
             vhi = weightedSum / validWeightSum;

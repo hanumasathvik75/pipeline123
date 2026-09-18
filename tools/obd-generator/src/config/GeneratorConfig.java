@@ -9,6 +9,9 @@ public class GeneratorConfig {
     private Map<String, Double> samplingRatesHz = new java.util.HashMap<>();
     private long durationMs;
     private long randomSeed;
+    private java.time.Instant startTime = java.time.Instant.parse("2026-09-17T10:00:00Z");
+    public java.time.Instant getStartTime() { return startTime; }
+    public void setStartTime(java.time.Instant value) { startTime = java.util.Objects.requireNonNull(value); }
     private ScenarioType scenarioType = ScenarioType.CITY_DRIVING;
     
     // Anomaly simulation

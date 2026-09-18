@@ -25,14 +25,16 @@ public class ObdGenerator {
             double rate = config.getSamplingRatesHz().getOrDefault(signal, 1.0);
             if (!Double.isFinite(rate) || rate <= 0 || rate > 100) throw new IllegalArgumentException("Sampling rate must be >0 and <=100 Hz");
         }
+        double readingBudget = config.getSupportedSignals().stream().mapToDouble(s -> config.getSamplingRatesHz().getOrDefault(s, 1.0)).sum() * config.getDurationMs() / 1000.0;
+        if (readingBudget > 200000) throw new IllegalArgumentException("Simulation exceeds 200000 sensor readings; reduce duration or sampling rates");
         random.setSeed(config.getRandomSeed());
         Map<String, Double> nextDue = new HashMap<>();
         List<ObdMessage> publicStream = new ArrayList<>();
         List<GroundTruthRecord> groundTruth = new ArrayList<>();
         
         long currentTimeMs = 0;
-        Instant startTime = Instant.parse("2026-09-17T10:00:00Z");
-        String sessionId = "SIM-" + UUID.nameUUIDFromBytes(String.valueOf(config.getRandomSeed()).getBytes()).toString();
+        Instant startTime = config.getStartTime();
+        String sessionId = "SIM-" + UUID.nameUUIDFromBytes((config.getVehicleId() + "|" + startTime + "|" + config.getRandomSeed()).getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
         
         long sequence = 1;
         while (currentTimeMs < config.getDurationMs()) {

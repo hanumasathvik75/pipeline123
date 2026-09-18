@@ -9,6 +9,7 @@ public final class ScenarioFile {
         Properties p = new Properties(); p.load(new StringReader(text));
         GeneratorConfig c = new GeneratorConfig();
         c.setVehicleId(p.getProperty("vehicle", "SIM-NEXON"));
+        if (p.containsKey("start_time")) c.setStartTime(java.time.Instant.parse(p.getProperty("start_time").trim()));
         c.setDurationMs(Long.parseLong(p.getProperty("duration_ms", "60000")));
         c.setRandomSeed(Long.parseLong(p.getProperty("seed", "42")));
         c.setScenarioType(ScenarioType.valueOf(p.getProperty("scenario", "CITY_DRIVING")));
@@ -59,7 +60,7 @@ public final class ScenarioFile {
     }
     public static String example() {
         return "# Times are milliseconds; values interpolate between points.\n"
-            + "vehicle=SIM-NEXON\nduration_ms=60000\nseed=42\nscenario=CITY_DRIVING\n"
+            + "vehicle=SIM-NEXON\nstart_time=2026-09-17T10:00:00Z\nduration_ms=60000\nseed=42\nscenario=CITY_DRIVING\n"
             + "signals=engine_rpm,vehicle_speed,coolant_temperature,calculated_engine_load,throttle_position\n"
             + "missing_fraction=0.02\nfault_start_ms=20000\nfault_end_ms=45000\ndtcs=P0301\n"
             + "engine_rpm.hz=3\nengine_rpm.unit=rpm\nengine_rpm.points=0:800,10000:800,15000:2200,45000:2200,50000:800,60000:800\n"

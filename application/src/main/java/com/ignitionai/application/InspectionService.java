@@ -29,6 +29,10 @@ public final class InspectionService {
     public InspectionService(File sensorDirectory) { this.sensorDirectory = sensorDirectory; }
 
     public InspectionResult assess(List<ObdMessage> input) throws Exception {
+        return assess(input, List.of());
+    }
+
+    public InspectionResult assess(List<ObdMessage> input, List<InspectionResult> priorSessions) throws Exception {
         if (input == null || input.isEmpty()) throw new IllegalArgumentException("No OBD records to assess");
         ObdMessage first = input.get(0);
         String vehicle = first.getVehicleRef().getVehicleId(), session = first.getSessionId();
@@ -41,6 +45,7 @@ public final class InspectionService {
         Map<String, SignalAnomalyTracker> trackers = new TreeMap<>();
         Map<String, AnomalyEpisode> active = new TreeMap<>();
         Map<String, Double> latest = new TreeMap<>();
+        Map<String, Integer> validCounts = new TreeMap<>();
         Map<String, AnalyticalObservation> observed = new TreeMap<>();
         List<ObdMessage> normalized = new ArrayList<>();
         List<AnomalyEpisode> episodes = new ArrayList<>();
@@ -69,8 +74,10 @@ public final class InspectionService {
                 if (r.getQuality().getStatus() != QualityStatus.VALID || !Double.isFinite(r.getValue()) || r.getMonotonicMs() < end) { invalid++; continue; }
                 long t = r.getMonotonicMs(); start = Math.min(start, t); end = Math.max(end, t);
                 latest.put(r.getSignalId(), r.getValue());
+                validCounts.merge(r.getSignalId(), 1, Integer::sum);
                 context = cm.transitionContext(context, latest, t);
-                String ref = msg.getMessageId() + "/" + r.getSignalId() + "/" + t;
+                // Session-scoped evidence prevents identical simulator sequence numbers from colliding across visits.
+                String ref = session + "/" + msg.getMessageId() + "/" + r.getSignalId() + "/" + t;
                 AnalyticalObservation obs = new AnalyticalObservation(r.getSignalId(), r.getValue(), r.getUnit(), t,
                     AnalyticalObservation.QualityState.AVAILABLE, List.of(ref), context.getContextVersion(), "application.v1", "0", msg.getSourceType().name());
                 observed.put(r.getSignalId(), obs);
@@ -124,10 +131,28 @@ public final class InspectionService {
         } else notes.add("Virtual sensor catalog not found");
         List<DegradationOutput> degradation = new ArrayList<>();
         Map<String, List<AnomalyEpisode>> histories = new TreeMap<>();
+        long epoch = AssessmentHistory.epochAtZero(normalized);
+        Map<String, InspectionResult> selectedHistory = new TreeMap<>();
+        Set<String> conflictingSessions = new TreeSet<>();
+        for (InspectionResult previous : priorSessions) {
+            if (!AssessmentHistory.eligible(normalized, previous.messages, AssessmentHistory.firstTime(normalized))) continue;
+            String id = previous.messages.get(0).getSessionId();
+            InspectionResult existing = selectedHistory.putIfAbsent(id, previous);
+            if (existing != null && !existing.certificate.getEvidenceDigest().equals(previous.certificate.getEvidenceDigest())) conflictingSessions.add(id);
+        }
+        for (String conflict : conflictingSessions) selectedHistory.remove(conflict);
+        for (InspectionResult previous : selectedHistory.values()) for (AnomalyEpisode ep : previous.episodes) {
+            histories.computeIfAbsent(ep.getSubsystemId(), x -> new ArrayList<>()).add(
+                com.ignitionai.degradation.store.EpisodeTimeline.atEpoch(ep, AssessmentHistory.epochAtZero(previous.messages)));
+        }
+        notes.add("Historical sessions used: " + selectedHistory.size() + " (same vehicle and source; previous 365 days). Timeline: phone receive UTC anchor.");
+        if (!conflictingSessions.isEmpty()) notes.add("Conflicting copies excluded for historical sessions: " + String.join(", ", conflictingSessions));
         for (AnomalyEpisode ep : episodes) {
-            List<AnomalyEpisode> history = histories.computeIfAbsent(ep.getSubsystemId(), x -> new ArrayList<>());
-            DegradationFeatures f = new DegradationFeatureBuilder().buildFeatures(ep, history);
-            TrendResult trend = new TrendAnalyzer().analyzeTrend(ep, history);
+            AnomalyEpisode timed = com.ignitionai.degradation.store.EpisodeTimeline.atEpoch(ep, epoch);
+            List<AnomalyEpisode> candidates = histories.computeIfAbsent(ep.getSubsystemId(), x -> new ArrayList<>());
+            List<AnomalyEpisode> history = com.ignitionai.degradation.store.EpisodeTimeline.before(timed, candidates);
+            DegradationFeatures f = new DegradationFeatureBuilder().buildFeatures(timed, history);
+            TrendResult trend = new TrendAnalyzer().analyzeTrend(timed, history);
             DegradationStateResult state = new DegradationStateEstimator().estimateState(f, trend);
             EventRiskResult risk = new EventRiskEstimator().estimateRisk(f, trend, state, "critical_failure", 168, false);
             DegradationOutput d = new DegradationOutput();
@@ -138,18 +163,35 @@ public final class InspectionService {
             d.setRiskStatus(risk.getStatus()); d.setEventRiskEstimate(risk.getStatus() == DegradationOutput.RiskStatus.AVAILABLE ? risk.getRiskEstimate() : null);
             d.setPredictionHorizonMs(168L * 3600000); d.setConfidence(0.5); d.setUncertainty(Math.min(1, trend.getUncertainty()));
             d.setDataSufficiencyStatus(history.size() >= 2 ? DegradationOutput.DataSufficiency.SPARSE : DegradationOutput.DataSufficiency.INSUFFICIENT);
-            d.setEvidenceReferences(List.copyOf(ep.getEvidenceReferences())); d.setModelVersion("state-space.v1"); d.setConfigurationVersion("preliminary.v1");
-            degradation.add(d); history.add(ep);
+            Set<String> contributingEvidence = new TreeSet<>(ep.getEvidenceReferences());
+            history.forEach(p -> contributingEvidence.addAll(p.getEvidenceReferences()));
+            d.setEvidenceReferences(List.copyOf(contributingEvidence)); d.setModelVersion("state-space.v1"); d.setConfigurationVersion("preliminary.v1");
+            degradation.add(d); candidates.add(timed);
         }
         List<SubsystemHealthAssessment> subs = new ArrayList<>();
         SubsystemScoreCalculator calculator = new SubsystemScoreCalculator(new SeverityClassifier(null));
         for (String signal : new TreeSet<>(floors.keySet())) {
             DegradationOutput last = null;
             for (DegradationOutput d : degradation) if (signal.equals(d.getSubsystemId())) last = d;
-            if (last != null) subs.add(calculator.calculateScore(last));
-            else subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.UNKNOWN, null, 0.0, 1.0,
-                List.of(observed.containsKey(signal) ? "NO_ESTABLISHED_DEGRADATION_HISTORY" : "NOT_OBSERVED"),
-                observed.containsKey(signal) ? observed.get(signal).getSourceObservationReferences() : List.of(), false));
+            if (last != null) {
+                SubsystemHealthAssessment calculated = calculator.calculateScore(last);
+                if (calculated.getHealthScore() != null) {
+                    subs.add(calculated);
+                } else {
+                    // A score is useful in the simulator even before vehicle-specific history exists.
+                    // It is deliberately low-confidence and is labelled as an indicator, never as calibrated health.
+                    double score = Math.max(0, Math.min(100, 100 - Optional.ofNullable(last.getDegradationScore()).orElse(0.0)));
+                    SeverityLevel severity = score < 50 ? SeverityLevel.CRITICAL : score < 75 ? SeverityLevel.DEGRADED : SeverityLevel.WATCH;
+                    List<String> flags = new ArrayList<>(calculated.getDegradedDataFlags()); flags.add("PRELIMINARY_INDICATOR_ONLY");
+                    subs.add(new SubsystemHealthAssessment(signal, signal, severity, score, 0.15, 0.85, flags,
+                        last.getEvidenceReferences() == null ? List.of() : last.getEvidenceReferences(), false));
+                }
+            } else if (validCounts.containsKey(signal)) {
+                subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.NORMAL, 100.0, 0.15, 0.85,
+                    List.of("NO_ESTABLISHED_DEGRADATION_HISTORY", "PRELIMINARY_INDICATOR_ONLY", "RISK_UNAVAILABLE"),
+                    observed.get(signal).getSourceObservationReferences(), false));
+            } else subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.UNKNOWN, null, 0.0, 1.0,
+                List.of("NOT_OBSERVED"), List.of(), false));
         }
         List<String> refs = new ArrayList<>(); for (AnomalyEpisode ep : episodes) refs.addAll(ep.getEvidenceReferences());
         Map<String, Double> weights = new TreeMap<>(); for (String id : floors.keySet()) weights.put(id, 1.0);
@@ -163,6 +205,7 @@ public final class InspectionService {
         notes.add("Latest DTC observations: " + (dtcCodes.isEmpty() ? (completeDtcSeen ? "none in the latest complete scan" : "scan unavailable") : String.join(", ", dtcCodes)));
         java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
         for (ObdMessage message : normalized) digest.update((com.ignitionai.obdinput.storage.ObdJsonMapper.serialize(message) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        for (InspectionResult previous : selectedHistory.values()) digest.update((previous.certificate.getEvidenceDigest() + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         StringBuilder fingerprint = new StringBuilder();
         for (byte b : digest.digest()) fingerprint.append(String.format(Locale.ROOT, "%02x", b & 255));
         return new InspectionResult(normalized, episodes, degradation, new ArrayList<>(all.values()), notes,

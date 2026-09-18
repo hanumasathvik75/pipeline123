@@ -37,6 +37,8 @@ public final class NativeWorkflowTest {
             check(!"CONFIRMED".equals(a.certificate.getHealthAssessment().getVinOrIdentityStatus()), "Invented identity");
             check(a.degradation.stream().allMatch(d -> d.getEventRiskEstimate() == null), "Uncalibrated probability published");
             check(!a.observations.isEmpty(), "Phase 3 not executed");
+            check(a.certificate.getHealthAssessment().getVehicleHealthIndex() != null, "Preliminary report has no usable indicator score");
+            check(a.certificate.getHealthAssessment().getDataQualityStatus().equals("PARTIAL"), "Preliminary score must disclose partial data quality");
             check(a.certificate.getHealthAssessment().getAssessmentTimestamp().contains("T"), "Timestamp not UTC");
             boolean rejected = false;
             try { MiniJson.parse("{\"x\":1} trailing"); } catch (RuntimeException e) { rejected=true; }
