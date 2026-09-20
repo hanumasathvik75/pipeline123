@@ -59,6 +59,10 @@
       "bin_std_normal_deg": 3.0,
       "bin_std_flag_deg": 6.0
     },
+    "hybrid_battery_health": {
+      "rationale": "SAE J1979 Mode 01 PID 0x5B ('Hybrid Battery Pack Remaining Life') is the one HV-battery figure standard OBD-II actually exposes -- a single aggregate percentage, nowhere near the per-cell/SoC-estimator detail bms-diagnostics computes from real BMS CAN exports, but it is genuinely standardized (unlike per-cell data, which is manufacturer-proprietary CAN traffic not reachable from a generic OBD-II port). Most non-hybrid/EV vehicles never report this PID at all; that is reported as UNSUPPORTED, not a low score, since 'no PID' and 'bad battery' are different facts. flag_below_pct is a conservative default pending real fleet outcome data, same disclosure as every other index here.",
+      "flag_below_pct": 60.0
+    },
     "signal_quality": {
       "rationale": "Session-level data-quality composite: how much of the incoming stream was usable at all, independent of any single subsystem's health. Combines three real, independently-computed measurements: (1) missingness -- fraction of ALL sensor readings (any signal) marked invalid or non-finite by the pre-processor; (2) implausibility -- of the readings that DID pass quality validation, the fraction whose value falls outside a hardcoded physically-possible range for that signal (catches a sensor reporting 'valid' garbage, which quality-status alone would miss); (3) sample-rate consistency -- for signals with a stated expected minimum rate, the ratio of achieved rate (valid-count / observed timespan) to that minimum, averaged only over signals actually present this session (a vehicle/adapter simply not supporting an optional PID is not penalized here). Weights, flag thresholds and expected rates are provisional -- same disclosure as every other index in this file -- and plausible_ranges are generous physical bounds (not tuned tolerances), chosen only to catch sensor garbage, not borderline-unhealthy-but-real values.",
       "plausible_ranges": {

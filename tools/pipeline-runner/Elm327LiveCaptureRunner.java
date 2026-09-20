@@ -96,7 +96,8 @@ public final class Elm327LiveCaptureRunner {
         List<String> signals = new ArrayList<>(java.util.Arrays.asList(
             "engine_rpm", "vehicle_speed", "coolant_temperature", "calculated_engine_load", "throttle_position",
             "manifold_absolute_pressure", "mass_airflow_rate", "timing_advance", "intake_air_temperature",
-            "barometric_pressure", "control_module_voltage", "short_term_fuel_trim_b1", "long_term_fuel_trim_b1", "oil_temperature"));
+            "barometric_pressure", "control_module_voltage", "short_term_fuel_trim_b1", "long_term_fuel_trim_b1", "oil_temperature",
+            "hybrid_battery_pack_life"));
 
         while (System.currentTimeMillis() < endAtMs) {
             long monotonicMs = (System.nanoTime() - startNanos) / 1_000_000L;

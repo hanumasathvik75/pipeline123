@@ -18,7 +18,7 @@ IgnitionAI 2.0/
 ├── tools/obd-generator/      Phase 2 – Configurable Stream Generator for testing, incl. real SAE J1979/J2012 ELM327 protocol encode/decode
 ├── vehicle-context/          Phase 3 – Vehicle Identity, Context, and Operating Regime State
 ├── direct-features/          Phase 3 – Rolling Window Feature Computation (~30 signal-derived features)
-├── virtual-sensors/          Phase 3 – Model-driven Sensor Generation, plus a Diagnostic Index plugin system: 10 composite condition indices (combustion, fuel, thermal, load response, charging, air intake, timing, driving behaviour, signal quality, overall condition) and a probabilistic fault graph (`FaultCandidateRanker`) combining index findings and DTCs into ranked root-cause candidates
+├── virtual-sensors/          Phase 3 – Model-driven Sensor Generation, plus a Diagnostic Index plugin system: 11 composite condition indices (combustion, fuel, thermal, load response, charging, air intake, timing, driving behaviour, signal quality, hybrid battery health via the standard SAE J1979 PID 0x5B, overall condition) and a probabilistic fault graph (`FaultCandidateRanker`) combining index findings and DTCs into ranked root-cause candidates
 ├── phase4-contract/          Phase 4 – Phase 4 Data Transfer Objects and States
 ├── expected-behaviour-model/ Phase 4 – Dynamic Baselines (Regime/Rolling)
 ├── residual-calculation/     Phase 4 – Calculates deviation (Observed - Expected)

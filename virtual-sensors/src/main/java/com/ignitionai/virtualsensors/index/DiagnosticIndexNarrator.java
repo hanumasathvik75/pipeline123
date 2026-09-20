@@ -56,6 +56,10 @@ public final class DiagnosticIndexNarrator {
                 return flagged
                     ? "Data quality this session was below the usual bar (" + pct(e, "missingness_fraction") + " missing, " + pct(e, "implausible_fraction") + " implausible readings) — treat the other findings above with extra caution."
                     : "Data quality this session was good: " + pct(e, "missingness_fraction") + " missing and " + pct(e, "implausible_fraction") + " implausible readings, well within the expected range.";
+            case "hybrid_battery_health":
+                return flagged
+                    ? "The vehicle reports " + e.get("mean_remaining_life_pct") + "% hybrid battery pack remaining life over OBD-II — below the " + e.get("flag_below_pct") + "% threshold, worth a closer look at the HV battery."
+                    : "The vehicle reports " + e.get("mean_remaining_life_pct") + "% hybrid battery pack remaining life over OBD-II — within the normal range.";
             case "overall_condition":
                 return flagged
                     ? "Combining every mechanical-condition index above (" + e.get("components_supported") + " supported this session), " + e.get("components_flagged") + " came back flagged — see those specific findings for what to check."

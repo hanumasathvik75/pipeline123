@@ -207,8 +207,9 @@ public final class IgnitionDesktop extends JFrame {
     }
     private void display() {
         VehicleHealthAssessment a = result.certificate.getHealthAssessment();
-        summary.setText("Vehicle: " + a.getVehicleId() + "\nAssessed: " + a.getAssessmentTimestamp()
-            + "\nVHI: " + value(a.getVehicleHealthIndex()) + "   |   " + a.getHealthBand() + "   |   Data: " + a.getDataQualityStatus()
+        summary.setText(diagnosticIndexHeadline(result.certificate.getDiagnosticIndex())
+            + "\nVehicle: " + a.getVehicleId() + "\nAssessed: " + a.getAssessmentTimestamp()
+            + "\nLegacy VHI (provisional, superseded above): " + value(a.getVehicleHealthIndex()) + "   |   " + a.getHealthBand() + "   |   Data: " + a.getDataQualityStatus()
             + "\nCoverage: " + value(a.getSubsystemCoverage()) + "   |   Confidence: " + value(a.getOverallConfidence())
             + "\nEpisodes: " + result.episodes.size() + "   |   Records: " + result.messages.size()
             + "\n" + String.join("\n", result.notes));
@@ -233,6 +234,31 @@ public final class IgnitionDesktop extends JFrame {
         ids.forEach(chartSignal::addItem); trace.repaint();
     }
     private static String value(Double n) { return n == null ? "Unavailable" : String.format(Locale.ROOT, "%.2f", n); }
+    /** Same overall_condition-preferring headline as the certificate's at-a-glance page
+     * (LatexGenerator.atAGlanceSection) -- kept in sync deliberately so the on-screen summary and
+     * the exported PDF never tell a technician two different top-line numbers for the same session. */
+    private static String diagnosticIndexHeadline(List<DiagnosticIndexResult> idx) {
+        DiagnosticIndexResult overall = idx.stream().filter(r -> "overall_condition".equals(r.getIndexId())).findFirst().orElse(null);
+        long supported, flagged;
+        String health;
+        if (overall != null && overall.getHealthPct() != null) {
+            supported = parseRatioPart(overall.getEvidence().get("components_supported"), 1);
+            flagged = Long.parseLong(overall.getEvidence().getOrDefault("components_flagged", "0"));
+            health = String.format(Locale.ROOT, "%.0f", overall.getHealthPct());
+        } else {
+            supported = idx.stream().filter(r -> r.getHealthPct() != null && !"overall_condition".equals(r.getIndexId())).count();
+            flagged = idx.stream().filter(r -> r.getState() == DiagnosticIndexResult.State.FLAGGED && !"overall_condition".equals(r.getIndexId())).count();
+            double healthSum = 0; int healthCount = 0;
+            for (DiagnosticIndexResult r : idx) if (r.getHealthPct() != null && !"overall_condition".equals(r.getIndexId())) { healthSum += r.getHealthPct(); healthCount++; }
+            health = healthCount > 0 ? String.format(Locale.ROOT, "%.0f", healthSum / healthCount) : "UNAVAILABLE";
+        }
+        return "IgnitionAI Diagnostic Index: " + health + "/100  (" + flagged + " of " + supported + " assessed systems flagged -- see Diagnostic Index tab)";
+    }
+    private static long parseRatioPart(String ratio, int part) {
+        if (ratio == null) return 0;
+        String[] parts = ratio.split("/");
+        try { return Long.parseLong(parts[part].trim()); } catch (Exception e) { return 0; }
+    }
     private Path choose(boolean save, String suggested) {
         JFileChooser chooser = new JFileChooser(); if (suggested != null) chooser.setSelectedFile(new java.io.File(suggested));
         int answer = save ? chooser.showSaveDialog(this) : chooser.showOpenDialog(this);
@@ -242,7 +268,9 @@ public final class IgnitionDesktop extends JFrame {
         return path;
     }
     private void openSession() { Path p = choose(false, null); if (p != null) load(p); }
-    private void load(Path p) { runTask(() -> new AssessmentHistory(sensorDirectory(), storage).assess(SessionFiles.read(p))); }
+    // Package-visible (not private) so DesktopSmokeTest, in the same package, can drive a real
+    // session through the app without automating the OS file-picker dialog `openSession` uses.
+    void load(Path p) { runTask(() -> new AssessmentHistory(sensorDirectory(), storage).assess(SessionFiles.read(p))); }
     /** Connects to a genuinely independent third-party ELM327 protocol emulator (see
      * {@link tools.pipeline_runner.Elm327LiveCaptureRunner}) over TCP, captures real telemetry
      * frames, and feeds the capture through the same unmodified pipeline as any other session --

@@ -12,6 +12,10 @@ This branch supplies a working desktop assessment/simulator flow and a buildable
 - Local sessions are under `%USERPROFILE%/IgnitionAI/sessions`. Session deletion is available in History. Files are plaintext local data; encryption and automatic retention are not yet integrated into this workflow.
 - Sensor manifests are discovered from `app/sensors` in the package; adding a valid manifest requires no core-code edit. Restart/reassess to load it. From source, the catalog is `virtual-sensors/src/main/resources/sensors`.
 
+## Battery health over OBD-II vs. the BMS module -- two different things
+
+Standard OBD-II (SAE J1979) does carry one genuinely standardized hybrid/EV battery figure: PID 0x5B, "Hybrid Battery Pack Remaining Life" -- a single aggregate percentage. The desktop app's live ELM327 capture and the Diagnostic Index now include this as the "Hybrid Battery Health" index; on a non-hybrid vehicle (or one that doesn't implement the PID) it correctly reports UNSUPPORTED rather than a fabricated score. This is the full extent of what a generic OBD-II port can tell you about the HV battery -- per-cell voltages, individual cell temperatures, and dual SoC-estimator (EKF vs Coulomb-count) disagreement are manufacturer-proprietary CAN traffic, not reachable from the standard 16-pin port at all, and remain the separate CLI path below.
+
 ## Battery Management System (BMS) reports
 
 Separate from the OBD-II desktop app -- most OBD-II ports never expose BMS internals, so this is its own CLI evidence path against real BMS CSV exports (`bms-diagnostics` module):

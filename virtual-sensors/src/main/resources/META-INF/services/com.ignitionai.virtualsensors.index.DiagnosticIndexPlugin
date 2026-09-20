@@ -7,4 +7,5 @@ com.ignitionai.virtualsensors.index.AirIntakeConsistencyIndexPlugin
 com.ignitionai.virtualsensors.index.TimingComplianceIndexPlugin
 com.ignitionai.virtualsensors.index.DrivingBehaviorIndexPlugin
 com.ignitionai.virtualsensors.index.SignalQualityScorePlugin
+com.ignitionai.virtualsensors.index.HybridBatteryHealthIndexPlugin
 com.ignitionai.virtualsensors.index.OverallConditionScorePlugin

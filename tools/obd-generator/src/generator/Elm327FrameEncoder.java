@@ -36,6 +36,7 @@ public final class Elm327FrameEncoder {
         PIDS.put("barometric_pressure", 0x33);
         PIDS.put("control_module_voltage", 0x42);
         PIDS.put("oil_temperature", 0x5C);
+        PIDS.put("hybrid_battery_pack_life", 0x5B);
     }
 
     public static Integer pidFor(String canonicalSignalId) { return PIDS.get(canonicalSignalId); }
@@ -59,6 +60,7 @@ public final class Elm327FrameEncoder {
         switch (signalId) {
             case "calculated_engine_load":
             case "throttle_position":
+            case "hybrid_battery_pack_life":
                 return new int[]{ clampByte(Math.round(value * 255.0 / 100.0)) };
             case "coolant_temperature":
             case "intake_air_temperature":
@@ -104,6 +106,7 @@ public final class Elm327FrameEncoder {
         switch (signalId) {
             case "calculated_engine_load":
             case "throttle_position":
+            case "hybrid_battery_pack_life":
                 return a * 100.0 / 255.0;
             case "coolant_temperature":
             case "intake_air_temperature":
@@ -137,7 +140,8 @@ public final class Elm327FrameEncoder {
             case "vehicle_speed": return "km/h";
             case "coolant_temperature": case "intake_air_temperature": case "oil_temperature": return "Cel";
             case "calculated_engine_load": case "throttle_position":
-            case "short_term_fuel_trim_b1": case "long_term_fuel_trim_b1": return "%";
+            case "short_term_fuel_trim_b1": case "long_term_fuel_trim_b1":
+            case "hybrid_battery_pack_life": return "%";
             case "manifold_absolute_pressure": case "barometric_pressure": return "kPa";
             case "timing_advance": return "deg";
             case "mass_airflow_rate": return "g/s";
