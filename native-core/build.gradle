@@ -11,4 +11,7 @@ sourceSets.main.java {
     setSrcDirs(modules.collect { rootProject.file(it + (rootProject.file(it + '/src/main/java').exists() ? '/src/main/java' : '/src')) })
     exclude '**/*Test*.java', '**/Phase6Fixtures.java'
 }
+sourceSets.main.resources {
+    setSrcDirs(modules.findAll { rootProject.file(it + '/src/main/resources').exists() }.collect { rootProject.file(it + '/src/main/resources') })
+}
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }

@@ -1,0 +1,10 @@
+com.ignitionai.virtualsensors.index.CombustionIndexPlugin
+com.ignitionai.virtualsensors.index.FuelIndexPlugin
+com.ignitionai.virtualsensors.index.ThermalIndexPlugin
+com.ignitionai.virtualsensors.index.LoadResponseIndexPlugin
+com.ignitionai.virtualsensors.index.ChargingIndexPlugin
+com.ignitionai.virtualsensors.index.AirIntakeConsistencyIndexPlugin
+com.ignitionai.virtualsensors.index.TimingComplianceIndexPlugin
+com.ignitionai.virtualsensors.index.DrivingBehaviorIndexPlugin
+com.ignitionai.virtualsensors.index.SignalQualityScorePlugin
+com.ignitionai.virtualsensors.index.OverallConditionScorePlugin

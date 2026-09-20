@@ -10,10 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.ServiceLoader;
 
 public class VirtualSensorRuntime {
     private Map<String, SensorDefinition> registeredSensors = new HashMap<>();
     private Map<String, VirtualSensorPlugin> plugins = new HashMap<>();
+
+    /**
+     * Auto-registers every VirtualSensorPlugin found via ServiceLoader (its class listed in
+     * META-INF/services/com.ignitionai.virtualsensors.VirtualSensorPlugin on the classpath).
+     * A plugin-backed sensor still needs a matching manifest (implementation_type=plugin) so its
+     * metadata, applicability and dependency validation go through the same path as formula sensors.
+     */
+    public void discoverPlugins() {
+        for (VirtualSensorPlugin plugin : ServiceLoader.load(VirtualSensorPlugin.class)) registerPlugin(plugin);
+    }
 
     public void loadSensors(List<SensorDefinition> definitions) {
         for (SensorDefinition def : definitions) {

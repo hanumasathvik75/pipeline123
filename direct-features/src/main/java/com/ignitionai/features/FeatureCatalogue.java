@@ -21,6 +21,22 @@ public class FeatureCatalogue {
         register(new FuelTrimSummaryFeature());
         register(new VoltageStatisticsFeature());
         register(new RegimeDurationFeature());
+        register(new EngineRunningFlagFeature());
+        register(new IdleFlagFeature());
+        register(new OilMinusCoolantFeature());
+        register(new RpmRadPerSecFeature());
+        register(new AccelerationMps2Feature());
+        register(new CruiseFlagFeature());
+        register(new AccelEventFlagFeature());
+        register(new DecelEventFlagFeature());
+        register(new CoolantMinusAmbientFeature());
+        register(new OilMinusAmbientFeature());
+        register(new BoostGaugeFeature());
+        register(new PedalThrottleGapFeature());
+        register(new ThrottleCommandGapFeature());
+        register(new InstantFuelEconomyFeature());
+        register(new FuelTrimImbalanceFeature());
+        register(new SensorCoverageFeature());
     }
 
     public void register(Feature feature) {

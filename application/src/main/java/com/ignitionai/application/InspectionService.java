@@ -6,6 +6,7 @@ import com.ignitionai.obd.AnalyticalObservation;
 import com.ignitionai.context.*;
 import com.ignitionai.features.*;
 import com.ignitionai.virtualsensors.*;
+import com.ignitionai.virtualsensors.index.*;
 import com.ignitionai.expectedbehaviour.RollingMeanModel;
 import com.ignitionai.residual.ResidualCalculator;
 import com.ignitionai.anomaly.*;
@@ -52,8 +53,7 @@ public final class InspectionService {
         List<String> notes = new ArrayList<>();
         Set<String> dtcCodes = new TreeSet<>();
         boolean completeDtcSeen = false;
-        Map<String, Double> floors = Map.of("engine_rpm", 150.0, "coolant_temperature", 3.0,
-            "vehicle_speed", 5.0, "calculated_engine_load", 5.0, "throttle_position", 5.0);
+        Map<String, Double> floors = DiagnosticIndexConfig.get().monitoredIndicatorNoiseFloors();
         long end = 0, start = Long.MAX_VALUE;
         int invalid = 0;
         for (ObdMessage raw : input) {
@@ -109,13 +109,18 @@ public final class InspectionService {
                     AnomalyEpisode ep = active.get(key);
                     if (ep == null) {
                         ep = new AnomalyEpisode(vehicle, session, r.getSignalId(), session + "/" + key + "/" + tracker.getFirstViolationMs(),
-                            tracker.getFirstViolationMs(), t, score, (double)(t - tracker.getFirstViolationMs()), 0, 1.0,
-                            context.getOperatingConditions().getOperatingRegime().name(), Map.of("confidence", 0.5), new ArrayList<>(),
+                            tracker.getFirstViolationMs(), t, score, (double)(t - tracker.getFirstViolationMs()), 0,
+                            tracker.getEpisodePersistence(), context.getOperatingConditions().getOperatingRegime().name(),
+                            Map.of("confidence", episodeQualityConfidence(tracker.getEpisodeTotalSamples())), new ArrayList<>(),
                             context.getContextVersion(), "causal-regime-mean.v1", "uncalibrated", null);
                         active.put(key, ep); episodes.add(ep);
                     }
                     ep.setSeverity(Math.max(ep.getSeverity(), score)); ep.setEndTimeMs(t);
                     ep.setDurationMs((double)(t - ep.getStartTimeMs())); ep.getEvidenceReferences().add(ref);
+                    // Persistence/quality-confidence are real duty-cycle measurements that evolve as the
+                    // episode runs, not constants fixed at creation -- see SignalAnomalyTracker.
+                    ep.setPersistence(tracker.getEpisodePersistence());
+                    ep.setQualityIndicators(Map.of("confidence", episodeQualityConfidence(tracker.getEpisodeTotalSamples())));
                 } else if (state == AnomalyState.CLOSURE || state == AnomalyState.NOMINAL) active.remove(key);
                 if (state == AnomalyState.CLOSURE || state == AnomalyState.NOMINAL) frozenBaselines.remove(key);
                 if (!frozenBaselines.containsKey(key)) baseline.addReading(new com.ignitionai.features.SensorReading(r.getSignalId(), r.getValue(), t, r.getUnit()));
@@ -127,8 +132,11 @@ public final class InspectionService {
         if (sensorDirectory != null && sensorDirectory.isDirectory()) {
             VirtualSensorRuntime runtime = new VirtualSensorRuntime();
             runtime.loadSensors(new ManifestLoader().loadManifests(sensorDirectory));
+            runtime.discoverPlugins();
             for (String id : new TreeSet<>(runtime.getRegisteredSensors().keySet())) all.put(id, runtime.evaluate(id, all, context, end));
         } else notes.add("Virtual sensor catalog not found");
+        List<DiagnosticIndexResult> diagnosticIndex = new DiagnosticIndexRuntime().evaluateAll(normalized, context);
+        List<FaultCandidate> faultCandidates = FaultCandidateRanker.rank(diagnosticIndex, new ArrayList<>(dtcCodes));
         List<DegradationOutput> degradation = new ArrayList<>();
         Map<String, List<AnomalyEpisode>> histories = new TreeMap<>();
         long epoch = AssessmentHistory.epochAtZero(normalized);
@@ -154,6 +162,8 @@ public final class InspectionService {
             DegradationFeatures f = new DegradationFeatureBuilder().buildFeatures(timed, history);
             TrendResult trend = new TrendAnalyzer().analyzeTrend(timed, history);
             DegradationStateResult state = new DegradationStateEstimator().estimateState(f, trend);
+            // isCalibrated stays false deliberately: HazardModelConfig's coefficients are invented
+            // placeholders, not fitted to real failure data -- see the warning on that class.
             EventRiskResult risk = new EventRiskEstimator().estimateRisk(f, trend, state, "critical_failure", 168, false);
             DegradationOutput d = new DegradationOutput();
             d.setVehicleId(vehicle); d.setSubsystemId(ep.getSubsystemId()); d.setEvaluationTimeMs(ep.getEndTimeMs());
@@ -161,7 +171,10 @@ public final class InspectionService {
             d.setPersistenceScore(f.getMeanPersistence()); d.setRecurrenceScore(history.size() / (history.size() + 1.0));
             d.setTrendDirection(trend.getDirection()); d.setTrendSlope(trend.getTrendSlope());
             d.setRiskStatus(risk.getStatus()); d.setEventRiskEstimate(risk.getStatus() == DegradationOutput.RiskStatus.AVAILABLE ? risk.getRiskEstimate() : null);
-            d.setPredictionHorizonMs(168L * 3600000); d.setConfidence(0.5); d.setUncertainty(Math.min(1, trend.getUncertainty()));
+            // Confidence is the complement of the trend model's own (data-derived) uncertainty, not a flat
+            // constant -- this was previously hardcoded to 0.5 regardless of input, discarding real signal.
+            double trendConfidence = Math.max(0.1, 1.0 - Math.min(1.0, trend.getUncertainty() * 0.5));
+            d.setPredictionHorizonMs(168L * 3600000); d.setConfidence(trendConfidence); d.setUncertainty(Math.min(1, trend.getUncertainty()));
             d.setDataSufficiencyStatus(history.size() >= 2 ? DegradationOutput.DataSufficiency.SPARSE : DegradationOutput.DataSufficiency.INSUFFICIENT);
             Set<String> contributingEvidence = new TreeSet<>(ep.getEvidenceReferences());
             history.forEach(p -> contributingEvidence.addAll(p.getEvidenceReferences()));
@@ -183,18 +196,20 @@ public final class InspectionService {
                     double score = Math.max(0, Math.min(100, 100 - Optional.ofNullable(last.getDegradationScore()).orElse(0.0)));
                     SeverityLevel severity = score < 50 ? SeverityLevel.CRITICAL : score < 75 ? SeverityLevel.DEGRADED : SeverityLevel.WATCH;
                     List<String> flags = new ArrayList<>(calculated.getDegradedDataFlags()); flags.add("PRELIMINARY_INDICATOR_ONLY");
-                    subs.add(new SubsystemHealthAssessment(signal, signal, severity, score, 0.15, 0.85, flags,
+                    double coverageConfidence = sampleCoverageConfidence(signal, validCounts.getOrDefault(signal, 0));
+                    subs.add(new SubsystemHealthAssessment(signal, signal, severity, score, coverageConfidence, 1.0 - coverageConfidence, flags,
                         last.getEvidenceReferences() == null ? List.of() : last.getEvidenceReferences(), false));
                 }
             } else if (validCounts.containsKey(signal)) {
-                subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.NORMAL, 100.0, 0.15, 0.85,
+                double coverageConfidence = sampleCoverageConfidence(signal, validCounts.get(signal));
+                subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.NORMAL, 100.0, coverageConfidence, 1.0 - coverageConfidence,
                     List.of("NO_ESTABLISHED_DEGRADATION_HISTORY", "PRELIMINARY_INDICATOR_ONLY", "RISK_UNAVAILABLE"),
                     observed.get(signal).getSourceObservationReferences(), false));
             } else subs.add(new SubsystemHealthAssessment(signal, signal, SeverityLevel.UNKNOWN, null, 0.0, 1.0,
                 List.of("NOT_OBSERVED"), List.of(), false));
         }
         List<String> refs = new ArrayList<>(); for (AnomalyEpisode ep : episodes) refs.addAll(ep.getEvidenceReferences());
-        Map<String, Double> weights = new TreeMap<>(); for (String id : floors.keySet()) weights.put(id, 1.0);
+        Map<String, Double> weights = DiagnosticIndexConfig.get().monitoredIndicatorWeights();
         VehicleHealthAssessment assessment = new VhiCalculator().calculateVhi(vehicle,
             normalized.get(normalized.size() - 1).getReceivedAt().toEpochMilli(), start == Long.MAX_VALUE ? 0 : end - start,
             subs, weights, refs, "preliminary.v1", "UNPUBLISHED", context.getContextVersion());
@@ -208,7 +223,33 @@ public final class InspectionService {
         for (InspectionResult previous : selectedHistory.values()) digest.update((previous.certificate.getEvidenceDigest() + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         StringBuilder fingerprint = new StringBuilder();
         for (byte b : digest.digest()) fingerprint.append(String.format(Locale.ROOT, "%02x", b & 255));
-        return new InspectionResult(normalized, episodes, degradation, new ArrayList<>(all.values()), notes,
-            new CertificateSnapshot(assessment, first.getSourceType().name(), session, fingerprint.toString()));
+        CertificateSnapshot certificate = new CertificateSnapshot(assessment, first.getSourceType().name(), session, fingerprint.toString());
+        certificate.setEvidenceAppendix(new ArrayList<>(dtcCodes), episodes, degradation, diagnosticIndex, faultCandidates,
+            start == Long.MAX_VALUE ? null : end - start, normalized.size());
+        return new InspectionResult(normalized, episodes, degradation, new ArrayList<>(all.values()), notes, certificate);
+    }
+
+    /** Data-coverage-based confidence proxy for a raw signal with no established degradation history:
+     * more valid samples this session raises confidence toward a capped ceiling; it is not a calibrated
+     * statistical confidence. Each signal has its own "full" sample bar sized to its own typical rate
+     * (config/diagnostic-index-config.json, monitored_indicators.confidence_full_at_samples) rather than
+     * one global number, so a slow 1Hz signal isn't judged against a fast signal's sampling needs. */
+    private static double sampleCoverageConfidence(String signal, int validSamples) {
+        DiagnosticIndexConfig cfg = DiagnosticIndexConfig.get();
+        double fullAt = cfg.monitoredIndicatorFullConfidenceSamples().get(signal);
+        double floor = cfg.monitoredIndicatorsNumber("confidence_floor");
+        double ceiling = cfg.monitoredIndicatorsNumber("confidence_ceiling");
+        return floor + (ceiling - floor) * SeriesUtil.clamp01(validSamples / fullAt);
+    }
+
+    /** Same shape as sampleCoverageConfidence but scoped to one anomaly episode's own sample count
+     * (see config/diagnostic-index-config.json under episode_quality for rationale/thresholds).
+     * Replaces the previous flat 0.5 hardcoded for every episode regardless of its evidence. */
+    private static double episodeQualityConfidence(int episodeSamples) {
+        DiagnosticIndexConfig cfg = DiagnosticIndexConfig.get();
+        double fullAt = cfg.episodeQualityNumber("full_confidence_at_samples");
+        double floor = cfg.episodeQualityNumber("confidence_floor");
+        double ceiling = cfg.episodeQualityNumber("confidence_ceiling");
+        return floor + (ceiling - floor) * SeriesUtil.clamp01(episodeSamples / fullAt);
     }
 }

@@ -146,6 +146,16 @@ java -ea -cp out tools.pipeline_runner.IgnitionAiPipelineRunner
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 
 echo.
+echo [TEST] Comprehensive Scenario Suite (7 independent fixtures)
+java -ea -cp out tools.pipeline_runner.ComprehensiveScenarioTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
+echo [TEST] BMS Degradation Trend Calibration
+java -ea -cp out com.ignitionai.bms.BmsDegradationTrendCalibrationTest
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+
+echo.
 echo ===================================================
 echo ALL TESTS PASSED SUCCESSFULLY!
 echo ===================================================

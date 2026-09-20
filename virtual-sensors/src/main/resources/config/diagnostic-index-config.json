@@ -1,0 +1,138 @@
+{
+  "config_version": "1.1.0",
+  "config_notes": "Every numeric threshold used by a DiagnosticIndexPlugin lives here, not as a Java literal, so it can be reviewed, versioned and revised without recompiling. Each index's 'rationale' field states why that value was chosen. Weights in monitored_indicators are explicitly PROVISIONAL EQUAL WEIGHTS pending real fleet/domain calibration -- this is stated here rather than left as an unexplained magic number in code.",
+  "indices": {
+    "combustion": {
+      "rationale": "RPM should hold steadier than a fixed fraction of itself during a short rolling window; a fixed floor avoids over-flagging at very low RPM where absolute noise is naturally larger relative to a tiny percentage.",
+      "window_samples": 5,
+      "rpm_floor_std": 60.0,
+      "rpm_std_fraction": 0.08,
+      "idle_floor_rpm": 900.0,
+      "flag_fraction_for_zero_health": 0.15,
+      "flag_fraction_for_flagged_state": 0.02,
+      "min_windows_for_confidence": 200
+    },
+    "fuel": {
+      "rationale": "10% combined trim is the commonly cited threshold at which OEM diagnostics themselves typically begin flagging fuel-trim-related codes; exceedance is measured as a session fraction rather than a single sample so a brief transient doesn't trip it.",
+      "threshold_pct": 10.0,
+      "exceedance_for_zero_health": 0.25,
+      "exceedance_for_flagged_state": 0.05,
+      "min_samples_for_confidence": 500
+    },
+    "thermal": {
+      "rationale": "82C is a conservative lower bound for thermostat-regulated operating temperature across common petrol engines; warm-up rate band widened to 1-25 C/min to admit both slow winter warm-ups and a compressed multi-minute inspection drive without false-flagging either.",
+      "operating_temp_c": 82.0,
+      "steady_std_normal_c": 3.0,
+      "steady_std_flag_c": 5.0,
+      "warmup_rate_min_c_per_min": 1.0,
+      "warmup_rate_max_c_per_min": 25.0
+    },
+    "load_response": {
+      "rationale": "Tip-in defined as throttle rising >15%/s by at least 10 percentage points, matched against SAE-typical naturally-aspirated response expectations; 1.5s max lag is a conservative outer bound before a delay is worth flagging to a technician.",
+      "tip_in_rate_pct_per_s": 15.0,
+      "min_tip_in_delta_pct": 10.0,
+      "rpm_response_rate_per_s": 150.0,
+      "look_ahead_ms": 5000,
+      "max_lag_seconds": 1.5,
+      "min_events": 2
+    },
+    "charging": {
+      "rationale": "12.4-14.9V is the standard accepted engine-running charging band for a 12V lead-acid system; ripple thresholds are a robust median-step proxy chosen to tolerate normal load-switching transients (lights, blower) without flagging them.",
+      "min_normal_v": 12.4,
+      "max_normal_v": 14.9,
+      "ripple_normal_v": 0.30,
+      "ripple_flag_v": 0.60
+    },
+    "air_intake_consistency": {
+      "rationale": "Adapted from Komorska et al. 2018 (air-intake virtual sensors) and Ahmed et al. 2011 (sliding-mode MAP/RPM observer): MAP and MAF are two independent measurements of the same intake airflow and should co-vary with RPM*load. A full manufacturer lookup-table calibration needs multi-session per-engine data IgnitionAI does not have yet, so this is a session-native adaptation: it checks whether that expected co-variation holds WITHIN the current session rather than against a pre-calibrated table. Correlation thresholds are Cohen's conventional 'strong effect' (0.5) and 'weak/broken effect' (0.3) boundaries, not manufacturer-specific tuning.",
+      "min_rpm_span_for_evaluation": 500.0,
+      "strong_correlation": 0.5,
+      "weak_correlation": 0.3,
+      "min_samples_for_confidence": 300
+    },
+    "timing_compliance": {
+      "rationale": "Adapted from Komorska et al. 2019 (ANN sensor-fault diagnosis via ECU adaptive-compensation fingerprint): ignition timing advance commanded at a given RPM/load operating point should be repeatable if the ECU's trusted sensor inputs (coolant/intake-air temp, MAP) are themselves stable; erratic timing at a REVISITED operating point suggests the ECU is compensating for a drifting input. Bin sizes are coarse enough to gather multiple visits within a short inspection drive.",
+      "rpm_bin_width": 500.0,
+      "load_bin_width": 15.0,
+      "min_samples_per_bin": 4,
+      "min_bins_for_confidence": 4,
+      "bin_std_normal_deg": 3.0,
+      "bin_std_flag_deg": 6.0
+    },
+    "signal_quality": {
+      "rationale": "Session-level data-quality composite: how much of the incoming stream was usable at all, independent of any single subsystem's health. Combines three real, independently-computed measurements: (1) missingness -- fraction of ALL sensor readings (any signal) marked invalid or non-finite by the pre-processor; (2) implausibility -- of the readings that DID pass quality validation, the fraction whose value falls outside a hardcoded physically-possible range for that signal (catches a sensor reporting 'valid' garbage, which quality-status alone would miss); (3) sample-rate consistency -- for signals with a stated expected minimum rate, the ratio of achieved rate (valid-count / observed timespan) to that minimum, averaged only over signals actually present this session (a vehicle/adapter simply not supporting an optional PID is not penalized here). Weights, flag thresholds and expected rates are provisional -- same disclosure as every other index in this file -- and plausible_ranges are generous physical bounds (not tuned tolerances), chosen only to catch sensor garbage, not borderline-unhealthy-but-real values.",
+      "plausible_ranges": {
+        "engine_rpm": [0, 8000],
+        "coolant_temperature": [-40, 150],
+        "vehicle_speed": [0, 300],
+        "calculated_engine_load": [0, 100],
+        "throttle_position": [0, 100],
+        "control_module_voltage": [0, 20],
+        "short_term_fuel_trim_b1": [-100, 100],
+        "long_term_fuel_trim_b1": [-100, 100],
+        "manifold_absolute_pressure": [0, 400],
+        "mass_airflow_rate": [0, 200],
+        "timing_advance": [-30, 70],
+        "oil_temperature": [-40, 180],
+        "intake_air_temperature": [-40, 90],
+        "barometric_pressure": [60, 110]
+      },
+      "expected_min_hz": {
+        "engine_rpm": 3.0,
+        "coolant_temperature": 0.5,
+        "vehicle_speed": 1.0,
+        "calculated_engine_load": 1.0,
+        "throttle_position": 1.0
+      },
+      "missingness_flag_fraction": 0.05,
+      "implausible_flag_fraction": 0.02,
+      "min_sample_rate_ratio_for_flag": 0.5,
+      "weight_missingness": 1.0,
+      "weight_implausibility": 1.0,
+      "weight_sample_rate": 0.5,
+      "min_readings_for_full_confidence": 1000.0,
+      "confidence_scale": 0.9
+    },
+    "driving_behavior": {
+      "rationale": "Adapted from the rule-based event-detection approach reported in Rimpas et al. 2022 (cited in Michailidis et al. 2025's OBD-II ML review, 88-95% accuracy on standard PIDs): named acceleration/jerk thresholds rather than a trained classifier, matching IgnitionAI's no-training-data-required contract. This index characterizes usage severity for a pre-owned inspection (relevant to expected wear), not a fault.",
+      "hard_accel_kmh_per_s": 8.0,
+      "hard_decel_kmh_per_s": 9.0,
+      "aggressive_fraction_for_flagged_state": 0.10,
+      "aggressive_fraction_for_zero_health": 0.35,
+      "min_seconds_for_confidence": 180.0
+    }
+  },
+  "monitored_indicators": {
+    "notes": "PROVISIONAL: raw-signal noise floors and equal internal weights, pending real fleet-calibrated values or GoMechanic domain-expert review. Structural subsystem grouping (multiple indicators per named subsystem) remains a known follow-up -- see the audit doc.",
+    "confidence_rationale": "This is a data-COVERAGE proxy (did this signal get enough valid samples this session to trust its reading), not a calibrated statistical confidence -- it is capped below 1.0 (see confidence_ceiling) because the whole preliminary pipeline is unvalidated against real fleet outcomes, not because of sample count. confidence_full_at_samples is now PER SIGNAL, not one global number: earlier this used a single threshold (2000) sized for engine_rpm's 5-10Hz rate, which unfairly read as 'low confidence' for slower, naturally smooth signals like a 1Hz coolant-temperature reading -- coolant temperature does not need 2000 samples to be trustworthy, it needs enough samples across enough of the drive to see its actual behaviour, which is a much lower bar for a slow-moving physical quantity. Each threshold below is roughly 2 minutes of that signal's own typical rate, a genuine physical-adequacy bar, not a number picked to make any one session's certificate look better or worse. A clean, complete capture (low missingness, full drive duration) correctly clears every signal's bar and lands at the ceiling for all five -- that is the honest outcome for good data, not a sign the number is hardcoded; a session with real dropouts or a cut-short capture will legitimately show lower, differentiated values, exactly as this metric is designed to do.",
+    "confidence_full_at_samples": {
+      "engine_rpm": 600.0,
+      "coolant_temperature": 120.0,
+      "vehicle_speed": 300.0,
+      "calculated_engine_load": 300.0,
+      "throttle_position": 300.0
+    },
+    "confidence_floor": 0.10,
+    "confidence_ceiling": 0.85,
+    "signal_noise_floor": {
+      "engine_rpm": 150.0,
+      "coolant_temperature": 3.0,
+      "vehicle_speed": 5.0,
+      "calculated_engine_load": 5.0,
+      "throttle_position": 5.0
+    },
+    "weight": {
+      "engine_rpm": 1.0,
+      "coolant_temperature": 1.0,
+      "vehicle_speed": 1.0,
+      "calculated_engine_load": 1.0,
+      "throttle_position": 1.0
+    }
+  },
+  "episode_quality": {
+    "rationale": "Confidence that a specific anomaly episode's persistence estimate is well-supported, based on how many samples were actually observed during that episode's lifespan (onset through recovery/closure) -- a real, per-episode computed sample-support metric. Previously this field was hardcoded to 0.5 for every episode regardless of how much or little data supported it, and persistence itself was hardcoded to 1.0 (which this section's samples now also drive). full_confidence_at_samples=20 is chosen against RollingWindowDetector's own persistenceMs=2000/recoveryMs=3000 config: an episode needs several evaluations past the 3-consecutive-sample onset threshold to have a stable duty-cycle estimate. Floor/ceiling remain provisional pending fleet calibration, matching monitored_indicators.",
+    "full_confidence_at_samples": 20.0,
+    "confidence_floor": 0.2,
+    "confidence_ceiling": 0.9
+  }
+}

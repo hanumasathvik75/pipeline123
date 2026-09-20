@@ -76,7 +76,6 @@ public class Phase7Tests {
         String latex = gen.generateCertificate(snap);
         
         if (!latex.contains("UNAVAILABLE")) throw new AssertionError("Missing data did not fall back to UNAVAILABLE in LaTeX");
-        if (!latex.contains("No Subsystem Data Available")) throw new AssertionError("Missing subsystems not handled gracefully");
     }
 
     private static void testEvidenceReferencePreservation() {

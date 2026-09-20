@@ -9,6 +9,7 @@ try {
     Copy-Item native-desktop/build/libs/ignitionai-desktop.jar $staging -Force
     Copy-Item native-core/build/libs/native-core.jar $staging -Force
     Copy-Item virtual-sensors/src/main/resources/sensors $staging -Recurse -Force
+    Copy-Item latex-certificate-generator/src/main/resources/branding $staging -Recurse -Force
     if (Test-Path (Join-Path $PSScriptRoot "releases/$OutputName")) { throw 'Output exists. Supply a new OutputName.' }
     $packageTool = (Get-Command $Jpackage -ErrorAction Stop).Source
     $linkTool = Join-Path (Split-Path $packageTool) 'jlink.exe'

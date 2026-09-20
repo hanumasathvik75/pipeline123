@@ -24,6 +24,9 @@ public class WindowBuffer {
             .collect(Collectors.toList());
     }
     
+    /** Canonical signal ids that have received at least one reading so far this session. */
+    public java.util.Set<String> knownSignalIds() { return java.util.Set.copyOf(buffer.keySet()); }
+
     public void cleanup(Long currentTimestampMs, Long maxRetentionMs) {
         Long cutoff = currentTimestampMs - maxRetentionMs;
         for (List<SensorReading> readings : buffer.values()) {

@@ -47,6 +47,7 @@ public class RollingWindowDetector implements AnomalyDetectorPlugin {
             tracker.setLastViolationMs(currentMs);
             
             if (state == AnomalyState.NOMINAL || state == AnomalyState.CLOSURE) {
+                tracker.resetEpisodeSampleCounts();
                 tracker.setFirstViolationMs(currentMs);
                 state = AnomalyState.ANOMALY_ONSET;
             } else if (state == AnomalyState.ANOMALY_ONSET) {
@@ -74,7 +75,8 @@ public class RollingWindowDetector implements AnomalyDetectorPlugin {
         
         tracker.setCurrentState(state);
         tracker.setLastScore(currentScore);
-        
+        tracker.recordEpisodeSample(isViolating);
+
         return currentScore;
     }
 }

@@ -1,0 +1,8 @@
+{
+  "rationale": "Weights for SubsystemScoreCalculator's degradation/risk/persistence/recurrence blend. These are the same values the code shipped with before this file existed -- moving them here does not change scoring output, it only makes them reviewable and revisable without recompiling. They are round numbers chosen for a plausible relative emphasis (event risk dominant, degradation score next, persistence/recurrence as smaller modifiers) and are NOT fitted against real fleet outcome data. Revisit once GoMechanic domain review or real failure/repair outcomes are available.",
+  "degradation_weight": 0.5,
+  "event_risk_weight": 30.0,
+  "persistence_weight": 10.0,
+  "recurrence_weight": 10.0,
+  "calculation_version": "1.1"
+}

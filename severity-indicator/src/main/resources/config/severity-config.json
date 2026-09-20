@@ -1,0 +1,9 @@
+{
+  "rationale": "Score/risk thresholds SeverityClassifier uses to bucket a subsystem into CRITICAL/DEGRADED/WATCH/NORMAL. Same values the code shipped with before this file existed -- moving them here does not change classification output, it only makes them reviewable and revisable without recompiling. Round numbers (80/50/20 on a 0-100 score, 0.8/0.5/0.2 on a 0-1 risk estimate) are placeholders expressing 'roughly top/middle/bottom third', NOT fitted against real fleet outcome data. Revisit once GoMechanic domain review or real failure/repair outcomes are available.",
+  "critical_degradation_score_threshold": 80.0,
+  "critical_event_risk_threshold": 0.8,
+  "degraded_degradation_score_threshold": 50.0,
+  "degraded_event_risk_threshold": 0.5,
+  "watch_degradation_score_threshold": 20.0,
+  "watch_event_risk_threshold": 0.2
+}
