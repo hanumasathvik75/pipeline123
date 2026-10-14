@@ -262,11 +262,11 @@ export default function FundraisingPage() {
         }}>
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 580, padding: '1.75rem', background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <span className="badge" style={{ marginBottom: '0.35rem', background: 'rgba(0, 0, 0, 0.15)', color: '#000000' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.35rem' }}>
+                <span className="badge" style={{ background: 'var(--accent-muted)', color: 'var(--accent)', border: '1px solid rgba(7, 57, 136, 0.2)' }}>
                   {selectedInvestor.round} · {selectedInvestor.stage}
                 </span>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{selectedInvestor.name}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{selectedInvestor.name}</h2>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{selectedInvestor.firm}</div>
               </div>
               <div style={{ textAlign: 'right' }}>

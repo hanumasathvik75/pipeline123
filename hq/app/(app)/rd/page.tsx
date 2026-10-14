@@ -113,14 +113,14 @@ export default function RDWorkspacePage() {
           {/* Research Track Overview Card */}
           <div className="card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.4rem' }}>
+                <span className="badge" style={{ background: 'var(--accent-muted)', color: 'var(--accent)', border: '1px solid rgba(7, 57, 136, 0.2)' }}>
                   Track: {rdStageLabel(currentProject.stage)}
                 </span>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                   {currentProject.title}
                 </h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
                   <strong>Research Question:</strong> {currentProject.researchQuestion}
                 </p>
               </div>

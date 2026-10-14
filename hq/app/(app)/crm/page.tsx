@@ -1330,11 +1330,11 @@ export default function CRMPage() {
         }}>
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 600, padding: '1.75rem', background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <span className={`badge ${leadStageColor(selectedLead.stage)}`} style={{ marginBottom: '0.35rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.35rem' }}>
+                <span className={`badge ${leadStageColor(selectedLead.stage)}`}>
                   {STAGES.find(s => s.stage === selectedLead.stage)?.label}
                 </span>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{selectedLead.companyName}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{selectedLead.companyName}</h2>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedLead.type} · {selectedLead.location}</div>
               </div>
               <div style={{ textAlign: 'right' }}>

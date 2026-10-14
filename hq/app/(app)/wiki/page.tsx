@@ -1,6 +1,6 @@
 'use client';
 
-
+import { BookOpen, FileText, Search, Plus, Edit2, Trash2, X, UploadCloud, ExternalLink, Loader2, Microscope, Cpu } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useHQStore } from '@/lib/store';
 import type { WikiDoc } from '@/lib/types';
@@ -139,7 +139,7 @@ export default function WikiPage() {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="btn btn-primary" onClick={() => openNewModal('Engineering')}>
-            <></>
+            <Plus size={15} />
             New Document
           </button>
         </div>
@@ -148,7 +148,7 @@ export default function WikiPage() {
       {/* Search & Category Filter Tabs */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ position: 'relative', maxWidth: 420 }}>
-          <></>
+          <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             className="input"
             placeholder="Search specs, research papers, guides…"
@@ -190,7 +190,7 @@ export default function WikiPage() {
               padding: '4px 14px'
             }}
           >
-            <></> Engineering ({docsByCategory['Engineering']?.length || 0})
+            <Cpu size={13} /> Engineering ({docsByCategory['Engineering']?.length || 0})
           </button>
 
           <button
@@ -207,7 +207,7 @@ export default function WikiPage() {
               padding: '4px 14px'
             }}
           >
-            <></> Research ({docsByCategory['Research']?.length || 0})
+            <Microscope size={13} /> Research ({docsByCategory['Research']?.length || 0})
           </button>
 
           {allCategories.filter(c => !PRIMARY_CATEGORIES.includes(c)).map(cat => (
@@ -249,8 +249,8 @@ export default function WikiPage() {
             <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {isEngineering && <></>}
-                  {isResearch && <></>}
+                  {isEngineering && <Cpu size={18} style={{ color: 'var(--primary)' }} />}
+                  {isResearch && <Microscope size={18} style={{ color: '#000000' }} />}
                   <span>{cat}</span>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                     ({items.length} {items.length === 1 ? 'doc' : 'docs'})
@@ -312,7 +312,7 @@ export default function WikiPage() {
                               onClick={(e) => openEditModal(doc, e)}
                               title="Edit"
                             >
-                              <></>
+                              <Edit2 size={14} />
                             </button>
                             <button 
                               className="btn btn-icon btn-ghost btn-sm" 
@@ -320,7 +320,7 @@ export default function WikiPage() {
                               style={{ color: 'var(--danger)' }}
                               title="Delete"
                             >
-                              <></>
+                              <Trash2 size={14} />
                             </button>
                           </>
                         )}
@@ -328,7 +328,7 @@ export default function WikiPage() {
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '3rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <></>
+                          <FileText size={18} style={{ color: doc.googleDriveUrl ? '#000000' : (isResearch ? '#000000' : 'var(--primary)') }} />
                           {doc.googleDriveUrl && (
                             <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#000000', background: 'rgba(0, 0, 0, 0.1)', padding: '0.15rem 0.4rem', borderRadius: 4 }}>
                               Drive
@@ -363,17 +363,17 @@ export default function WikiPage() {
         }}>
           <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 800, padding: '2rem', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-              <div>
-                <span className="badge" style={{ marginBottom: '0.5rem', background: viewingDoc.category === 'Research' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(0, 0, 0, 0.15)', color: viewingDoc.category === 'Research' ? '#000000' : 'var(--primary)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.4rem' }}>
+                <span className="badge" style={{ background: 'var(--accent-muted)', color: 'var(--accent)', border: '1px solid rgba(7, 57, 136, 0.2)' }}>
                   {viewingDoc.category}
                 </span>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{viewingDoc.title}</h3>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.25, margin: 0 }}>{viewingDoc.title}</h3>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   {viewingDoc.readTime} · Last updated {new Date(viewingDoc.updatedAt).toLocaleDateString()}
                 </div>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsViewModalOpen(false)}>
-                <></>
+                <X size={20} />
               </button>
             </div>
             <div style={{ padding: '1.5rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
@@ -383,7 +383,7 @@ export default function WikiPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <a href={viewingDoc.googleDriveUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-secondary">
-                      <></> Open in Google Drive
+                      <ExternalLink size={14} /> Open in Google Drive
                     </a>
                   </div>
                   <div style={{ width: '100%', height: '65vh', minHeight: '500px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)', background: '#000000' }}>
@@ -425,7 +425,7 @@ export default function WikiPage() {
                 </h3>
               </div>
               <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsModalOpen(false)}>
-                <></>
+                <X size={16} />
               </button>
             </div>
 
@@ -462,7 +462,7 @@ export default function WikiPage() {
                       cursor: 'pointer', transition: 'all 0.15s ease'
                     }}
                   >
-                    <></> Engineering
+                    <Cpu size={16} /> Engineering
                   </button>
 
                   <button
@@ -477,7 +477,7 @@ export default function WikiPage() {
                       cursor: 'pointer', transition: 'all 0.15s ease'
                     }}
                   >
-                    <></> Research
+                    <Microscope size={16} /> Research
                   </button>
                 </div>
 
@@ -568,7 +568,7 @@ export default function WikiPage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
                   >
-                    {isUploading ? <></> : <></>}
+                    {isUploading ? <Loader2 size={15} className="animate-spin" /> : <UploadCloud size={15} />}
                     {isUploading ? 'Uploading...' : 'Upload File'}
                   </button>
                 </div>
