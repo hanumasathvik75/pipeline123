@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useHQStore } from '@/lib/store';
-
+import { Target, Plus, Edit2, Trash2, X, PlusCircle, MinusCircle } from 'lucide-react';
 import type { Goal, KeyResult } from '@/lib/types';
 
 export default function GoalsPage() {
@@ -15,7 +15,7 @@ export default function GoalsPage() {
   const [objective, setObjective] = useState('');
   const [progress, setProgress] = useState(0);
   const [keyResults, setKeyResults] = useState<KeyResult[]>([
-      { id: `kr-${Date.now()}`, title: '', target: '', current: '', progress: 0 }
+    { id: `kr-${Date.now()}`, title: '', target: '', current: '', progress: 0 }
   ]);
 
   const isAdmin = currentUser?.role === 'c_level';
@@ -39,50 +39,50 @@ export default function GoalsPage() {
   };
 
   const handleDelete = (id: string) => {
-      if(window.confirm('Are you sure you want to delete this Goal/OKR?')) {
-          deleteGoal(id);
-      }
+    if (window.confirm('Are you sure you want to delete this Goal/OKR?')) {
+      deleteGoal(id);
+    }
   };
 
   const handleAddKR = () => {
-      setKeyResults([...keyResults, { id: `kr-${Date.now()}`, title: '', target: '', current: '', progress: 0 }]);
+    setKeyResults([...keyResults, { id: `kr-${Date.now()}`, title: '', target: '', current: '', progress: 0 }]);
   };
 
   const handleRemoveKR = (index: number) => {
-      if(keyResults.length > 1) {
-          setKeyResults(keyResults.filter((_, i) => i !== index));
-      }
+    if (keyResults.length > 1) {
+      setKeyResults(keyResults.filter((_, i) => i !== index));
+    }
   };
 
   const updateKR = (index: number, field: keyof KeyResult, value: string | number) => {
-      const updated = [...keyResults];
-      updated[index] = { ...updated[index], [field]: value };
-      setKeyResults(updated);
+    const updated = [...keyResults];
+    updated[index] = { ...updated[index], [field]: value };
+    setKeyResults(updated);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      if(!quarter.trim() || !objective.trim()) return;
+    e.preventDefault();
+    if (!quarter.trim() || !objective.trim()) return;
 
-      const validKRs = keyResults.filter(kr => kr.title.trim() !== '');
+    const validKRs = keyResults.filter(kr => kr.title.trim() !== '');
 
-      if(editingGoal) {
-          updateGoal(editingGoal.id, {
-              quarter: quarter.trim(),
-              objective: objective.trim(),
-              progress,
-              keyResults: validKRs
-          });
-      } else {
-          addGoal({
-              quarter: quarter.trim(),
-              objective: objective.trim(),
-              progress,
-              keyResults: validKRs,
-              createdBy: currentUser?.id || 'sys'
-          });
-      }
-      setIsModalOpen(false);
+    if (editingGoal) {
+      updateGoal(editingGoal.id, {
+        quarter: quarter.trim(),
+        objective: objective.trim(),
+        progress,
+        keyResults: validKRs
+      });
+    } else {
+      addGoal({
+        quarter: quarter.trim(),
+        objective: objective.trim(),
+        progress,
+        keyResults: validKRs,
+        createdBy: currentUser?.id || 'sys'
+      });
+    }
+    setIsModalOpen(false);
   };
 
   return (
@@ -95,104 +95,122 @@ export default function GoalsPage() {
           </p>
         </div>
         {isAdmin && (
-            <button className="btn btn-primary" onClick={openNewModal}>
-            <></>
-            New Goal
-            </button>
+          <button className="btn btn-primary" onClick={openNewModal} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Plus size={16} />
+            <span>New Goal</span>
+          </button>
         )}
       </div>
 
       {goals.length === 0 ? (
-          <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <></>
-              <h3>No Goals Set</h3>
-              <p>Add your first OKR to start tracking progress.</p>
-          </div>
+        <div className="card" style={{ padding: '3.5rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <Target size={48} style={{ opacity: 0.25, margin: '0 auto 1rem', color: 'var(--accent)' }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>No Goals Set</h3>
+          <p style={{ fontSize: '0.875rem' }}>Add your first OKR to start tracking progress across the organization.</p>
+        </div>
       ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {goals.map((group) => (
-              <div key={group.id} className="card hover-effect" style={{ padding: '1.5rem', position: 'relative' }}>
-                {isAdmin && (
-                    <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.25rem' }}>
-                        <button className="btn btn-icon btn-ghost btn-sm" onClick={() => openEditModal(group)}>
-                            <></>
-                        </button>
-                        <button className="btn btn-icon btn-ghost btn-sm" onClick={() => handleDelete(group.id)} style={{ color: '#000000' }}>
-                            <></>
-                        </button>
-                    </div>
-                )}
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem', paddingRight: '4rem' }}>
-                  <div>
-                    <span className="badge" style={{ background: 'rgba(0, 0, 0, 0.15)', color: '#000000', marginBottom: '0.4rem' }}>
-                      {group.quarter}
-                    </span>
-                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {group.objective}
-                    </h2>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>
-                      {group.progress}%
-                    </span>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Aggregate Progress</div>
-                  </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {goals.map((group) => (
+            <div key={group.id} className="card" style={{ padding: '1.75rem', position: 'relative' }}>
+              {isAdmin && (
+                <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.35rem' }}>
+                  <button
+                    className="btn btn-icon btn-ghost btn-sm"
+                    onClick={() => openEditModal(group)}
+                    title="Edit Goal"
+                    aria-label="Edit Goal"
+                  >
+                    <Edit2 size={15} style={{ color: 'var(--text-secondary)' }} />
+                  </button>
+                  <button
+                    className="btn btn-icon btn-ghost btn-sm"
+                    onClick={() => handleDelete(group.id)}
+                    title="Delete Goal"
+                    aria-label="Delete Goal"
+                  >
+                    <Trash2 size={15} style={{ color: 'var(--danger)' }} />
+                  </button>
                 </div>
+              )}
 
-                <div className="progress-bar" style={{ height: 6, marginBottom: '1.25rem' }}>
-                  <div className="progress-fill" style={{ width: `${group.progress}%`, background: group.progress >= 80 ? '#000000' : 'var(--accent)' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem', paddingRight: isAdmin ? '4.5rem' : '0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.45rem', flex: 1, minWidth: 260 }}>
+                  <span className="badge" style={{ background: 'var(--accent-muted)', color: 'var(--accent)', border: '1px solid rgba(7, 57, 136, 0.2)', padding: '0.2rem 0.65rem', fontWeight: 600 }}>
+                    {group.quarter}
+                  </span>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1.35 }}>
+                    {group.objective}
+                  </h2>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {group.keyResults && group.keyResults.map((kr, i) => (
-                    <div
-                      key={kr.id || i}
-                      style={{
-                        padding: '1rem',
-                        borderRadius: 'var(--radius)',
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '80%' }}>
-                          {kr.title}
-                        </div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: kr.progress >= 80 ? '#000000' : '#000000' }}>
-                          {kr.progress}%
-                        </span>
-                      </div>
-
-                      <div className="progress-bar" style={{ height: 4, marginBottom: '0.5rem' }}>
-                        <div
-                          className="progress-fill"
-                          style={{
-                            width: `${kr.progress}%`,
-                            background: kr.progress >= 80 ? '#000000' : '#000000',
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        <span>Target: {kr.target}</span>
-                        <span>Status: {kr.current}</span>
-                      </div>
-                    </div>
-                  ))}
-                  {(!group.keyResults || group.keyResults.length === 0) && (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>No key results defined for this objective.</div>
-                  )}
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: group.progress >= 80 ? 'var(--success)' : 'var(--accent)' }}>
+                    {group.progress}%
+                  </span>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>Aggregate Progress</div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="progress-bar" style={{ height: 6, marginBottom: '1.5rem' }}>
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${group.progress}%`,
+                    background: group.progress >= 80 ? 'var(--success)' : 'var(--accent)',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {group.keyResults && group.keyResults.map((kr, i) => (
+                  <div
+                    key={kr.id || i}
+                    style={{
+                      padding: '1rem 1.25rem',
+                      borderRadius: 'var(--radius)',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '80%' }}>
+                        {kr.title}
+                      </div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: kr.progress >= 80 ? 'var(--success)' : 'var(--accent)' }}>
+                        {kr.progress}%
+                      </span>
+                    </div>
+
+                    <div className="progress-bar" style={{ height: 4, marginBottom: '0.625rem' }}>
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${kr.progress}%`,
+                          background: kr.progress >= 80 ? 'var(--success)' : 'var(--accent)',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      <span>Target: <strong style={{ color: 'var(--text-primary)' }}>{kr.target}</strong></span>
+                      <span>Status: <strong style={{ color: 'var(--text-primary)' }}>{kr.current}</strong></span>
+                    </div>
+                  </div>
+                ))}
+                {(!group.keyResults || group.keyResults.length === 0) && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '0.5rem' }}>
+                    No key results defined for this objective.
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Goal Modal */}
       {isModalOpen && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
           padding: '1rem'
         }}>
@@ -203,107 +221,107 @@ export default function GoalsPage() {
                   {editingGoal ? 'Edit Goal' : 'New Goal'}
                 </h3>
               </div>
-              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsModalOpen(false)}>
-                <></>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsModalOpen(false)} aria-label="Close modal">
+                <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                            Quarter/Timeline *
-                        </label>
-                        <input
-                            className="input"
-                            placeholder="e.g. Q3 2026"
-                            value={quarter}
-                            onChange={e => setQuarter(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div>
-                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                            Overall Progress (%)
-                        </label>
-                        <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            className="input"
-                            value={progress}
-                            onChange={e => setProgress(Number(e.target.value))}
-                        />
-                    </div>
-                </div>
-
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-                        Objective *
-                    </label>
-                    <input
-                        className="input"
-                        placeholder="e.g. Expand platform capabilities"
-                        value={objective}
-                        onChange={e => setObjective(e.target.value)}
-                        required
-                    />
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Quarter/Timeline *
+                  </label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Q3 2026"
+                    value={quarter}
+                    onChange={e => setQuarter(e.target.value)}
+                    required
+                  />
                 </div>
-                
-                <div style={{ marginTop: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                            Key Results
-                        </label>
-                        <button type="button" className="btn btn-sm btn-ghost" onClick={handleAddKR}>
-                            <></> Add KR
-                        </button>
-                    </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                    Overall Progress (%)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="input"
+                    value={progress}
+                    onChange={e => setProgress(Number(e.target.value))}
+                  />
+                </div>
+              </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {keyResults.map((kr, index) => (
-                            <div key={kr.id} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>KR #{index + 1}</span>
-                                    <button type="button" className="btn btn-icon btn-ghost btn-sm" onClick={() => handleRemoveKR(index)} style={{ color: '#000000' }}>
-                                        <></>
-                                    </button>
-                                </div>
-                                <input
-                                    className="input"
-                                    placeholder="Title"
-                                    value={kr.title}
-                                    onChange={e => updateKR(index, 'title', e.target.value)}
-                                    required
-                                />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '0.5rem' }}>
-                                     <input
-                                        className="input"
-                                        placeholder="Target (e.g. $1M)"
-                                        value={kr.target}
-                                        onChange={e => updateKR(index, 'target', e.target.value)}
-                                    />
-                                    <input
-                                        className="input"
-                                        placeholder="Current Status"
-                                        value={kr.current}
-                                        onChange={e => updateKR(index, 'current', e.target.value)}
-                                    />
-                                     <input
-                                        type="number"
-                                        min={0}
-                                        max={100}
-                                        className="input"
-                                        placeholder="%"
-                                        value={kr.progress}
-                                        onChange={e => updateKR(index, 'progress', Number(e.target.value))}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+                  Objective *
+                </label>
+                <input
+                  className="input"
+                  placeholder="e.g. Expand platform capabilities"
+                  value={objective}
+                  onChange={e => setObjective(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ marginTop: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Key Results
+                  </label>
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={handleAddKR} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <PlusCircle size={14} /> Add KR
+                  </button>
                 </div>
-                
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {keyResults.map((kr, index) => (
+                    <div key={kr.id} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', background: 'var(--bg-elevated)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>KR #{index + 1}</span>
+                        <button type="button" className="btn btn-icon btn-ghost btn-sm" onClick={() => handleRemoveKR(index)} style={{ color: 'var(--danger)' }} aria-label="Remove Key Result">
+                          <MinusCircle size={14} />
+                        </button>
+                      </div>
+                      <input
+                        className="input"
+                        placeholder="Title"
+                        value={kr.title}
+                        onChange={e => updateKR(index, 'title', e.target.value)}
+                        required
+                      />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '0.5rem' }}>
+                        <input
+                          className="input"
+                          placeholder="Target (e.g. $1M)"
+                          value={kr.target}
+                          onChange={e => updateKR(index, 'target', e.target.value)}
+                        />
+                        <input
+                          className="input"
+                          placeholder="Current Status"
+                          value={kr.current}
+                          onChange={e => updateKR(index, 'current', e.target.value)}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          className="input"
+                          placeholder="%"
+                          value={kr.progress}
+                          onChange={e => updateKR(index, 'progress', Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
                   Cancel

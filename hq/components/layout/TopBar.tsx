@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useHQStore } from '@/lib/store';
 
 import { getInitials } from '@/lib/utils';
+import { Plus, X, CheckCircle2, ChevronDown, Menu, CheckSquare, FolderKanban, CalendarDays, Building2, TrendingUp } from 'lucide-react';
 import type { Priority, ProjectStatus, LeadStage, InvestorStage } from '@/lib/types';
 
 const PAGE_TITLES: Record<string, string> = {
@@ -173,18 +174,17 @@ export default function TopBar() {
           <button 
             className="btn btn-ghost mobile-only" 
             onClick={() => useHQStore.getState().toggleMobileMenu()}
-            style={{ marginRight: '0.25rem', padding: '0.25rem 0.5rem', fontWeight: 600 }}
+            style={{ marginRight: '0.25rem', padding: '0.25rem 0.5rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
           >
-            Menu
+            <Menu size={16} />
+            <span>Menu</span>
           </button>
-          <h2 style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+          <h2 style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
             {title}
           </h2>
           <span className="desktop-only" style={{ color: 'var(--border-hover)', userSelect: 'none' }}>/</span>
           <span className="desktop-only" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>IgnitionAI HQ</span>
         </div>
-
-
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -193,10 +193,9 @@ export default function TopBar() {
             onClick={() => setIsQuickOpen(true)}
             style={{ gap: '0.375rem', fontSize: '0.8rem', height: 34, padding: '0 0.875rem' }}
           >
+            <Plus size={15} style={{ flexShrink: 0 }} />
             <span style={{ fontWeight: 600 }}>New</span>
           </button>
-
-
 
           {currentUser && (
             <button
@@ -206,12 +205,12 @@ export default function TopBar() {
             >
               <div
                 className="avatar"
-                style={{ width: 24, height: 24, fontSize: '0.6rem', background: 'linear-gradient(135deg, #000000, #000000)' }}
+                style={{ width: 24, height: 24, fontSize: '0.65rem', background: 'var(--accent)', color: '#ffffff', borderRadius: '50%', fontWeight: 700 }}
               >
                 {getInitials(currentUser.name)}
               </div>
-              <span className="desktop-only" style={{ fontWeight: 600 }}>{currentUser.name}</span>
-              <></>
+              <span className="desktop-only" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{currentUser.name}</span>
+              <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} />
             </button>
           )}
         </div>
@@ -223,10 +222,10 @@ export default function TopBar() {
           position: 'fixed', bottom: '1.5rem', right: '1.5rem',
           background: 'var(--accent)', color: '#fff',
           padding: '0.75rem 1.25rem', borderRadius: 'var(--radius)',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.5)', zIndex: 2000,
+          boxShadow: 'var(--shadow-lg)', zIndex: 2000,
           display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600
         }}>
-          <></>
+          <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
           {toast}
         </div>
       )}
@@ -234,7 +233,7 @@ export default function TopBar() {
       {/* Global Quick Action Modal */}
       {isQuickOpen && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+          position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500,
           padding: '1rem'
         }}>
@@ -244,26 +243,26 @@ export default function TopBar() {
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Quick Create</h3>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Instantly launch an action across the IgnitionAI OS.</p>
               </div>
-              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsQuickOpen(false)}>
-                <></>
+              <button className="btn btn-icon btn-ghost btn-sm" onClick={() => setIsQuickOpen(false)} aria-label="Close modal">
+                <X size={16} />
               </button>
             </div>
 
             {/* Tabs */}
             <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '1.25rem', background: 'var(--bg-elevated)', padding: '0.25rem', borderRadius: 8 }}>
               {[
-                { id: 'task', label: 'Task', },
-                { id: 'project', label: 'Project', },
-                { id: 'meeting', label: 'Meeting', },
-                { id: 'lead', label: 'Lead', },
-                { id: 'investor', label: 'Investor', },
+                { id: 'task', label: 'Task', icon: CheckSquare },
+                { id: 'project', label: 'Project', icon: FolderKanban },
+                { id: 'meeting', label: 'Meeting', icon: CalendarDays },
+                { id: 'lead', label: 'Lead', icon: Building2 },
+                { id: 'investor', label: 'Investor', icon: TrendingUp },
               ].filter(tab => {
                 if (currentUser?.role === 'intern') {
                   return ['task', 'lead'].includes(tab.id);
                 }
                 return true;
               }).map(tab => {
-
+                const Icon = tab.icon;
                 const active = activeTab === tab.id;
                 return (
                   <button
@@ -275,13 +274,18 @@ export default function TopBar() {
                       flex: 1,
                       gap: '0.3rem',
                       fontSize: '0.75rem',
-                      height: 30,
-                      background: active ? 'var(--bg-card)' : 'transparent',
+                      height: 32,
+                      background: active ? 'var(--bg-surface)' : 'transparent',
                       color: active ? 'var(--accent)' : 'var(--text-secondary)',
-                      boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                      boxShadow: active ? 'var(--shadow-sm)' : 'none',
+                      border: active ? '1px solid var(--border)' : '1px solid transparent',
+                      fontWeight: active ? 600 : 500,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-
+                    <Icon size={13} style={{ flexShrink: 0 }} />
                     {tab.label}
                   </button>
                 );
