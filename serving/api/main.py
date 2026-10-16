@@ -17,6 +17,7 @@ from serving.diagnostics.pipeline import analyze_file
 from serving.diagnostics.explanation import explain_structured_diagnosis
 from serving.diagnostics.dtc_engine import analyze_dtcs
 from serving.diagnostics.hybrid_engine import get_hybrid_engine
+from serving.diagnostics.enginefault_service import predict_enginefault
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
@@ -336,6 +337,37 @@ def evaluate_hybrid_telemetry(features: dict[str, float]):
     result = engine.evaluate(features)
     return result.to_dict()
 
+
+# ---------------------------------------------------------------------------
+# Real EngineFault XGBoost Diagnostic Model (Mobile REST API Endpoint)
+# ---------------------------------------------------------------------------
+
+@app.post(
+    "/api/diagnostics/enginefault-predict",
+    response_model=schemas.EngineFaultPredictResponse,
+    tags=["Diagnostics"]
+)
+def predict_enginefault_endpoint(payload: schemas.EngineFaultPredictRequest):
+    """Real EngineFault XGBoost Inference Endpoint (Trained on 55,999 Real Telemetry Samples).
+
+    Dedicated REST API for Mobile Application (Flutter/Android/iOS/Postman).
+    Accepts 14 engine telemetry parameters with flexible key naming and physical default fallbacks.
+    Returns:
+      - Predicted fault ID (0: Normal, 1: Rich Mixture, 2: Lean Mixture, 3: Low Voltage)
+      - Fault label & severity
+      - Diagnostic confidence & full multi-class probability distribution
+      - Hybrid physics confirmation source
+      - Actionable workshop repair action
+    """
+    try:
+        data = payload.model_dump()
+        extra = getattr(payload, "__pydantic_extra__", {}) or {}
+        data.update(extra)
+        
+        result = predict_enginefault(data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"EngineFault diagnostic inference failed: {str(e)}")
 
 
 # ---------------------------------------------------------------------------
