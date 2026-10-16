@@ -140,11 +140,25 @@ class HybridDiagnosticEngine:
             f["thermal_deficit_score"] = float(max(0.0, 65.0 - coolant_m))
             
         # 5. Electrical voltage margin
-        if "voltage_physics_margin" not in f:
-            f["voltage_physics_margin"] = f.get("voltage_min", 13.8) - 12.45
+        # Provide sensible physical defaults for any missing mobile telemetry features
+        defaults = {
+            "rpm_mean": 750.0, "rpm_std": 6.0, "rpm_kurtosis": 0.0,
+            "speed_mean": 0.0, "speed_std": 0.0,
+            "throttle_mean": 4.0, "engine_load_mean": 18.0,
+            "map_mean": 30.0, "map_std": 0.5, "maf_mean": 2.2, "maf_map_ratio": 0.073,
+            "trim_mean": 0.0, "trim_std": 0.5,
+            "coolant_mean": 88.0, "coolant_warmup_rate": 0.8, "intake_mean": 25.0,
+            "coolant_intake_delta": 63.0,
+            "voltage_mean": 14.1, "voltage_ripple_std": 0.02
+        }
+        for k, v in defaults.items():
+            if k not in f:
+                f[k] = v
+        if "idle_fraction" not in f:
+            f["idle_fraction"] = 1.0 if f.get("speed_mean", 0.0) < 5.0 else 0.0
 
         # --- STAGE 1: MACHINE LEARNING INFERENCE ---
-        feat_vector = np.array([[f[c] for c in FEATURE_COLS]])
+        feat_vector = np.array([[float(f.get(c, 0.0)) for c in FEATURE_COLS]])
         ml_preds = self.model.predict(feat_vector)[0]
         
         # Estimate ML probabilities from individual estimators
