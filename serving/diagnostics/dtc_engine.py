@@ -126,7 +126,7 @@ def find_sensor_anomalies(sensor_values: dict[str, float]) -> dict[str, float]:
     mad = np.median(np.abs(vals - med)) + 1e-6
     for k, v in sensor_values.items():
         anomalies[k] = float(abs(v - med) / mad)
-    maxv = max(anomalies.values()) if anomalies else 1.0
+    maxv = max(anomalies.values()) if anomalies and max(anomalies.values()) > 0 else 1.0
     for k in anomalies:
         anomalies[k] = max(0.05, anomalies[k] / maxv)
     return anomalies
