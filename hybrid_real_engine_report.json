@@ -1,0 +1,75 @@
+{
+  "dataset": "EngineFaultDB (55,999 rows)",
+  "anomaly_detection": {
+    "accuracy": 100.0,
+    "precision": 100.0,
+    "recall": 100.0,
+    "f1_score": 100.0,
+    "confusion_matrix": [
+      [
+        3200,
+        0
+      ],
+      [
+        0,
+        8000
+      ]
+    ]
+  },
+  "four_class_diagnostics": {
+    "accuracy": 74.93,
+    "macro_f1": 75.77,
+    "confusion_matrix": [
+      [
+        3200,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2200,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1586,
+        1413
+      ],
+      [
+        0,
+        0,
+        1394,
+        1406
+      ]
+    ],
+    "per_class": {
+      "No Fault (Normal)": {
+        "precision": 100.0,
+        "recall": 100.0,
+        "f1_score": 100.0,
+        "test_support": 3200
+      },
+      "Rich Mixture": {
+        "precision": 99.95,
+        "recall": 100.0,
+        "f1_score": 99.98,
+        "test_support": 2200
+      },
+      "Lean Mixture": {
+        "precision": 53.22,
+        "recall": 52.87,
+        "f1_score": 53.04,
+        "test_support": 3000
+      },
+      "Low Voltage": {
+        "precision": 49.88,
+        "recall": 50.21,
+        "f1_score": 50.04,
+        "test_support": 2800
+      }
+    }
+  }
+}
