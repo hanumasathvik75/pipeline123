@@ -16,6 +16,7 @@ from serving.core.database import engine, get_db
 from serving.diagnostics.pipeline import analyze_file
 from serving.diagnostics.explanation import explain_structured_diagnosis
 from serving.diagnostics.dtc_engine import analyze_dtcs
+from serving.diagnostics.hybrid_engine import get_hybrid_engine
 
 # Create all database tables
 models.Base.metadata.create_all(bind=engine)
@@ -318,6 +319,23 @@ def quick_scan(request: QuickScanRequest):
         result["vehicle"] = request.vehicle
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Option B: Hybrid ML + Physics Bounds Evaluation
+# ---------------------------------------------------------------------------
+
+@app.post("/api/diagnostics/hybrid-evaluate")
+def evaluate_hybrid_telemetry(features: dict[str, float]):
+    """Option B: Evaluates a 30-second OBD-II feature vector using Hybrid ML + Physics Bounds.
+
+    Accepts 24 statistical & physics features extracted from a 30s driving window.
+    Returns: VHI (0-100), health grade, subsystem scores, fault flags, and actionable candidates with detection source badges.
+    """
+    engine = get_hybrid_engine()
+    result = engine.evaluate(features)
+    return result.to_dict()
+
 
 
 # ---------------------------------------------------------------------------

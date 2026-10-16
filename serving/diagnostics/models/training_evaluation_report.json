@@ -1,0 +1,241 @@
+{
+  "model_type": "MultiOutputClassifier(XGBoost)",
+  "best_hyperparameters": {
+    "n_estimators": 150,
+    "max_depth": 5,
+    "learning_rate": 0.06,
+    "subsample": 0.85,
+    "colsample_bytree": 0.65
+  },
+  "features_used": [
+    "rpm_mean",
+    "rpm_std",
+    "rpm_kurtosis",
+    "speed_mean",
+    "speed_std",
+    "idle_fraction",
+    "throttle_mean",
+    "engine_load_mean",
+    "map_mean",
+    "map_std",
+    "maf_mean",
+    "maf_map_ratio",
+    "maf_physics_ratio",
+    "trim_mean",
+    "trim_std",
+    "stoich_closed_loop_residual",
+    "coolant_mean",
+    "coolant_warmup_rate",
+    "intake_mean",
+    "coolant_intake_delta",
+    "thermal_deficit_score",
+    "voltage_mean",
+    "voltage_ripple_std",
+    "voltage_physics_margin",
+    "rpm_det_std",
+    "rpm_r3",
+    "rpm_r7",
+    "hunting_surge_metric"
+  ],
+  "target_columns": [
+    "fault_lean_trim",
+    "fault_rich_trim",
+    "fault_combustion_hunting",
+    "fault_alternator_sag",
+    "fault_thermal_delay"
+  ],
+  "cv_macro_f1": 0.8696928262461733,
+  "test_metrics": {
+    "subset_accuracy": 0.9535809018567639,
+    "hamming_loss": 0.009283819628647215,
+    "macro_f1": 0.8549082558520965,
+    "micro_f1": 0.9685534591194969,
+    "weighted_f1": 0.9716231660707808,
+    "per_fault": {
+      "fault_lean_trim": {
+        "precision": 1.0,
+        "recall": 0.9924,
+        "f1": 0.9962
+      },
+      "fault_rich_trim": {
+        "precision": 1.0,
+        "recall": 0.9643,
+        "f1": 0.9818
+      },
+      "fault_combustion_hunting": {
+        "precision": 0.2727,
+        "recall": 0.3529,
+        "f1": 0.3077
+      },
+      "fault_alternator_sag": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "fault_thermal_delay": {
+        "precision": 0.9925,
+        "recall": 0.9852,
+        "f1": 0.9888
+      }
+    }
+  },
+  "test_confusion_matrices": {
+    "fault_lean_trim": [
+      [
+        491,
+        0
+      ],
+      [
+        2,
+        261
+      ]
+    ],
+    "fault_rich_trim": [
+      [
+        670,
+        0
+      ],
+      [
+        3,
+        81
+      ]
+    ],
+    "fault_combustion_hunting": [
+      [
+        721,
+        16
+      ],
+      [
+        11,
+        6
+      ]
+    ],
+    "fault_alternator_sag": [
+      [
+        696,
+        0
+      ],
+      [
+        0,
+        58
+      ]
+    ],
+    "fault_thermal_delay": [
+      [
+        618,
+        1
+      ],
+      [
+        2,
+        133
+      ]
+    ]
+  },
+  "feature_importances_per_target": {
+    "fault_lean_trim": {
+      "trim_mean": 0.3016,
+      "stoich_closed_loop_residual": 0.2257,
+      "map_mean": 0.0809,
+      "throttle_mean": 0.0808,
+      "speed_std": 0.0639,
+      "maf_physics_ratio": 0.0462,
+      "engine_load_mean": 0.0426,
+      "maf_mean": 0.0364,
+      "maf_map_ratio": 0.0277,
+      "coolant_warmup_rate": 0.019,
+      "rpm_mean": 0.0168,
+      "speed_mean": 0.0135,
+      "coolant_mean": 0.0094,
+      "map_std": 0.0092,
+      "trim_std": 0.0072
+    },
+    "fault_rich_trim": {
+      "trim_mean": 0.5095,
+      "stoich_closed_loop_residual": 0.2563,
+      "maf_physics_ratio": 0.0278,
+      "intake_mean": 0.024,
+      "voltage_physics_margin": 0.0233,
+      "thermal_deficit_score": 0.0182,
+      "throttle_mean": 0.0161,
+      "voltage_mean": 0.0159,
+      "coolant_mean": 0.0139,
+      "map_mean": 0.0137,
+      "trim_std": 0.0126,
+      "engine_load_mean": 0.0122,
+      "maf_map_ratio": 0.01,
+      "maf_mean": 0.0086,
+      "speed_mean": 0.0074,
+      "rpm_r7": 0.0069,
+      "rpm_det_std": 0.0054,
+      "rpm_kurtosis": 0.0053
+    },
+    "fault_combustion_hunting": {
+      "maf_mean": 0.1321,
+      "rpm_mean": 0.1259,
+      "speed_mean": 0.1055,
+      "idle_fraction": 0.0665,
+      "hunting_surge_metric": 0.0455,
+      "throttle_mean": 0.0407,
+      "rpm_r3": 0.0388,
+      "rpm_det_std": 0.0353,
+      "rpm_r7": 0.0337,
+      "speed_std": 0.0297,
+      "voltage_physics_margin": 0.0291,
+      "trim_mean": 0.0265,
+      "rpm_std": 0.0245,
+      "thermal_deficit_score": 0.0244,
+      "maf_map_ratio": 0.0241,
+      "stoich_closed_loop_residual": 0.0234,
+      "maf_physics_ratio": 0.0216,
+      "rpm_kurtosis": 0.0215,
+      "voltage_ripple_std": 0.0202,
+      "map_std": 0.0189,
+      "voltage_mean": 0.0171,
+      "coolant_intake_delta": 0.0157,
+      "intake_mean": 0.0154,
+      "map_mean": 0.015,
+      "coolant_mean": 0.015,
+      "trim_std": 0.0138,
+      "engine_load_mean": 0.0125,
+      "coolant_warmup_rate": 0.0076
+    },
+    "fault_alternator_sag": {
+      "voltage_mean": 0.5281,
+      "voltage_physics_margin": 0.1839,
+      "coolant_mean": 0.0623,
+      "map_mean": 0.0335,
+      "voltage_ripple_std": 0.03,
+      "throttle_mean": 0.0213,
+      "coolant_intake_delta": 0.0193,
+      "map_std": 0.0141,
+      "rpm_det_std": 0.0131,
+      "stoich_closed_loop_residual": 0.0126,
+      "engine_load_mean": 0.0121,
+      "trim_mean": 0.0109,
+      "thermal_deficit_score": 0.0101,
+      "maf_map_ratio": 0.0098,
+      "rpm_mean": 0.0098,
+      "rpm_std": 0.0064
+    },
+    "fault_thermal_delay": {
+      "speed_mean": 0.2936,
+      "thermal_deficit_score": 0.1975,
+      "coolant_intake_delta": 0.1216,
+      "coolant_warmup_rate": 0.0729,
+      "rpm_mean": 0.0587,
+      "coolant_mean": 0.0479,
+      "intake_mean": 0.0472,
+      "speed_std": 0.0418,
+      "voltage_mean": 0.0211,
+      "trim_std": 0.0133,
+      "throttle_mean": 0.0111,
+      "rpm_std": 0.0098,
+      "map_mean": 0.0096,
+      "voltage_physics_margin": 0.0074,
+      "hunting_surge_metric": 0.0072,
+      "map_std": 0.0067,
+      "engine_load_mean": 0.0066,
+      "maf_map_ratio": 0.006
+    }
+  }
+}
