@@ -21,9 +21,15 @@ from sklearn.metrics import (
     classification_report, confusion_matrix
 )
 
-DATA_PATH = r"D:\EngineFaultDB_Final.csv"
-MODEL_PATH = r"D:\IgnitionAI\serving\diagnostics\models\best_hybrid_enginefault_model.joblib"
-REPORT_PATH = r"D:\IgnitionAI\hybrid_real_engine_report.json"
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent
+DATA_PATH = REPO_ROOT / "data" / "EngineFaultDB_Final.csv"
+if not DATA_PATH.exists():
+    DATA_PATH = Path(r"D:\EngineFaultDB_Final.csv")
+
+MODEL_PATH = REPO_ROOT / "serving" / "diagnostics" / "models" / "best_hybrid_enginefault_model.joblib"
+REPORT_PATH = REPO_ROOT / "hybrid_real_engine_report.json"
 
 CLASS_LABELS = {
     0: "No Fault (Normal)",
