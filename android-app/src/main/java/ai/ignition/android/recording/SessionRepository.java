@@ -157,8 +157,6 @@ public class SessionRepository {
             SessionStatus finalStatus;
             if (validation.isValid()) {
                 finalStatus = SessionStatus.COMPLETE;
-            } else if (validation.getValidRecordCount() > 0) {
-                finalStatus = SessionStatus.INVALID;
             } else {
                 finalStatus = SessionStatus.INVALID;
             }

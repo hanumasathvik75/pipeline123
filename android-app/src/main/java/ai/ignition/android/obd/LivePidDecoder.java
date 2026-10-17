@@ -22,9 +22,15 @@ public class LivePidDecoder {
         public final boolean valid;
         public final String status;
         public final Instant timestamp;
+        public final long durationMs;
 
         public PidReading(String pid, String signalName, Double value, String unit,
                           String rawResponse, boolean valid, String status) {
+            this(pid, signalName, value, unit, rawResponse, valid, status, 0L);
+        }
+
+        public PidReading(String pid, String signalName, Double value, String unit,
+                          String rawResponse, boolean valid, String status, long durationMs) {
             this.pid = pid;
             this.signalName = signalName;
             this.value = value;
@@ -33,12 +39,13 @@ public class LivePidDecoder {
             this.valid = valid;
             this.status = status;
             this.timestamp = Instant.now();
+            this.durationMs = durationMs;
         }
 
         @Override
         public String toString() {
             if (!valid) return signalName + " (" + pid + "): " + status + " [Raw='" + rawResponse + "']";
-            return String.format(Locale.ROOT, "%s (%s): %.1f %s [Raw='%s']", signalName, pid, value, unit, rawResponse);
+            return String.format(Locale.ROOT, "%s (%s): %.1f %s [Raw='%s', Latency=%dms]", signalName, pid, value, unit, rawResponse, durationMs);
         }
     }
 
@@ -100,37 +107,44 @@ public class LivePidDecoder {
     }
 
     public static PidReading decodeRaw(String rawResponse, String pid, String signalName, String unit, PayloadParser parser) {
+        return decodeRaw(rawResponse, pid, signalName, unit, parser, 0L);
+    }
+
+    public static PidReading decodeRaw(String rawResponse, String pid, String signalName, String unit, PayloadParser parser, long durationMs) {
         if (rawResponse == null || rawResponse.isBlank()) {
-            return new PidReading(pid, signalName, null, unit, rawResponse, false, "EMPTY_RESPONSE");
+            return new PidReading(pid, signalName, null, unit, rawResponse, false, "EMPTY_RESPONSE", durationMs);
         }
         if (rawResponse.contains("NO DATA") || rawResponse.contains("UNABLE") || rawResponse.contains("?")) {
-            return new PidReading(pid, signalName, null, unit, rawResponse, false, "NO_DATA_OR_ERROR");
+            return new PidReading(pid, signalName, null, unit, rawResponse, false, "NO_DATA_OR_ERROR", durationMs);
         }
 
         String clean = rawResponse.replaceAll("\\s+", "").toUpperCase(Locale.ROOT);
         String expectedHeader = "41" + pid.replace("01", "");
         int idx = clean.indexOf(expectedHeader);
         if (idx == -1) {
-            return new PidReading(pid, signalName, null, unit, rawResponse, false, "MISSING_HEADER_" + expectedHeader);
+            return new PidReading(pid, signalName, null, unit, rawResponse, false, "MISSING_HEADER_" + expectedHeader, durationMs);
         }
 
         try {
             Double val = parser.parse(clean, idx);
             if (val == null) {
-                return new PidReading(pid, signalName, null, unit, rawResponse, false, "IMPLAUSIBLE_OR_SHORT_VALUE");
+                return new PidReading(pid, signalName, null, unit, rawResponse, false, "IMPLAUSIBLE_OR_SHORT_VALUE", durationMs);
             }
-            return new PidReading(pid, signalName, val, unit, rawResponse, true, "VALID");
+            return new PidReading(pid, signalName, val, unit, rawResponse, true, "VALID", durationMs);
         } catch (Exception e) {
-            return new PidReading(pid, signalName, null, unit, rawResponse, false, "PARSE_ERROR: " + e.getMessage());
+            return new PidReading(pid, signalName, null, unit, rawResponse, false, "PARSE_ERROR: " + e.getMessage(), durationMs);
         }
     }
 
     private static PidReading queryPid(ObdTransport transport, String pid, String name, String unit, PayloadParser parser) {
+        long startNs = System.nanoTime();
         try {
             String raw = transport.exchange(pid, TIMEOUT);
-            return decodeRaw(raw, pid, name, unit, parser);
+            long durationMs = (System.nanoTime() - startNs) / 1_000_000L;
+            return decodeRaw(raw, pid, name, unit, parser, durationMs);
         } catch (IOException e) {
-            return new PidReading(pid, name, null, unit, "ERROR", false, "IO_ERROR: " + e.getMessage());
+            long durationMs = (System.nanoTime() - startNs) / 1_000_000L;
+            return new PidReading(pid, name, null, unit, "ERROR", false, "IO_ERROR: " + e.getMessage(), durationMs);
         }
     }
 }

@@ -16,13 +16,14 @@
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
     <application
+        android:name=".IgnitionApplication"
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="IgnitionAI"
         android:roundIcon="@android:drawable/sym_def_app_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar">
+        android:theme="@style/Theme.IgnitionAI">
 
         <activity
             android:name="ai.ignition.android.MainActivity"
@@ -39,6 +40,11 @@
 
         <service
             android:name="com.ignitionai.nativeapp.CaptureService"
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false" />
+
+        <service
+            android:name="ai.ignition.android.recording.DriveRecordingService"
             android:foregroundServiceType="connectedDevice"
             android:exported="false" />
     </application>
