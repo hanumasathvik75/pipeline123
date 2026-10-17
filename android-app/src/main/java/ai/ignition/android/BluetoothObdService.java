@@ -11,9 +11,13 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 /**
- * Android background service managing physical RFCOMM Bluetooth SPP connection
- * to an ELM327 OBD-II adapter.
+ * Legacy prototype service for Bluetooth RFCOMM capture.
+ *
+ * @deprecated Superceded by {@link ai.ignition.android.obd.ClassicSppTransport} and
+ * {@link ai.ignition.android.diagnostics.HardwareTestRunner}, which provide prompt-framed
+ * bounded reads, deadlines, and multi-protocol decoding. Preserved for backward compatibility.
  */
+@Deprecated
 public class BluetoothObdService extends Service {
 
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -24,9 +28,11 @@ public class BluetoothObdService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String deviceAddress = intent.getStringExtra("DEVICE_ADDRESS");
-        if (deviceAddress != null) {
-            connectToDevice(deviceAddress);
+        if (intent != null) {
+            String deviceAddress = intent.getStringExtra("DEVICE_ADDRESS");
+            if (deviceAddress != null) {
+                connectToDevice(deviceAddress);
+            }
         }
         return START_STICKY;
     }
@@ -35,6 +41,7 @@ public class BluetoothObdService extends Service {
         new Thread(() -> {
             try {
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                if (adapter == null) return;
                 BluetoothDevice device = adapter.getRemoteDevice(address);
                 socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
                 socket.connect();
