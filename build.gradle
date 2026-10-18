@@ -1,1 +1,4 @@
-plugins { id 'com.android.application' version '9.0.1' apply false }
+plugins {
+    id 'com.android.application' version '9.0.1' apply false
+    id 'org.springframework.boot' version '3.2.5' apply false
+}

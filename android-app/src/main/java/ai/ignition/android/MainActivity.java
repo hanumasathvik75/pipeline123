@@ -52,12 +52,17 @@ import ai.ignition.android.recording.SessionEvent;
 import ai.ignition.android.recording.SessionExporter;
 import ai.ignition.android.recording.SessionManifest;
 import ai.ignition.android.recording.SessionRepository;
+import ai.ignition.android.assessment.AssessmentApiClient;
+import ai.ignition.android.assessment.AssessmentResult;
 import ai.ignition.android.recording.SessionStatus;
 import ai.ignition.android.recording.SessionValidator;
 import ai.ignition.android.recording.ValidationResult;
 import ai.ignition.android.util.RedactionUtil;
+import android.widget.EditText;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothDevice activeDevice;
     private boolean isAdapterConnected = false;
     private SessionRepository sessionRepository;
+    private AssessmentApiClient assessmentApiClient;
     private HardwareTestRunner testRunner;
     private final StringBuilder consoleLog = new StringBuilder();
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
@@ -313,6 +319,7 @@ public class MainActivity extends AppCompatActivity {
 
         testRunner = new HardwareTestRunner(this);
         sessionRepository = new SessionRepository(getFilesDir());
+        assessmentApiClient = new AssessmentApiClient(this);
 
         // Startup recovery for interrupted sessions
         List<SessionManifest> recovered = sessionRepository.detectAndRecoverInterruptedSessions();
@@ -331,9 +338,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnRefreshDongle.setOnClickListener(v -> startConnectionFlow());
 
-        btnAssess.setOnClickListener(v -> {
-            Toast.makeText(this, "Backend assessment integration will follow after hardware milestone verification", Toast.LENGTH_SHORT).show();
-        });
+        btnAssess.setOnClickListener(v -> performAssessmentFlow());
 
         btnDriveRecord.setOnClickListener(v -> {
             if (DriveRecordingService.isRecordingActive()) {
@@ -416,6 +421,171 @@ public class MainActivity extends AppCompatActivity {
             return sessions.get(0).getSessionId();
         }
         return null;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Vehicle Health Index & Real Hybrid ML Assessment
+    // ---------------------------------------------------------------------------------------------
+
+    private void performAssessmentFlow() {
+        String targetSessionId = getTargetSessionId();
+
+        // 1. If target session exists, assess its recording
+        if (targetSessionId != null) {
+            File sessionFile = sessionRepository.getSessionJsonlFile(targetSessionId);
+            if (sessionFile.exists() && sessionFile.length() > 0) {
+                assessSessionFile(targetSessionId, sessionFile);
+                return;
+            }
+        }
+
+        // 2. If no recorded session or session file empty, check for live telemetry readings
+        Double rpm = parseLiveDouble(tvRpm);
+        Double speed = parseLiveDouble(tvSpeed);
+        Double coolant = parseLiveDouble(tvCoolant);
+        Double load = parseLiveDouble(tvLoad);
+
+        if (rpm != null || speed != null) {
+            assessLiveSnapshot(rpm, speed, coolant, load);
+            return;
+        }
+
+        // 3. If neither session nor live data is available, show guidance
+        new AlertDialog.Builder(this)
+                .setTitle("No Telemetry to Assess")
+                .setMessage("No drive session recordings or live OBD telemetry found.\n\n" +
+                        "1. Record a drive session using 'Record Drive Session', or\n" +
+                        "2. Connect to an ELM327 adapter to run a live telemetry assessment.\n\n" +
+                        "Backend Gateway: " + assessmentApiClient.getBackendBaseUrl())
+                .setPositiveButton("Configure Backend IP", (d, w) -> showConfigureBackendDialog())
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private void assessSessionFile(String sessionId, File sessionFile) {
+        btnAssess.setEnabled(false);
+        btnAssess.setText("Evaluating ML…");
+        appendLog("[AI Assessment] Submitting session " + sessionId + " to Spring Boot backend (" + assessmentApiClient.getBackendBaseUrl() + ")…");
+
+        ioExecutor.execute(() -> {
+            try {
+                // Read session JSONL content
+                StringBuilder sb = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(new FileReader(sessionFile))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line).append("\n");
+                    }
+                }
+                String jsonlContent = sb.toString();
+
+                runOnUiThread(() -> {
+                    assessmentApiClient.assessSession(sessionId, jsonlContent, new AssessmentApiClient.AssessmentCallback() {
+                        @Override
+                        public void onSuccess(AssessmentResult result) {
+                            btnAssess.setEnabled(true);
+                            btnAssess.setText("Assess Vehicle Health");
+                            handleAssessmentSuccess(result);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            btnAssess.setEnabled(true);
+                            btnAssess.setText("Assess Vehicle Health");
+                            handleAssessmentError(errorMessage);
+                        }
+                    });
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    btnAssess.setEnabled(true);
+                    btnAssess.setText("Assess Vehicle Health");
+                    Toast.makeText(MainActivity.this, "Failed to read session file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void assessLiveSnapshot(Double rpm, Double speed, Double coolant, Double load) {
+        btnAssess.setEnabled(false);
+        btnAssess.setText("Evaluating ML…");
+        appendLog("[AI Assessment] Submitting live OBD telemetry snapshot to Spring Boot backend…");
+
+        assessmentApiClient.assessLiveTelemetry(rpm, speed, coolant, load, new AssessmentApiClient.AssessmentCallback() {
+            @Override
+            public void onSuccess(AssessmentResult result) {
+                btnAssess.setEnabled(true);
+                btnAssess.setText("Assess Vehicle Health");
+                handleAssessmentSuccess(result);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                btnAssess.setEnabled(true);
+                btnAssess.setText("Assess Vehicle Health");
+                handleAssessmentError(errorMessage);
+            }
+        });
+    }
+
+    private void handleAssessmentSuccess(AssessmentResult result) {
+        tvVhiScore.setText(result.getVhiScore() + " / 100");
+        tvVhiScore.setTextColor(result.getStatusColor());
+
+        appendLog(String.format(Locale.ROOT,
+                "[AI Assessment Result] VHI: %d/100 (%s) | Fault: %s | Evaluated %,d frames",
+                result.getVhiScore(), result.getHealthStatus(), result.getDominantFault(), result.getFramesEvaluated()));
+
+        new AlertDialog.Builder(this)
+                .setTitle("IgnitionAI Hybrid Diagnostics")
+                .setMessage(result.getFormattedSummary())
+                .setPositiveButton("OK", null)
+                .setNeutralButton("Backend Settings", (d, w) -> showConfigureBackendDialog())
+                .show();
+    }
+
+    private void handleAssessmentError(String errorMsg) {
+        appendLog("[AI Assessment Error] " + errorMsg);
+        new AlertDialog.Builder(this)
+                .setTitle("Backend Assessment Notice")
+                .setMessage(errorMsg)
+                .setPositiveButton("OK", null)
+                .setNeutralButton("Configure Server URL", (d, w) -> showConfigureBackendDialog())
+                .show();
+    }
+
+    private void showConfigureBackendDialog() {
+        EditText input = new EditText(this);
+        input.setText(assessmentApiClient.getBackendBaseUrl());
+        input.setSingleLine();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Configure Spring Boot Gateway URL")
+                .setMessage("Enter the Spring Boot Gateway URL (e.g., http://10.0.2.2:8080 for Android emulator, or your computer's local IP http://192.168.x.x:8080):")
+                .setView(input)
+                .setPositiveButton("Save", (d, w) -> {
+                    String newUrl = input.getText().toString().trim();
+                    if (!newUrl.isEmpty()) {
+                        assessmentApiClient.setBackendBaseUrl(newUrl);
+                        appendLog("Backend Gateway URL set to: " + newUrl);
+                        Toast.makeText(this, "Backend URL saved: " + newUrl, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private Double parseLiveDouble(TextView tv) {
+        if (tv == null || tv.getText() == null) return null;
+        String t = tv.getText().toString().trim();
+        if (t.isEmpty() || t.equals("--")) return null;
+        try {
+            String num = t.split(" ")[0];
+            return Double.parseDouble(num);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
