@@ -76,3 +76,12 @@ The architecture operates strictly linearly. No module may bypass its predecesso
 7. **Phase 7** validates the assessment against the schema, generates a deterministic `CertificateSnapshot`, and renders a final LaTeX certificate.
 
 Each module exposes an explicit input/output contract. No module merges responsibilities with another.
+
+---
+
+## Real Hybrid ML Diagnostics & Spring Boot Gateway
+
+- **FastAPI ML Microservice (`ml/`)**: Hosts the Real-World Hybrid XGBoost model (`best_hybrid_enginefault_model.joblib`) trained on 55,999 EngineFaultDB samples.
+- **Spring Boot Gateway (`spring-backend/`)**: REST API gateway on port 8080 connecting Rahul's Android App to the ML model.
+- **Automatic Physics Feature Derivation (`ml/enrich_csv.py`)**: Automatically computes all 14 physical/stoichiometric parameters from raw OBD logs.
+- Full mathematical formulas, PID derivations, and VHI calculations are documented in [**`ml/README.md`**](ml/README.md).
