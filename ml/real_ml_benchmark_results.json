@@ -1,0 +1,258 @@
+{
+  "Logistic Regression": {
+    "accuracy": 59.04,
+    "macro_precision": 59.19,
+    "macro_recall": 58.97,
+    "macro_f1": 59.05,
+    "weighted_f1": 58.96,
+    "train_time_sec": 1.34,
+    "per_class": {
+      "No Fault (Normal)": {
+        "precision": 72.19,
+        "recall": 76.0,
+        "f1_score": 74.04,
+        "test_support": 3200
+      },
+      "Rich Mixture": {
+        "precision": 68.58,
+        "recall": 64.77,
+        "f1_score": 66.62,
+        "test_support": 2200
+      },
+      "Lean Mixture": {
+        "precision": 46.2,
+        "recall": 46.77,
+        "f1_score": 46.48,
+        "test_support": 3000
+      },
+      "Low Voltage": {
+        "precision": 49.82,
+        "recall": 48.32,
+        "f1_score": 49.06,
+        "test_support": 2800
+      }
+    },
+    "confusion_matrix": [
+      [
+        2432,
+        615,
+        146,
+        7
+      ],
+      [
+        622,
+        1425,
+        147,
+        6
+      ],
+      [
+        223,
+        24,
+        1403,
+        1350
+      ],
+      [
+        92,
+        14,
+        1341,
+        1353
+      ]
+    ]
+  },
+  "Decision Tree": {
+    "accuracy": 74.64,
+    "macro_precision": 75.52,
+    "macro_recall": 75.5,
+    "macro_f1": 75.5,
+    "weighted_f1": 74.65,
+    "train_time_sec": 0.67,
+    "per_class": {
+      "No Fault (Normal)": {
+        "precision": 99.75,
+        "recall": 99.78,
+        "f1_score": 99.77,
+        "test_support": 3200
+      },
+      "Rich Mixture": {
+        "precision": 99.77,
+        "recall": 99.64,
+        "f1_score": 99.7,
+        "test_support": 2200
+      },
+      "Lean Mixture": {
+        "precision": 52.94,
+        "recall": 51.3,
+        "f1_score": 52.11,
+        "test_support": 3000
+      },
+      "Low Voltage": {
+        "precision": 49.6,
+        "recall": 51.29,
+        "f1_score": 50.43,
+        "test_support": 2800
+      }
+    },
+    "confusion_matrix": [
+      [
+        3193,
+        2,
+        5,
+        0
+      ],
+      [
+        3,
+        2192,
+        4,
+        1
+      ],
+      [
+        2,
+        1,
+        1539,
+        1458
+      ],
+      [
+        3,
+        2,
+        1359,
+        1436
+      ]
+    ],
+    "feature_importances": {
+      "CO": 32.4,
+      "Force": 11.7,
+      "CO2": 11.11,
+      "O2": 9.17,
+      "Power": 9.09,
+      "Consumption L/100KM": 5.87,
+      "TPS": 5.33,
+      "HC": 4.97,
+      "MAP": 4.7,
+      "RPM": 3.42,
+      "Consumption L/H": 1.69,
+      "Speed": 0.29,
+      "AFR": 0.15,
+      "Lambda": 0.12
+    }
+  },
+  "Random Forest": {
+    "accuracy": 74.21,
+    "macro_precision": 75.06,
+    "macro_recall": 75.06,
+    "macro_f1": 75.06,
+    "weighted_f1": 74.2,
+    "train_time_sec": 1.54,
+    "per_class": {
+      "No Fault (Normal)": {
+        "precision": 100.0,
+        "recall": 100.0,
+        "f1_score": 100.0,
+        "test_support": 3200
+      },
+      "Rich Mixture": {
+        "precision": 100.0,
+        "recall": 100.0,
+        "f1_score": 100.0,
+        "test_support": 2200
+      },
+      "Lean Mixture": {
+        "precision": 51.83,
+        "recall": 52.27,
+        "f1_score": 52.05,
+        "test_support": 3000
+      },
+      "Low Voltage": {
+        "precision": 48.4,
+        "recall": 47.96,
+        "f1_score": 48.18,
+        "test_support": 2800
+      }
+    },
+    "confusion_matrix": [
+      [
+        3200,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2200,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1568,
+        1432
+      ],
+      [
+        0,
+        0,
+        1457,
+        1343
+      ]
+    ]
+  },
+  "XGBoost": {
+    "accuracy": 74.43,
+    "macro_precision": 75.25,
+    "macro_recall": 75.26,
+    "macro_f1": 75.25,
+    "weighted_f1": 74.41,
+    "train_time_sec": 1.62,
+    "per_class": {
+      "No Fault (Normal)": {
+        "precision": 100.0,
+        "recall": 100.0,
+        "f1_score": 100.0,
+        "test_support": 3200
+      },
+      "Rich Mixture": {
+        "precision": 99.95,
+        "recall": 100.0,
+        "f1_score": 99.98,
+        "test_support": 2200
+      },
+      "Lean Mixture": {
+        "precision": 52.21,
+        "recall": 53.43,
+        "f1_score": 52.82,
+        "test_support": 3000
+      },
+      "Low Voltage": {
+        "precision": 48.85,
+        "recall": 47.61,
+        "f1_score": 48.22,
+        "test_support": 2800
+      }
+    },
+    "confusion_matrix": [
+      [
+        3200,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2200,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1603,
+        1396
+      ],
+      [
+        0,
+        0,
+        1467,
+        1333
+      ]
+    ]
+  }
+}
