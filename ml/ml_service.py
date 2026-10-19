@@ -335,47 +335,13 @@ def evaluate_drive_session(req: SessionEvaluationRequest):
     signal_history = {"RPM": [], "Speed": [], "Coolant Temperature": [], "Calculated Engine Load": []}
     direct_frames = []
 
-    for rec in records:
+    for idx, rec in enumerate(records):
         if not isinstance(rec, dict):
             continue
-        event_type = rec.get("event_type")
-        if event_type == "OBD_OBSERVATION":
-            status = rec.get("status")
-            if status != "VALID":
-                continue
-                
-            sig = rec.get("signal_name") or ""
-            val = rec.get("value")
-            if val is None:
-                continue
-                
-            details = rec.get("details") or {}
-            cycle = details.get("cycle_index") or rec.get("sequence", 0) // 4
-            
-            if cycle not in frames_dict:
-                frames_dict[cycle] = {}
-            
-            # Normalize signal name
-            sig_lower = sig.lower()
-            if "rpm" in sig_lower:
-                frames_dict[cycle]["RPM"] = float(val)
-                signal_history["RPM"].append(float(val))
-            elif "speed" in sig_lower:
-                frames_dict[cycle]["Speed"] = float(val)
-                signal_history["Speed"].append(float(val))
-            elif "coolant" in sig_lower:
-                frames_dict[cycle]["Coolant"] = float(val)
-                signal_history["Coolant Temperature"].append(float(val))
-            elif "load" in sig_lower:
-                frames_dict[cycle]["Load"] = float(val)
-                frames_dict[cycle]["TPS"] = float(val)
-                signal_history["Calculated Engine Load"].append(float(val))
-            elif "map" in sig_lower or "manifold" in sig_lower:
-                frames_dict[cycle]["MAP"] = float(val)
-            elif "lambda" in sig_lower:
-                frames_dict[cycle]["Lambda"] = float(val)
-        else:
-            # Direct frame object (e.g. {"rpm": 2500, "speed": 60, "map": 85, "tps": 35} or uppercase)
+
+        # Check if this record is already a full frame dictionary (has direct sensor keys)
+        direct_keys = [k for k in rec.keys() if str(k).upper() in ["RPM", "SPEED", "MAP", "TPS", "LOAD"]]
+        if direct_keys and ("signal_name" not in rec or rec.get("signal_name") is None):
             synth = synthesize_missing_features(rec)
             direct_frames.append(synth)
             rpm_val = float(synth.get("RPM", 0.0))
@@ -387,6 +353,57 @@ def evaluate_drive_session(req: SessionEvaluationRequest):
                 signal_history["Speed"].append(spd_val)
             if load_val > 0:
                 signal_history["Calculated Engine Load"].append(load_val)
+            continue
+
+        # Otherwise process as individual OBD observation event
+        status = rec.get("status")
+        if status is not None and str(status).upper() not in ["VALID", "OK", "SUCCESS", "TRUE", "1"]:
+            continue
+
+        sig = rec.get("signal_name") or rec.get("signal") or rec.get("name") or rec.get("pid") or ""
+        val = rec.get("value") if rec.get("value") is not None else rec.get("val")
+        if val is None:
+            for k, v in rec.items():
+                if str(k).upper() in ["RPM", "SPEED", "MAP", "TPS", "LOAD"] and v is not None:
+                    sig = str(k)
+                    val = v
+                    break
+
+        if val is None:
+            continue
+
+        details = rec.get("details") if isinstance(rec.get("details"), dict) else {}
+        cycle = (
+            details.get("cycle_index")
+            if details.get("cycle_index") is not None
+            else rec.get("cycle_index", rec.get("cycle", None))
+        )
+        if cycle is None:
+            seq = rec.get("sequence")
+            cycle = (seq // 4) if seq is not None else idx
+
+        if cycle not in frames_dict:
+            frames_dict[cycle] = {}
+
+        # Normalize signal name
+        sig_lower = str(sig).lower()
+        if "rpm" in sig_lower:
+            frames_dict[cycle]["RPM"] = float(val)
+            signal_history["RPM"].append(float(val))
+        elif "speed" in sig_lower:
+            frames_dict[cycle]["Speed"] = float(val)
+            signal_history["Speed"].append(float(val))
+        elif "coolant" in sig_lower:
+            frames_dict[cycle]["Coolant"] = float(val)
+            signal_history["Coolant Temperature"].append(float(val))
+        elif "load" in sig_lower:
+            frames_dict[cycle]["Load"] = float(val)
+            frames_dict[cycle]["TPS"] = float(val)
+            signal_history["Calculated Engine Load"].append(float(val))
+        elif "map" in sig_lower or "manifold" in sig_lower:
+            frames_dict[cycle]["MAP"] = float(val)
+        elif "lambda" in sig_lower:
+            frames_dict[cycle]["Lambda"] = float(val)
 
     evaluation_frames = list(direct_frames)
 
