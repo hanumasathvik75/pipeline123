@@ -1,6 +1,7 @@
 package ai.ignition.spring.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
@@ -12,30 +13,39 @@ import java.util.Map;
 public class LiveTelemetryRequest {
 
     @JsonProperty("RPM")
+    @JsonAlias("rpm")
     private Double rpm;
 
     @JsonProperty("Speed")
+    @JsonAlias("speed")
     private Double speed;
 
     @JsonProperty("MAP")
+    @JsonAlias("map")
     private Double map;
 
     @JsonProperty("TPS")
+    @JsonAlias("tps")
     private Double tps;
 
     @JsonProperty("Coolant")
+    @JsonAlias("coolant")
     private Double coolant;
 
     @JsonProperty("Load")
+    @JsonAlias("load")
     private Double load;
 
     @JsonProperty("O2")
+    @JsonAlias("o2")
     private Double o2;
 
     @JsonProperty("Lambda")
+    @JsonAlias("lambda")
     private Double lambda;
 
     @JsonProperty("sessionId")
+    @JsonAlias("session_id")
     private String sessionId;
 
     @JsonProperty("extraSignals")

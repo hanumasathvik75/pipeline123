@@ -112,21 +112,7 @@ def enrich_raw_obd_dataframe(df_raw: pd.DataFrame, vehicle_mass_kg: float = 1250
     v_ms = (speed / 3.6).clip(lower=1.0)
     force_n = ((power_kw * 1000.0) / v_ms).clip(lower=20.0, upper=4500.0)
 
-    # 3. Fuel Consumption Derivation (L/H and L/100KM)
-    # Using Speed-Density: MAF = (MAP * RPM * Vd * VolEff) / (120 * R * T)
-    # Air gas constant R=287, T=298K, Vd=1.5L, VolEff=0.82
-    if col_maf:
-        maf_gps = pd.to_numeric(df_raw[col_maf], errors='coerce')
-    else:
-        maf_gps = (map_kpa * rpm * 1.5 * 0.82) / (120.0 * 287.0 * 298.0) * 1000.0 / 28.97
-        maf_gps = maf_gps.clip(lower=1.2)
-
-    # Fuel mass flow (g/s) = MAF / 14.7 (stoichiometric)
-    # L/h = (Fuel_mass_flow / 745 g/L) * 3600
-    cons_lh = ((maf_gps / 14.7) / 745.0 * 3600.0).clip(lower=0.5, upper=40.0)
-    cons_l100km = (cons_lh / speed.clip(lower=5.0) * 100.0).clip(lower=1.0, upper=50.0)
-
-    # 4. Air-Fuel & Exhaust Emissions Invariants
+    # 3. Air-Fuel & Exhaust Emissions Invariants (Calculated first for accurate fuel flow)
     if col_lambda:
         lambda_val = pd.to_numeric(df_raw[col_lambda], errors='coerce').fillna(1.0)
     elif col_afr:
@@ -136,7 +122,7 @@ def enrich_raw_obd_dataframe(df_raw: pd.DataFrame, vehicle_mass_kg: float = 1250
         lambda_val = np.where(tps > 75.0, 0.92, np.where(tps < 10.0, 1.02, 1.00))
         lambda_val = pd.Series(lambda_val, index=df_raw.index)
 
-    afr_val = lambda_val * 14.7
+    afr_val = (lambda_val * 14.7).clip(lower=10.0, upper=20.0)
 
     # O2 Sensor Voltage (V)
     if col_o2:
@@ -150,6 +136,25 @@ def enrich_raw_obd_dataframe(df_raw: pd.DataFrame, vehicle_mass_kg: float = 1250
     co_pct = np.where(lambda_val < 0.95, 2.4, np.where(lambda_val > 1.05, 0.12, 0.25))
     hc_ppm = np.where(lambda_val < 0.95, 310.0, np.where(lambda_val > 1.05, 260.0, 45.0))
     co2_pct = np.where(lambda_val < 0.95, 12.1, np.where(lambda_val > 1.05, 11.8, 14.9))
+
+    # 4. Fuel Consumption Derivation (L/H and L/100KM)
+    # Using Standard Speed-Density: MAF = (MAP_kPa * 1000 * RPM * Vd * VolEff) / (120 * R_air * T) in kg/s
+    # Air gas constant R_air = 287.05 J/(kg*K), T = 298.15K, Vd = 1.5e-3 m^3, VolEff = 0.82
+    # Converting to g/s (* 1000.0)
+    if col_maf:
+        maf_gps = pd.to_numeric(df_raw[col_maf], errors='coerce').fillna(2.5)
+    else:
+        maf_gps = (map_kpa * rpm * 1.5 * 0.82) / (120.0 * 287.05 * 298.15) * 1000.0
+        maf_gps = maf_gps.clip(lower=0.0, upper=250.0)
+
+    # Fuel mass flow (g/s) = MAF / actual AFR
+    # L/h = (Fuel_mass_flow / 745 g/L gasoline density) * 3600
+    fuel_mass_gps = maf_gps / afr_val
+    cons_lh = (fuel_mass_gps / 745.0 * 3600.0).clip(lower=0.1, upper=45.0)
+
+    # Distance-based consumption (L/100km): only meaningful when vehicle is moving (speed >= 3 km/h)
+    cons_l100km = np.where(speed < 3.0, 0.0, (cons_lh / speed.clip(lower=3.0)) * 100.0)
+    cons_l100km = pd.Series(cons_l100km, index=df_raw.index).clip(lower=0.0, upper=50.0)
 
     # Assemble into exact model feature set
     out['MAP'] = map_kpa.round(2)
@@ -208,13 +213,15 @@ def main():
         preds = np.argmax(probs, axis=1)
 
         labels = {0: "No Fault (Normal)", 1: "Rich Mixture", 2: "Lean Mixture", 3: "Low Voltage"}
-        counts = pd.Series(preds).map(labels).value_counts()
+        counts = pd.Series(preds).map(labels).value_counts().to_dict()
         print("\n" + "=" * 60)
         print("[+] MODEL DIAGNOSTIC RESULTS SUMMARY:")
         print("=" * 60)
-        for label, count in counts.items():
-            pct = (count / len(preds)) * 100.0
-            print(f"  • {label:<22}: {count:,} frames ({pct:.2f}%)")
+        for cls_id in sorted(labels.keys()):
+            label_name = labels[cls_id]
+            count = counts.get(label_name, 0)
+            pct = (count / max(1, len(preds))) * 100.0
+            print(f"  • {label_name:<22}: {count:,} frames ({pct:.2f}%)")
         print("=" * 60)
 
 if __name__ == "__main__":
