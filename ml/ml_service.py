@@ -113,8 +113,12 @@ class SessionEvaluationRequest(BaseModel):
     session_id: Optional[str] = "session-unknown"
     vin: Optional[str] = None
     records: Optional[List[Dict[str, Any]]] = None
+    session_records: Optional[List[Dict[str, Any]]] = None
     raw_jsonl: Optional[str] = None
     file_path: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
 
 class SessionEvaluationResponse(BaseModel):
     session_id: str
@@ -138,65 +142,81 @@ def synthesize_missing_features(row: Dict[str, Any]) -> Dict[str, float]:
     """
     Fills in missing SAE J1979 physical derivatives using deterministic automotive formulas
     so any standard OBD stream can be evaluated by the 14-feature Real Hybrid model.
+    Supports both lowercase and uppercase keys seamlessly.
     """
-    rpm = float(row.get('RPM') or 1500.0)
-    speed = float(row.get('Speed') or 40.0)
-    tps = float(row.get('TPS') or (row.get('Load') or 25.0))
-    load = float(row.get('Load') or tps)
+    # Normalize input dictionary keys to uppercase for uniform access
+    norm = {str(k).upper(): v for k, v in row.items() if v is not None}
+
+    rpm = float(norm.get('RPM') if norm.get('RPM') is not None else 1500.0)
+    speed = float(norm.get('SPEED') if norm.get('SPEED') is not None else 40.0)
+    tps = float(norm.get('TPS') if norm.get('TPS') is not None else (norm.get('LOAD') if norm.get('LOAD') is not None else 25.0))
+    load = float(norm.get('LOAD') if norm.get('LOAD') is not None else tps)
     
     # MAP (kPa) estimation from load if not measured directly
-    map_val = float(row.get('MAP') or (load * 0.85 + 20.0))
+    map_val = float(norm.get('MAP') if norm.get('MAP') is not None else (load * 0.85 + 20.0))
     
     # Vehicle parameters (Standard 1.4L - 1.6L C-segment passenger car, m=1250 kg)
     # Power (kW) approx = Torque * RPM / 9549, Torque ~ Load * Displacement * 0.8
-    power = float(row.get('Power') or max(1.0, (load / 100.0) * (rpm / 6000.0) * 85.0))
+    power = float(norm.get('POWER') if norm.get('POWER') is not None else max(1.0, (load / 100.0) * (rpm / 6000.0) * 85.0))
     
     # Tractive Force (N) = Power (W) / max(v_ms, 0.5)
     v_ms = max(speed / 3.6, 1.0)
-    force = float(row.get('Force') or min(4500.0, (power * 1000.0) / v_ms))
-    
-    # Fuel Consumption L/h: Standard Speed-Density Air Mass Calculation
-    # MAF ~ (MAP * RPM * Vd * Vol_Eff) / (120 * R * T)
-    # L/h = (MAF_gps / 14.7 / 745_g_per_L) * 3600
-    cons_lh = float(row.get('Consumption L/H') or row.get('Consumption_LH') or max(0.6, (map_val * rpm * 1.5 * 0.82) / (120 * 287 * 298) / 14.7 / 0.745 * 3.6))
-    
-    # Consumption L/100km
-    cons_l100km = float(row.get('Consumption L/100KM') or row.get('Consumption_L100KM') or (cons_lh / max(speed, 5.0) * 100.0))
+    force = float(norm.get('FORCE') if norm.get('FORCE') is not None else min(4500.0, (power * 1000.0) / v_ms))
     
     # Air-Fuel Ratio & Lambda
-    lambda_val = float(row.get('Lambda') or 1.0)
-    afr = float(row.get('AFR') or (lambda_val * 14.7))
-    o2 = float(row.get('O2') or (0.45 if abs(lambda_val - 1.0) < 0.03 else (0.85 if lambda_val < 0.98 else 0.15)))
+    lambda_val = float(norm.get('LAMBDA') if norm.get('LAMBDA') is not None else 1.0)
+    afr = float(norm.get('AFR') if norm.get('AFR') is not None else (lambda_val * 14.7))
+    o2 = float(norm.get('O2') if norm.get('O2') is not None else (0.45 if abs(lambda_val - 1.0) < 0.03 else (0.85 if lambda_val < 0.98 else 0.15)))
+
+    # Fuel Consumption L/h: Standard Speed-Density Air Mass Calculation
+    # MAF = (MAP_kPa * 1000 * RPM * Vd * VolEff) / (120 * R_air * T) in kg/s, converted to g/s (* 1000)
+    # Air gas constant R_air = 287.05 J/(kg*K), T = 298.15K, Vd = 1.5e-3 m^3, VolEff = 0.82
+    if norm.get('MAF') is not None:
+        maf_gps = float(norm.get('MAF'))
+    else:
+        maf_gps = (map_val * rpm * 1.5 * 0.82) / (120.0 * 287.05 * 298.15) * 1000.0
+    maf_gps = max(0.0, min(250.0, maf_gps))
+
+    # Fuel mass flow (g/s) = MAF / actual AFR
+    # L/h = (Fuel_mass_flow / 745 g/L gasoline density) * 3600
+    fuel_mass_gps = maf_gps / max(10.0, afr)
+    cons_lh = float(norm.get('CONSUMPTION L/H') or norm.get('CONSUMPTION_LH') or max(0.1, min(45.0, (fuel_mass_gps / 745.0) * 3600.0)))
+    
+    # Distance-based consumption (L/100km): 0.0 below 3 km/h
+    if speed < 3.0:
+        cons_l100km = 0.0
+    else:
+        cons_l100km = float(norm.get('CONSUMPTION L/100KM') or norm.get('CONSUMPTION_L100KM') or min(50.0, (cons_lh / speed) * 100.0))
     
     # Exhaust Emissions Invariants
     if lambda_val < 0.96:
-        co = float(row.get('CO') or 2.2) # Rich: elevated CO
-        hc = float(row.get('HC') or 320.0)
-        co2 = float(row.get('CO2') or 12.2)
+        co = float(norm.get('CO') if norm.get('CO') is not None else 2.2) # Rich: elevated CO
+        hc = float(norm.get('HC') if norm.get('HC') is not None else 320.0)
+        co2 = float(norm.get('CO2') if norm.get('CO2') is not None else 12.2)
     elif lambda_val > 1.04:
-        co = float(row.get('CO') or 0.15)
-        hc = float(row.get('HC') or 280.0) # Lean misfire: unburned HC
-        co2 = float(row.get('CO2') or 11.5)
+        co = float(norm.get('CO') if norm.get('CO') is not None else 0.15)
+        hc = float(norm.get('HC') if norm.get('HC') is not None else 280.0) # Lean misfire: unburned HC
+        co2 = float(norm.get('CO2') if norm.get('CO2') is not None else 11.5)
     else:
-        co = float(row.get('CO') or 0.25)
-        hc = float(row.get('HC') or 45.0)
-        co2 = float(row.get('CO2') or 14.8)
+        co = float(norm.get('CO') if norm.get('CO') is not None else 0.25)
+        hc = float(norm.get('HC') if norm.get('HC') is not None else 45.0)
+        co2 = float(norm.get('CO2') if norm.get('CO2') is not None else 14.8)
         
     return {
-        'MAP': map_val,
-        'TPS': tps,
-        'Force': force,
-        'Power': power,
-        'RPM': rpm,
-        'Consumption L/H': cons_lh,
-        'Consumption L/100KM': cons_l100km,
-        'Speed': speed,
-        'CO': co,
-        'HC': hc,
-        'CO2': co2,
-        'O2': o2,
-        'Lambda': lambda_val,
-        'AFR': afr
+        'MAP': round(map_val, 2),
+        'TPS': round(tps, 2),
+        'Force': round(force, 2),
+        'Power': round(power, 2),
+        'RPM': round(rpm, 1),
+        'Consumption L/H': round(cons_lh, 2),
+        'Consumption L/100KM': round(cons_l100km, 2),
+        'Speed': round(speed, 1),
+        'CO': round(co, 2),
+        'HC': round(hc, 1),
+        'CO2': round(co2, 2),
+        'O2': round(o2, 2),
+        'Lambda': round(lambda_val, 2),
+        'AFR': round(afr, 2)
     }
 
 def run_hybrid_inference(features_dict: Dict[str, float]):
@@ -280,9 +300,11 @@ def evaluate_drive_session(req: SessionEvaluationRequest):
     session_id = req.session_id or "session-unknown"
     records = []
 
-    # 1. Parse from direct records list
+    # 1. Parse from direct records list or session_records
     if req.records:
         records = req.records
+    elif req.session_records:
+        records = req.session_records
     # 2. Parse from raw JSONL string
     elif req.raw_jsonl:
         for line in req.raw_jsonl.strip().split("\n"):
@@ -307,62 +329,74 @@ def evaluate_drive_session(req: SessionEvaluationRequest):
         raise HTTPException(status_code=400, detail="No session records provided or found in payload.")
 
     # ----------------------------------------------------------------------------------------------
-    # Frame Assembly from Rahul's Session Events
+    # Frame Assembly (Supports both Rahul's OBD_OBSERVATION events & Direct Telemetry Frame dicts)
     # ----------------------------------------------------------------------------------------------
-    # Group observations by cycle_index or timestamp to form unified frames
     frames_dict = {}
     signal_history = {"RPM": [], "Speed": [], "Coolant Temperature": [], "Calculated Engine Load": []}
+    direct_frames = []
 
     for rec in records:
+        if not isinstance(rec, dict):
+            continue
         event_type = rec.get("event_type")
-        if event_type != "OBD_OBSERVATION":
-            continue
-        
-        status = rec.get("status")
-        if status != "VALID":
-            continue
+        if event_type == "OBD_OBSERVATION":
+            status = rec.get("status")
+            if status != "VALID":
+                continue
+                
+            sig = rec.get("signal_name") or ""
+            val = rec.get("value")
+            if val is None:
+                continue
+                
+            details = rec.get("details") or {}
+            cycle = details.get("cycle_index") or rec.get("sequence", 0) // 4
             
-        sig = rec.get("signal_name") or ""
-        val = rec.get("value")
-        if val is None:
-            continue
+            if cycle not in frames_dict:
+                frames_dict[cycle] = {}
             
-        details = rec.get("details") or {}
-        cycle = details.get("cycle_index") or rec.get("sequence", 0) // 4
-        
-        if cycle not in frames_dict:
-            frames_dict[cycle] = {}
-        
-        # Normalize signal name
-        sig_lower = sig.lower()
-        if "rpm" in sig_lower:
-            frames_dict[cycle]["RPM"] = float(val)
-            signal_history["RPM"].append(float(val))
-        elif "speed" in sig_lower:
-            frames_dict[cycle]["Speed"] = float(val)
-            signal_history["Speed"].append(float(val))
-        elif "coolant" in sig_lower:
-            frames_dict[cycle]["Coolant"] = float(val)
-            signal_history["Coolant Temperature"].append(float(val))
-        elif "load" in sig_lower:
-            frames_dict[cycle]["Load"] = float(val)
-            frames_dict[cycle]["TPS"] = float(val)
-            signal_history["Calculated Engine Load"].append(float(val))
-        elif "map" in sig_lower or "manifold" in sig_lower:
-            frames_dict[cycle]["MAP"] = float(val)
-        elif "lambda" in sig_lower:
-            frames_dict[cycle]["Lambda"] = float(val)
+            # Normalize signal name
+            sig_lower = sig.lower()
+            if "rpm" in sig_lower:
+                frames_dict[cycle]["RPM"] = float(val)
+                signal_history["RPM"].append(float(val))
+            elif "speed" in sig_lower:
+                frames_dict[cycle]["Speed"] = float(val)
+                signal_history["Speed"].append(float(val))
+            elif "coolant" in sig_lower:
+                frames_dict[cycle]["Coolant"] = float(val)
+                signal_history["Coolant Temperature"].append(float(val))
+            elif "load" in sig_lower:
+                frames_dict[cycle]["Load"] = float(val)
+                frames_dict[cycle]["TPS"] = float(val)
+                signal_history["Calculated Engine Load"].append(float(val))
+            elif "map" in sig_lower or "manifold" in sig_lower:
+                frames_dict[cycle]["MAP"] = float(val)
+            elif "lambda" in sig_lower:
+                frames_dict[cycle]["Lambda"] = float(val)
+        else:
+            # Direct frame object (e.g. {"rpm": 2500, "speed": 60, "map": 85, "tps": 35} or uppercase)
+            synth = synthesize_missing_features(rec)
+            direct_frames.append(synth)
+            rpm_val = float(synth.get("RPM", 0.0))
+            spd_val = float(synth.get("Speed", 0.0))
+            load_val = float(synth.get("TPS", 0.0))
+            if rpm_val > 0:
+                signal_history["RPM"].append(rpm_val)
+            if spd_val >= 0:
+                signal_history["Speed"].append(spd_val)
+            if load_val > 0:
+                signal_history["Calculated Engine Load"].append(load_val)
 
-    # If no structured observation cycles were grouped, fall back to evaluating records directly
-    evaluation_frames = []
+    evaluation_frames = list(direct_frames)
+
+    # If structured observation cycles were grouped, add them
     for c_id, f_data in sorted(frames_dict.items()):
-        # Minimum plausible frame requires at least RPM or Speed
         if "RPM" in f_data or "Speed" in f_data:
             synth = synthesize_missing_features(f_data)
             evaluation_frames.append(synth)
 
     if not evaluation_frames:
-        # Construct synthetic frames from individual observations if cycle pairing was incomplete
         avg_rpm = float(np.mean(signal_history["RPM"])) if signal_history["RPM"] else 1200.0
         avg_speed = float(np.mean(signal_history["Speed"])) if signal_history["Speed"] else 30.0
         avg_load = float(np.mean(signal_history["Calculated Engine Load"])) if signal_history["Calculated Engine Load"] else 22.0

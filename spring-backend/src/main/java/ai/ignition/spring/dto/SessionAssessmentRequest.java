@@ -1,5 +1,6 @@
 package ai.ignition.spring.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,18 +14,22 @@ import java.util.Map;
 public class SessionAssessmentRequest {
 
     @JsonProperty("session_id")
+    @JsonAlias({"sessionId", "sessionID"})
     private String sessionId;
 
     @JsonProperty("vin")
     private String vin;
 
     @JsonProperty("raw_jsonl")
+    @JsonAlias({"rawJsonl", "rawJSONL"})
     private String rawJsonl;
 
     @JsonProperty("records")
+    @JsonAlias({"session_records", "sessionRecords", "telemetry", "frames", "data"})
     private List<Map<String, Object>> records;
 
     @JsonProperty("file_path")
+    @JsonAlias({"filePath"})
     private String filePath;
 
     public SessionAssessmentRequest() {}
